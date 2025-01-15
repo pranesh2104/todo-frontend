@@ -1,1 +1,45 @@
-<p>sign-in works!</p>
+<div class="flex-row align-center-center signup-parent" style="width: 100%;height: 100%;">
+  @if (signInForm) {
+  <mat-card appearance="outlined">
+    <form [formGroup]="signInForm" class="flex-column align-center-center" style="padding: 40px;gap: 7px;">
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Email</mat-label>
+        <input type="email" required trimVal matInput formControlName="email" placeholder="Email" />
+        @if (signInForm.get('email')?.hasError('required')) {
+        <mat-error>
+          Email is required!
+        </mat-error>
+        }
+        @else if (signInForm.get('email')?.hasError('invalidEmail')) {
+        <mat-error>
+          Invalid Email!
+        </mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Password</mat-label>
+        <input [type]="isPasswordVisible ? 'text' : 'password'" required trimVal matInput formControlName="password"
+          placeholder="Password" />
+        @if (signInForm.get('password')?.hasError('required')) {
+        <mat-error>
+          Password is required!
+        </mat-error>
+        }
+        @else if (signInForm.get('password')?.hasError('invalidPassword')) {
+        <mat-error>
+          Invalid Password!
+        </mat-error>
+        }
+        <mat-icon matSuffix style="cursor: pointer;" (click)="isPasswordVisible=!isPasswordVisible">{{isPasswordVisible?
+          'visibility_off' : 'visibility'
+          }}</mat-icon>
+      </mat-form-field>
+
+      <span style="margin-bottom: 10px;">Don't have an account? <a href="./signup">Sign Up</a></span>
+      <div class="flex-row align-center-center">
+        <button mat-raised-button (click)="onLogin()">Sign In</button>
+      </div>
+    </form>
+  </mat-card>
+  }
+</div>

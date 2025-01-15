@@ -1,1 +1,126 @@
-<p>sign-up works!</p>
+<div class="flex-row align-center-center signup-parent" style="width: 100%;height: 100%;">
+  @if (signupForm) {
+  <mat-card appearance="outlined" class="signup-card-container">
+    <mat-card-header class="flex-column align-center-center">
+      <h3>Create Your Account</h3>
+      <span style="margin-bottom: 10px;">Have an account? <a href="./login">Login now</a></span>
+    </mat-card-header>
+    <form [formGroup]="signupForm" class="flex-column align-center-center" style="padding:20px 40px 40px 40px;">
+      <div class="flex-row align-center-center" style="gap: 10px;width: 100%;">
+        <mat-form-field appearance="outline" style="width: 50%;">
+          <mat-label>First Name</mat-label>
+          <input type="text" required trimVal matInput formControlName="firstName" placeholder="First Name" />
+          @if (signupForm.get('firstName')?.hasError('required') ) {
+          <mat-error>
+            First Name is required!
+          </mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline" style="width: 50%;">
+          <mat-label>Last Name</mat-label>
+          <input type="text" trimVal matInput formControlName="lastName" placeholder="Last Name" />
+        </mat-form-field>
+      </div>
+      <div style="width: 100%;">
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Email</mat-label>
+          <input type="email" required trimVal matInput formControlName="email" placeholder="Email" />
+          @if (!isEmailCheckLoading && isEmailAvailable === true && signupForm.get('email')?.value) {
+          <mat-icon class="status-icon" style="color: limegreen;" matSuffix>check</mat-icon>
+          }
+          @else if(!isEmailCheckLoading && isEmailAvailable === false && signupForm.get('email')?.value) {
+          <mat-icon class="status-icon" style="color: lightcoral;" matSuffix>close</mat-icon>
+          }
+          @if (signupForm.get('email')?.hasError('required')) {
+          <mat-error>
+            Email is required!
+          </mat-error>
+          }
+          @else if (signupForm.get('email')?.hasError('invalidEmail')) {
+          <mat-error>
+            Invalid Email!
+          </mat-error>
+          }
+          @else if (signupForm.get('email')?.hasError('emailExists')) {
+          <mat-error>This email is already registered</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      @if(!isOTPSended && !isEmailVerified) {
+      <div>
+        <button mat-raised-button (click)="onSendOTP()"> {{isOTPSending ? 'Sending OTP...' : 'Send OTP'}}</button>
+      </div>
+      }
+      @if (isEmailVerified) {
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Password</mat-label>
+        <input [type]="isPasswordVisible ? 'text' : 'password'" required trimVal matInput formControlName="password"
+          placeholder="Password" />
+        @if (signupForm.get('password')?.hasError('required')) {
+        <mat-error>
+          Password is required!
+        </mat-error>
+        }
+        @else if (signupForm.get('password')?.hasError('invalidPassword')) {
+        <mat-error>
+          Invalid Password!
+        </mat-error>
+        }
+        <mat-icon matSuffix style="cursor: pointer;" (click)="isPasswordVisible=!isPasswordVisible">{{isPasswordVisible?
+          'visibility_off' : 'visibility'
+          }}</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Repeat Password</mat-label>
+        <input [type]="isRepeatPasswordVisible ? 'text' : 'password'" required trimVal matInput
+          formControlName="repeatPassword" placeholder="Repeat Password" />
+        @if (signupForm.get('repeatPassword')?.hasError('required')) {
+        <mat-error>
+          Password is required!
+        </mat-error>
+        }
+        @else if (signupForm.get('repeatPassword')?.value && signupForm.get('repeatPassword')?.hasError('notMatching')
+        && signupForm.get('repeatPassword')?.touched) {
+        <mat-error>
+          Password do not match!
+        </mat-error>
+        }
+        <mat-icon matSuffix style="cursor: pointer;"
+          (click)="isRepeatPasswordVisible=!isRepeatPasswordVisible">{{isRepeatPasswordVisible?
+          'visibility_off' : 'visibility'
+          }}</mat-icon>
+      </mat-form-field>
+      }
+      @else if (isOTPSended) {
+      <ng-container *ngTemplateOutlet="otp"></ng-container>
+      }
+      @if (isEmailVerified) {
+      <div class="flex-row align-center-center">
+        <button mat-raised-button (click)="onUserRegister()" [disabled]="!isEmailVerified">Sign Up</button>
+      </div>
+      }
+    </form>
+  </mat-card>
+  }
+</div>
+
+
+<ng-template #otp>
+  <div class="otp-container flex-column align-center-center" style="width: 100%;height: 100%;gap: 10px;">
+    @if (otpForm) {
+    <span style="color: gray;font-size: 15px;">A verification code has been sent to your email</span>
+    <form [formGroup]="otpForm">
+      <div class="otp-inputs" (paste)="handlePaste($event)">
+        @for (control of otpControls; track control; let i = $index) {
+        <input class="otp-input" [id]="'otp-input-'+i" [formControlName]="control" type="text" maxlength="1"
+          inputmode="numeric" autocomplete="off" (keydown)="onKeyDown($event, i)" (input)="onInput($event, i)"
+          [class.error]="otpForm.get(control)?.errors && otpForm.get(control)?.touched">
+        }
+      </div>
+      <div style="width: 100%;margin-top: 15px;" class="flex-row align-center-center">
+        <button mat-raised-button (click)="onVerifyOTP()">Verify OTP</button>
+      </div>
+    </form>
+    }
+  </div>
+</ng-template>
