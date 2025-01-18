@@ -13,6 +13,7 @@ query CheckEmail($email: String) {
   checkEmail(email: $email) {
     code
     message
+    success
   }
 }`;
 
@@ -22,6 +23,7 @@ mutation SendEmailOTP($userDetails: SendEmailOTPInput!) {
   sendEmailOTP(userDetails: $userDetails) {
     message
     success
+    code
   }
 }`;
 
@@ -30,5 +32,7 @@ mutation VerifyOTP($otpDetails: OTPDetails!) {
   verifyOTP(otpDetails: $otpDetails) {
     message
     success
+    code
+    attempt
   }
 }`;

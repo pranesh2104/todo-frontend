@@ -1,7 +1,12 @@
 <div class="flex-row align-center-center signup-parent" style="width: 100%;height: 100%;">
   @if (signInForm) {
   <mat-card appearance="outlined">
-    <form [formGroup]="signInForm" class="flex-column align-center-center" style="padding: 40px;gap: 7px;">
+    <mat-card-header class="flex-column align-center-center">
+      <h3>Login to your account</h3>
+      <span style="margin-bottom: 10px;">Don't have an account? <a class="anchorTag" href="./login">Sign
+          Up</a></span>
+    </mat-card-header>
+    <form [formGroup]="signInForm" class="flex-column align-center-center" style="padding: 40px;">
       <mat-form-field appearance="outline" style="width: 100%;">
         <mat-label>Email</mat-label>
         <input type="email" required trimVal matInput formControlName="email" placeholder="Email" />
@@ -10,7 +15,7 @@
           Email is required!
         </mat-error>
         }
-        @else if (signInForm.get('email')?.hasError('invalidEmail')) {
+        @else if (signInForm.get('email')?.hasError('pattern')) {
         <mat-error>
           Invalid Email!
         </mat-error>
@@ -25,7 +30,7 @@
           Password is required!
         </mat-error>
         }
-        @else if (signInForm.get('password')?.hasError('invalidPassword')) {
+        @else if (signInForm.get('password')?.hasError('pattern')) {
         <mat-error>
           Invalid Password!
         </mat-error>
@@ -34,9 +39,12 @@
           'visibility_off' : 'visibility'
           }}</mat-icon>
       </mat-form-field>
-
-      <span style="margin-bottom: 10px;">Don't have an account? <a href="./signup">Sign Up</a></span>
-      <div class="flex-row align-center-center">
+      <div class="flex-row align-end-center" style="width: 100%;">
+        <a class="anchorTag"
+          [href]="this.signInForm.get('email')?.valid && this.signInForm.get('email')?.value ? '/resetPassword?email=' + this.signInForm.get('email')?.value : './resetPassword'">
+          Forgot Password? </a>
+      </div>
+      <div class="flex-row align-center-center" style="margin-top: 10px;">
         <button mat-raised-button (click)="onLogin()">Sign In</button>
       </div>
     </form>

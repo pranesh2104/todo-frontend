@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { CustomValidators } from '../../custom-validators/email-password.validator';
+import { EMAIL_PATTERN, PASSWORD_PATTERN } from '../../constants/auth.constant';
 
 @Component({
   selector: 'app-sign-in',
@@ -16,21 +16,13 @@ import { CustomValidators } from '../../custom-validators/email-password.validat
 export class SignInComponent implements OnInit {
 
   signInForm = new FormGroup({
-    email: new FormControl('', [Validators.required, CustomValidators.emailValidator]),
-    password: new FormControl('', [Validators.required, CustomValidators.passwordValidator])
+    email: new FormControl('', [Validators.required, Validators.pattern(EMAIL_PATTERN)]),
+    password: new FormControl('', [Validators.required, Validators.pattern(PASSWORD_PATTERN)])
   });
 
   isPasswordVisible: boolean = false;
-  customerId!: string;
-
-
-  @Input()
-  set id(customerId: string) {
-    this.customerId = customerId;
-  }
 
   ngOnInit(): void {
-    console.log('this.customerId ', this.customerId);
   }
 
   onLogin() {

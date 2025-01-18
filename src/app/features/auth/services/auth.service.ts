@@ -2,7 +2,7 @@ import { computed, Injectable, signal } from '@angular/core';
 import { GraphqlClientService } from '../../../shared/services/graphlql-client.service';
 import { CHECK_EMAIL, CREATE_USER, SEND_EMAIL_OTP, VERIFY_OTP } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
-import { CreateUserArguments, IUserDetails, SendEmailOTPArguments, VerifyOTPArguments } from '../models/auth.model';
+import { CreateUserArguments, ICreateUserDetails, SendEmailOTPArguments, VerifyOTPArguments } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +26,7 @@ export class AuthService {
   clearRegistrationEmail() {
     this.registrationEmalil.set('');
   }
-  createUser(userDetails: CreateUserArguments): Observable<IUserDetails> {
+  createUser(userDetails: CreateUserArguments): Observable<ICreateUserDetails> {
     return this.graphqlClientService.executeMutation(CREATE_USER, userDetails);
   }
 

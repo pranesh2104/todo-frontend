@@ -1,11 +1,4 @@
-import { FormControl } from "@angular/forms";
-
-export interface SignUpForm {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
+import { FormControl, FormGroup } from "@angular/forms";
 
 export interface CreateUserArguments {
   userDetails: UserDetailsInput;
@@ -18,13 +11,17 @@ interface UserDetailsInput {
   password: string;
 }
 
-export interface IUserDetails {
+export interface ICreateUserDetails {
+  createUser: ICreateUserResponse;
+}
+
+interface ICreateUserResponse {
+
   email: string;
   firstName: string;
   lastName?: string | null;
   id: number;
 }
-
 export interface IEmailCheckResponse {
   checkEmail: ICheckEmail;
 }
@@ -52,4 +49,32 @@ export interface SendEmailOTPArguments {
   email: string;
   firstName: string;
   lastName?: string;
+}
+
+export interface ISignUpForm {
+  firstName: FormControl<string>;
+  lastName: FormControl<string | null>
+  email: FormControl<string>
+  password?: FormControl<string | null>
+  repeatPassword?: FormControl<string | null>
+}
+
+export interface ISignUpState {
+  password: {
+    isVisible: boolean;
+    isRepeatVisible: boolean;
+  };
+  email: {
+    status: string;
+    isVerified: boolean;
+    isChangeEnabled: boolean;
+    isEmailAvailable: boolean;
+  };
+  otp: {
+    status: string;
+    error: string | null;
+    remainingAttempts: number;
+    isSubmitting: boolean;
+    form: FormGroup | null;
+  };
 }
