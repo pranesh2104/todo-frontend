@@ -254,7 +254,7 @@ export class SignUpComponent implements OnInit {
     const otp = this.getOtpValue();
     if (!email || !otp) return;
     this.state.otp.isSubmitting = true;
-    this.authService.verifyOTP({ email, otp: +otp }).subscribe({
+    this.authService.verifyOTP({ email, otp: otp }).subscribe({
       next: (res: CommonAPIResponse) => {
         this.handleOTPVerificationResponse(res);
       },

@@ -42,7 +42,7 @@ export interface IOTPForm {
 
 export interface VerifyOTPArguments {
   email: string;
-  otp: number;
+  otp: string;
 }
 
 export interface SendEmailOTPArguments {
