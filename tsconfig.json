@@ -26,7 +26,11 @@
     "paths": {
       "@shared/*": ["app/shared/*"],
       "@core/*": ["app/core/*"]
-    }
+    },
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

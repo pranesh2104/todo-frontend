@@ -9,7 +9,7 @@ export class GraphqlClientService {
 
   constructor(private apollo: Apollo) { }
 
-  executeQuery(query: string, variables?: { [key: string]: any }): Observable<any> {
+  executeQuery(query: string, variables: { [key: string]: any }): Observable<any> {
     return this.apollo.query({
       query: gql`${query}`,
       variables: variables,
@@ -19,23 +19,19 @@ export class GraphqlClientService {
     );
   }
 
-  executeWatchQuery(query: string, variables?: { [key: string]: any }): Observable<any> {
+  executeWatchQuery(query: string, variables: { [key: string]: any }): Observable<any> {
     return this.apollo.watchQuery({
       query: gql`${query}`,
       variables: variables
-    }).valueChanges.pipe(
-      map(this.handleResponse),
-    );
+    }).valueChanges.pipe(map(this.handleResponse));
   }
 
-  executeMutation(mutation: string, variables?: { [key: string]: any }): Observable<any> {
+  executeMutation(mutation: string, variables: { [key: string]: any }): Observable<any> {
     return this.apollo.mutate({
       mutation: gql`${mutation}`,
       variables: variables,
       errorPolicy: 'all'
-    }).pipe(
-      map(this.handleResponse),
-    );
+    }).pipe(map(this.handleResponse));
   }
 
   private handleResponse(response: ApolloQueryResult<any> | MutationResult<any>): any {
@@ -52,7 +48,7 @@ export class GraphqlClientService {
       return response.data;
     }
     if (response && response.errors) {
-      return response.errors
+      return response.errors;
     }
   }
 }

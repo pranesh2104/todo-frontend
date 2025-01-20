@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { GraphqlClientService } from '../../../shared/services/graphlql-client.service';
+import { GraphqlClientService } from '../../../shared/services/graphql-client.service';
 import { CHECK_EMAIL, CREATE_USER, SEND_EMAIL_OTP, VERIFY_OTP } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
 import { CreateUserArguments, ICreateUserDetails, SendEmailOTPArguments, VerifyOTPArguments } from '../models/auth.model';
@@ -9,14 +9,14 @@ import { CreateUserArguments, ICreateUserDetails, SendEmailOTPArguments, VerifyO
 })
 export class AuthService {
 
-  private registrationEmalil = signal('raavana@yopmail.com');
+  private registrationEmail = signal('raavana@yopmail.com');
 
-  readonly registerEmail = computed(() => this.registrationEmalil());
+  readonly registerEmail = computed(() => this.registrationEmail());
 
   constructor(private graphqlClientService: GraphqlClientService) { }
 
   setRegistrationEmail(email: string) {
-    this.registrationEmalil.set(email);
+    this.registrationEmail.set(email);
   }
 
   getRegistrationEmail() {
@@ -24,7 +24,7 @@ export class AuthService {
   }
 
   clearRegistrationEmail() {
-    this.registrationEmalil.set('');
+    this.registrationEmail.set('');
   }
   createUser(userDetails: CreateUserArguments): Observable<ICreateUserDetails> {
     return this.graphqlClientService.executeMutation(CREATE_USER, userDetails);

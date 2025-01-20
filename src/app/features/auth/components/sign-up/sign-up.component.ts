@@ -7,10 +7,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { CustomValidators } from '../../custom-validators/email-password.validator';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
-import { GraphqlClientService } from '../../../../shared/services/graphlql-client.service';
+import { GraphqlClientService } from '../../../../shared/services/graphql-client.service';
 import { debounceTime, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
-import { SnackBarService } from '../../../../shared/services/snack-bar.service';
 import { IEmailCheckResponse, IOTPForm, ISignUpForm, ISignUpState, ICreateUserDetails } from '../../models/auth.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
@@ -57,7 +56,7 @@ export class SignUpComponent implements OnInit {
 
   isOTPResending: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router, private snackBarService: SnackBarService, private formBuilder: FormBuilder, private elementRef: ElementRef) { }
+  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder, private elementRef: ElementRef) { }
 
 
   readonly showOTPInput = () => this.state.otp.status === AUTH_STATUS.OTP.SENT && !this.state.email.isVerified;
@@ -280,6 +279,7 @@ export class SignUpComponent implements OnInit {
   private handleOTPError(verifyOTP: CommonResponse): void {
     switch (verifyOTP.code) {
       case OTP_RELATED_API_RESPONSE_CODES.OTP_EXPIRED:
+      case OTP_RELATED_API_RESPONSE_CODES.OTP_NOT_FOUND:
         this.state.otp.error = null;
         this.state.otp.status = AUTH_STATUS.OTP.EXPIRED;
         break;
@@ -287,7 +287,7 @@ export class SignUpComponent implements OnInit {
         this.state.otp.error = `Invalid verification code. ${verifyOTP.attempt} attempt remaining`;
         this.state.otp.remainingAttempts = Number(verifyOTP.attempt);
         break;
-      case OTP_RELATED_API_RESPONSE_CODES.OTP_EXCCED:
+      case OTP_RELATED_API_RESPONSE_CODES.OTP_EXCEED:
         this.state.otp.remainingAttempts = 0;
         this.state.otp.error = null;
         break;
