@@ -4,7 +4,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
-import { GraphqlClientService } from './shared/services/graphlql-client.service';
+import { GraphqlClientService } from './shared/services/graphql-client.service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
 import { GraphqlConfigService } from './shared/services/graphql-config.service';
