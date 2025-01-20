@@ -1,0 +1,104 @@
+.signup-card-container {
+  width: 35%;
+}
+
+
+::ng-deep .email-container .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+
+.status-icon {
+  font-family: 'Material Icons';
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+// OTP Form Style
+.otp-inputs {
+  display: flex;
+  gap: 1rem;
+}
+
+.otp-input {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  font-size: 1.2rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.otp-input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.otp-input.error {
+  border-color: #dc3545;
+  animation: shake 0.5s;
+}
+
+.error-container {
+  margin: 8px 0;
+  text-align: center;
+}
+
+.otp-error {
+  color: #f44336;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.125;
+}
+
+.otp-input.error {
+  border-color: #f44336;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.shake-animation {
+  animation: shake 0.5s;
+}
+
+// Mobile upto (480px)
+@media only screen and (max-width:480px) {
+  .signup-card-container {
+    width: 90%;
+  }
+
+}
+
+// Tablet (481px to 1024px)
+@media only screen and (min-width:481px) and (max-width:1024px) {
+  .signup-card-container {
+    width: 80%;
+  }
+}
+
+// Laptop (1025px to 1200px)
+@media only screen and (min-width:1025px) and (max-width:1200px) {}
+
+// Dekstop
+@media only screen and (min-width:1201px) {}

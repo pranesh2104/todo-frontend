@@ -1,1 +1,53 @@
-<p>sign-in works!</p>
+<div class="flex-row align-center-center signup-parent" style="width: 100%;height: 100%;">
+  @if (signInForm) {
+  <mat-card appearance="outlined">
+    <mat-card-header class="flex-column align-center-center">
+      <h3>Login to your account</h3>
+      <span style="margin-bottom: 10px;">Don't have an account? <a class="anchorTag" href="/signup">Sign
+          Up</a></span>
+    </mat-card-header>
+    <form [formGroup]="signInForm" class="flex-column align-center-center" style="padding: 40px;">
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Email</mat-label>
+        <input type="email" required trimVal matInput formControlName="email" placeholder="Email" />
+        @if (signInForm.get('email')?.hasError('required')) {
+        <mat-error>
+          Email is required!
+        </mat-error>
+        }
+        @else if (signInForm.get('email')?.hasError('pattern')) {
+        <mat-error>
+          Invalid Email!
+        </mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Password</mat-label>
+        <input [type]="isPasswordVisible ? 'text' : 'password'" required trimVal matInput formControlName="password"
+          placeholder="Password" />
+        @if (signInForm.get('password')?.hasError('required')) {
+        <mat-error>
+          Password is required!
+        </mat-error>
+        }
+        @else if (signInForm.get('password')?.hasError('pattern')) {
+        <mat-error>
+          Invalid Password!
+        </mat-error>
+        }
+        <mat-icon matSuffix style="cursor: pointer;" (click)="isPasswordVisible=!isPasswordVisible">{{isPasswordVisible?
+          'visibility_off' : 'visibility'
+          }}</mat-icon>
+      </mat-form-field>
+      <div class="flex-row align-end-center" style="width: 100%;">
+        <a class="anchorTag"
+          [href]="this.signInForm.get('email')?.valid && this.signInForm.get('email')?.value ? '/resetPassword?email=' + this.signInForm.get('email')?.value : './resetPassword'">
+          Forgot Password? </a>
+      </div>
+      <div class="flex-row align-center-center" style="margin-top: 10px;">
+        <button mat-raised-button (click)="onLogin()">Sign In</button>
+      </div>
+    </form>
+  </mat-card>
+  }
+</div>

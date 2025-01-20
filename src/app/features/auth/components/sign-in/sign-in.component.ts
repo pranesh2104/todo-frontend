@@ -1,21 +1,31 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { EMAIL_PATTERN, PASSWORD_PATTERN } from '../../constants/auth.constant';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [],
+  imports: [MatCardModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss'
 })
 export class SignInComponent implements OnInit {
-  customerId!: string;
 
+  signInForm = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.pattern(EMAIL_PATTERN)]),
+    password: new FormControl('', [Validators.required, Validators.pattern(PASSWORD_PATTERN)])
+  });
 
-  @Input()
-  set id(customerId: string) {
-    this.customerId = customerId;
-  }
+  isPasswordVisible: boolean = false;
 
   ngOnInit(): void {
-    console.log('this.customerId ', this.customerId);
+  }
+
+  onLogin() {
+
   }
 }
