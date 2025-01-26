@@ -1,8 +1,8 @@
-export interface CommonAPIResponse {
-  [key: string]: CommonResponse
+export interface ICommonAPIResponse {
+  [key: string]: ICommonResponse
 }
 
-export interface CommonResponse {
+export interface ICommonResponse {
   code: string;
   message: string;
   success: string;

@@ -7,7 +7,9 @@ import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/c
 import { GraphqlClientService } from './shared/services/graphql-client.service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Apollo, APOLLO_OPTIONS } from 'apollo-angular';
-import { GraphqlConfigService } from './shared/services/graphql-config.service';
+import { GraphqlConfigService } from './core/services/graphql-config.service';
+import { providePrimeNG } from 'primeng/config';
+import Aura from '@primeng/themes/aura';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,6 +29,17 @@ export const appConfig: ApplicationConfig = {
     },
     Apollo,
     GraphqlClientService,
-    provideAnimationsAsync()
+    provideAnimationsAsync(),
+    providePrimeNG({
+      theme: {
+        preset: Aura,
+        options: {
+          prefix: 'p',
+          darkModeSelector: '.my-app-dark',
+          cssLayer: false
+        }
+      },
+      ripple: true
+    })
   ]
 };

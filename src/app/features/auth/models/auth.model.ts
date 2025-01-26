@@ -1,12 +1,11 @@
-import { FormControl, FormGroup } from "@angular/forms";
+import { FormControl } from "@angular/forms";
 
 export interface CreateUserArguments {
   userDetails: UserDetailsInput;
 }
 
 interface UserDetailsInput {
-  firstName: string;
-  lastName?: string;
+  name: string;
   email: string;
   password: string;
 }
@@ -18,8 +17,7 @@ export interface ICreateUserDetails {
 interface ICreateUserResponse {
 
   email: string;
-  firstName: string;
-  lastName?: string | null;
+  name: string;
   id: number;
 }
 export interface IEmailCheckResponse {
@@ -47,34 +45,38 @@ export interface VerifyOTPArguments {
 
 export interface SendEmailOTPArguments {
   email: string;
-  firstName: string;
-  lastName?: string;
+  name: string;
 }
 
 export interface ISignUpForm {
-  firstName: FormControl<string>;
-  lastName: FormControl<string | null>
-  email: FormControl<string>
-  password?: FormControl<string | null>
-  repeatPassword?: FormControl<string | null>
+  name: FormControl<string>;
+  email: FormControl<string>;
+  otp: FormControl<number | null>;
+  password: FormControl<string>;
+  repeatPassword: FormControl<string>;
 }
 
 export interface ISignUpState {
-  password: {
-    isVisible: boolean;
-    isRepeatVisible: boolean;
-  };
-  email: {
-    status: string;
-    isVerified: boolean;
-    isChangeEnabled: boolean;
-    isEmailAvailable: boolean;
-  };
-  otp: {
-    status: string;
-    error: string | null;
-    remainingAttempts: number;
-    isSubmitting: boolean;
-    form: FormGroup | null;
-  };
+  email: IEmailCommonState;
+  otp: IOTPCommonState;
+}
+
+export interface IEmailCommonState {
+  status: string;
+  isVerified?: boolean;
+  isChangeEnabled?: boolean;
+  isEmailAvailable: boolean;
+}
+
+interface IOTPCommonState {
+  status: string;
+  error: string | null;
+  remainingAttempts: number;
+  isSubmitting: boolean;
+  isDisabled: boolean;
+}
+export interface UpdatePasswordArguments {
+  email: string;
+  password: string;
+  token: string;
 }

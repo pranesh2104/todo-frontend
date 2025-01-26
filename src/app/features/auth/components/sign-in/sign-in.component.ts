@@ -1,15 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
 import { EMAIL_PATTERN, PASSWORD_PATTERN } from '../../constants/auth.constant';
+import { CardModule } from 'primeng/card';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
+import { InputText } from 'primeng/inputtext';
+import { Message } from 'primeng/message';
+import { Password } from 'primeng/password';
+import { Button } from 'primeng/button';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [MatCardModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  imports: [ReactiveFormsModule, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss'
 })
@@ -26,6 +28,14 @@ export class SignInComponent implements OnInit {
   }
 
   onLogin() {
+    const emailFormControl = this.signInForm.get('email');
+    const passwordFormControl = this.signInForm.get('password');
+    if (emailFormControl && passwordFormControl && emailFormControl.valid && passwordFormControl.valid) {
 
+    }
+    else {
+      emailFormControl?.markAsDirty();
+      passwordFormControl?.markAsDirty();
+    }
   }
 }

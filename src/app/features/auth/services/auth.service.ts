@@ -1,8 +1,8 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { GraphqlClientService } from '../../../shared/services/graphql-client.service';
-import { CHECK_EMAIL, CREATE_USER, SEND_EMAIL_OTP, VERIFY_OTP } from '../graphql/auth.query';
+import { CHECK_EMAIL, CREATE_USER, SEND_EMAIL_OTP, SEND_RESET_PASSWORD_LINK, UPDATE_PASSWORD, VERIFY_OTP } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
-import { CreateUserArguments, ICreateUserDetails, SendEmailOTPArguments, VerifyOTPArguments } from '../models/auth.model';
+import { CreateUserArguments, ICreateUserDetails, SendEmailOTPArguments, UpdatePasswordArguments, VerifyOTPArguments } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -40,5 +40,14 @@ export class AuthService {
 
   verifyOTP(otpDetails: VerifyOTPArguments) {
     return this.graphqlClientService.executeMutation(VERIFY_OTP, { otpDetails });
+  }
+
+  sendResetPasswordLink(email: string) {
+    return this.graphqlClientService.executeMutation(SEND_RESET_PASSWORD_LINK, { email });
+  }
+
+  updatePassword(passwordDetails: UpdatePasswordArguments) {
+    return this.graphqlClientService.executeMutation(UPDATE_PASSWORD, { passwordDetails });
+
   }
 }
