@@ -25,6 +25,8 @@ export const AUTH_STATUS = {
     INITIAL: 'INITIAL',
     CHECKING: 'CHECKING',
     VALID: 'VALID',
-    INVALID: 'INVALID'
+    INVALID: 'INVALID',
+    CHECKED: 'CHECKED',
+    FAILED: 'FAILED'
   }
 }

@@ -1,38 +1,39 @@
-import { Component, ElementRef, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomValidators } from '../../custom-validators/email-password.validator';
-import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { GraphqlClientService } from '../../../../shared/services/graphql-client.service';
-import { debounceTime, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
-import { Router } from '@angular/router';
-import { IEmailCheckResponse, IOTPForm, ISignUpForm, ISignUpState, ICreateUserDetails } from '../../models/auth.model';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { ISignUpForm, ISignUpState, ICreateUserDetails } from '../../models/auth.model';
 import { CommonModule } from '@angular/common';
-import { CommonAPIResponse, CommonResponse } from '@shared/models/shared.model';
+import { ICommonAPIResponse, ICommonResponse } from '@shared/models/shared.model';
 import { AUTH_STATUS, EMAIL_PATTERN, OTP_RELATED_API_RESPONSE_CODES, PASSWORD_PATTERN } from '../../constants/auth.constant';
-
+import { CardModule } from 'primeng/card';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputTextModule } from 'primeng/inputtext';
+import { Message } from 'primeng/message';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
+import { InputOtpModule } from 'primeng/inputotp';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
+import { finalize, interval, Subscription, takeWhile } from 'rxjs';
 
 @Component({
   selector: 'app-sign-up',
-  imports: [MatCardModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule, CommonModule],
+  imports: [ButtonModule, Toast, InputOtpModule, CardModule, ReactiveFormsModule, CommonModule, InputGroupModule, InputGroupAddonModule, InputTextModule, Message, IconFieldModule, InputIconModule, PasswordModule, FormsModule],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.scss',
-  providers: [GraphqlClientService]
+  providers: [GraphqlClientService, MessageService]
 })
 export class SignUpComponent implements OnInit {
 
   readonly AUTH_STATUS = AUTH_STATUS;
 
   state: ISignUpState = {
-    password: {
-      isVisible: false,
-      isRepeatVisible: false
-    },
     email: {
       status: AUTH_STATUS.EMAIL.INITIAL,
       isVerified: false,
@@ -44,11 +45,9 @@ export class SignUpComponent implements OnInit {
       error: null as string | null,
       remainingAttempts: 3,
       isSubmitting: false,
-      form: null as FormGroup | null
+      isDisabled: false
     }
   }
-
-  isEmailCheckLoading: boolean = false;
 
   isEmailChangeEnabled: boolean = false;
 
@@ -56,8 +55,9 @@ export class SignUpComponent implements OnInit {
 
   isOTPResending: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router, private formBuilder: FormBuilder, private elementRef: ElementRef) { }
+  timer = 15;
 
+  constructor(private authService: AuthService, private formBuilder: FormBuilder, private activeRoute: ActivatedRoute, private toastMessageService: MessageService, private router: Router) { }
 
   readonly showOTPInput = () => this.state.otp.status === AUTH_STATUS.OTP.SENT && !this.state.email.isVerified;
 
@@ -67,59 +67,43 @@ export class SignUpComponent implements OnInit {
 
   readonly showOTPError = () => this.state.otp.error !== null;
 
+  private timerSubscription!: Subscription;
 
   ngOnInit(): void {
     this.initializeForm();
-    this.setupEmailValidation();
-  }
-
-  private initializeForm(): void {
-    this.signupForm = this.formBuilder.group({
-      firstName: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[a-zA-Z]/)], nonNullable: true }),
-      lastName: new FormControl(''),
-      email: new FormControl('', { validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true })
-    });
-  }
-
-  private setupEmailValidation(): void {
-    this.signupForm.get('email')?.valueChanges.pipe(debounceTime(500), distinctUntilChanged(), filter((email: string | null) => Boolean(email && this.signupForm.get('email')?.valid)),
-      switchMap((email) => {
-        if (!email) return of(null);
-        this.state.email.status = AUTH_STATUS.EMAIL.CHECKING;
-        return this.authService.checkEmailExist(email);
-      })
-    ).subscribe({
-      next: (res: IEmailCheckResponse | null) => {
-        if (res?.checkEmail) {
-          const emailExists = res.checkEmail.code === 'EMAIL_EXIST';
-          this.updateEmailValidationError(emailExists);
-        }
+    this.activeRoute.queryParams.subscribe((queryParams: Params) => {
+      if (queryParams && queryParams['email']) {
+        this.signupForm.get('email')?.setValue(queryParams['email']);
       }
     });
   }
 
-  private updateEmailValidationError(emailExists: boolean): void {
-    const emailControl = this.signupForm.get('email');
-    if (!emailControl) return;
-    const currentErrors = emailControl.errors || {};
-    this.isEmailCheckLoading = false;
-    this.state.email.isEmailAvailable = !emailExists;
-    if (emailExists) {
-      emailControl.markAsTouched();
-      emailControl.setErrors({ ...currentErrors, emailExists: true });
-    } else {
-      delete currentErrors['emailExists'];
-      emailControl.setErrors(Object.keys(currentErrors).length ? currentErrors : null);
-    }
+  private initializeForm(): void {
+    this.signupForm = this.formBuilder.group({
+      name: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[a-zA-Z]+$/)], nonNullable: true }),
+      email: new FormControl('', {
+        validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
+        asyncValidators: CustomValidators.checkEmailExist(this.authService,
+          { setCheckingState: (checkState: string) => this.state.email.status = checkState },
+          { setEmailExistState: (emailExistState: boolean) => this.state.email.isEmailAvailable = emailExistState },
+          true
+        )
+      }),
+      otp: new FormControl(),
+      password: new FormControl('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
+      repeatPassword: new FormControl('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
+    });
+    this.signupForm.get('otp')?.addValidators(Validators.pattern(/^\d{6}$/));
+    this.signupForm.addValidators(CustomValidators.matchPasswordValidator())
   }
 
   onSendOTP(): void {
     if (this.state.otp.status === AUTH_STATUS.OTP.SENDING) return;
     const emailFormControl = this.signupForm.get('email');
-    const { firstName, lastName } = this.signupForm.value;
-    if (emailFormControl && emailFormControl.value && firstName && (emailFormControl.disabled ? true : emailFormControl?.valid)) {
+    const nameFormControl = this.signupForm.get('name');
+    if (emailFormControl && emailFormControl.value && nameFormControl && nameFormControl.value && (emailFormControl.disabled ? true : emailFormControl?.valid)) {
       this.state.otp.status = AUTH_STATUS.OTP.SENDING;
-      this.authService.sendEmailOTP({ email: emailFormControl.value.toLowerCase(), firstName, lastName: lastName || '' }).subscribe({
+      this.authService.sendEmailOTP({ email: emailFormControl.value.toLowerCase(), name: nameFormControl.value }).subscribe({
         next: () => this.handleOTPSendSuccess(),
         error: () => {
           this.state.otp.status = AUTH_STATUS.OTP.ERROR;
@@ -127,13 +111,17 @@ export class SignUpComponent implements OnInit {
         }
       });
     }
+    else {
+      if (emailFormControl && !emailFormControl.value)
+        emailFormControl.markAsDirty();
+      if (nameFormControl && !nameFormControl.value)
+        nameFormControl.markAsDirty();
+    }
   }
 
   private handleOTPSendSuccess() {
+    this.state.otp.isDisabled = false;
     this.signupForm.get('email')?.disable();
-    if (!this.state.otp.form) {
-      this.buildOTPForm();
-    }
     this.state.otp.status = AUTH_STATUS.OTP.SENT;
     this.state.email.isChangeEnabled = false;
     if (this.isOTPResending) {
@@ -151,120 +139,24 @@ export class SignUpComponent implements OnInit {
     this.isEmailChangeEnabled = true;
   }
 
-  buildOTPForm() {
-    this.state.otp.form = this.formBuilder.group({
-      digit0: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[0-9]$/)], nonNullable: true }),
-      digit1: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[0-9]$/)], nonNullable: true }),
-      digit2: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[0-9]$/)], nonNullable: true }),
-      digit3: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[0-9]$/)], nonNullable: true }),
-      digit4: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[0-9]$/)], nonNullable: true }),
-      digit5: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[0-9]$/)], nonNullable: true }),
-    });
-  }
-
-  get otpControls(): string[] {
-    if (this.state.otp && this.state.otp.form)
-      return Object.keys(this.state.otp.form.controls);
-    return ['']
-  }
-
-  onKeyDown(event: KeyboardEvent, index: number) {
-    const input = event.target as HTMLInputElement;
-    const key = event.key;
-
-    if (!/^\d$/.test(key) &&
-      !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(key)) {
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 'ArrowLeft' && index > 0) {
-      event.preventDefault();
-      this.focusInput(index - 1);
-    } else if (key === 'ArrowRight' && index < 5) {
-      event.preventDefault();
-      this.focusInput(index + 1);
-    }
-
-    if (key === 'Backspace') {
-      if (input.value === '' && index > 0) {
-        event.preventDefault();
-        this.focusInput(index - 1);
-        const controlName = `digit${index - 1}` as keyof IOTPForm;
-        const control = this.state.otp.form?.get(controlName);
-        if (control) {
-          control.setValue('');
-        }
-      }
-    }
-  }
-
-  onInput(event: Event, index: number) {
-    const input = event.target as HTMLInputElement;
-    let value = input.value;
-
-    if (value.length > 1) { // If user enter more than 1 number in one field.
-      value = value.slice(-1);
-      input.value = value;
-      const controlName = `digit${index + 1}` as keyof IOTPForm;
-      const control = this.state.otp.form?.get(controlName);
-      if (control)
-        control.setValue(value);
-    }
-
-    if (value && index < 5)
-      this.focusInput(index + 1);
-  }
-
-  handlePaste(event: ClipboardEvent) {
-    event.preventDefault();
-
-    const pastedData = event.clipboardData?.getData('text');
-    if (!pastedData) return;
-
-    const numbers = pastedData.replace(/\D/g, '').slice(0, 6);
-
-    numbers.split('').forEach((num, index) => {
-      if (index < 6) {
-        const controlName = `digit${index}` as keyof IOTPForm;
-        const control = this.state.otp.form?.get(controlName);
-        if (control) {
-          control.setValue(num);
-        }
-      }
-    });
-    const focusIndex = Math.min(numbers.length, 5);
-    this.focusInput(focusIndex);
-  }
-
-  private focusInput(index: number) {
-    const focusInputField = this.elementRef.nativeElement.querySelector(`#otp-input-${index}`);
-    if (focusInputField)
-      focusInputField.focus();
-  }
-
-  getOtpValue(): string {
-    return Object.values(this.state.otp.form?.value).join('');
-  }
-
   onVerifyOTP(): void {
-    if (!this.state.otp.form?.valid) return;
+    const otpFormControl = this.signupForm.get('otp');
     const email = this.signupForm.get('email')?.value;
-    const otp = this.getOtpValue();
-    if (!email || !otp) return;
-    this.state.otp.isSubmitting = true;
-    this.authService.verifyOTP({ email, otp: otp }).subscribe({
-      next: (res: CommonAPIResponse) => {
-        this.handleOTPVerificationResponse(res);
-      },
-      error: () => {
-        this.state.otp.isSubmitting = false;
-        this.state.otp.status = AUTH_STATUS.OTP.ERROR;
-      }
-    });
+    if (otpFormControl && otpFormControl.value && otpFormControl.value.toString().length == 6 && email) {
+      this.state.otp.isSubmitting = true;
+      this.authService.verifyOTP({ email, otp: otpFormControl.value.toString() }).subscribe({
+        next: (res: ICommonAPIResponse) => {
+          this.handleOTPVerificationResponse(res);
+        },
+        error: () => {
+          this.state.otp.isSubmitting = false;
+          this.state.otp.status = AUTH_STATUS.OTP.ERROR;
+        }
+      });
+    }
   }
 
-  private handleOTPVerificationResponse(res: CommonAPIResponse): void {
+  private handleOTPVerificationResponse(res: ICommonAPIResponse): void {
     if (res?.['verifyOTP']?.success &&
       res['verifyOTP'].code === OTP_RELATED_API_RESPONSE_CODES.OTP_VERIFIED) {
       this.setPasswordControlAndValidator();
@@ -276,11 +168,12 @@ export class SignUpComponent implements OnInit {
     this.state.otp.isSubmitting = false;
   }
 
-  private handleOTPError(verifyOTP: CommonResponse): void {
+  private handleOTPError(verifyOTP: ICommonResponse): void {
     switch (verifyOTP.code) {
       case OTP_RELATED_API_RESPONSE_CODES.OTP_EXPIRED:
       case OTP_RELATED_API_RESPONSE_CODES.OTP_NOT_FOUND:
         this.state.otp.error = null;
+        this.state.otp.isDisabled = true;
         this.state.otp.status = AUTH_STATUS.OTP.EXPIRED;
         break;
       case OTP_RELATED_API_RESPONSE_CODES.INVALID_OTP:
@@ -290,9 +183,10 @@ export class SignUpComponent implements OnInit {
       case OTP_RELATED_API_RESPONSE_CODES.OTP_EXCEED:
         this.state.otp.remainingAttempts = 0;
         this.state.otp.error = null;
+        this.state.otp.isDisabled = true;
         break;
     }
-    this.state.otp.form?.reset();
+    this.signupForm.get('otp')?.reset();
   }
 
   setPasswordControlAndValidator() {
@@ -303,17 +197,16 @@ export class SignUpComponent implements OnInit {
 
   onUserRegister() {
     if (this.signupForm.value && this.signupForm.valid) {
-      const firstName = this.signupForm.value.firstName;
-      const lastName = this.signupForm.value.lastName || '';
+      const name = this.signupForm.value.name;
       const emailFormControl = this.signupForm.get('email');
       const password = this.signupForm.value.password;
-      if (firstName && emailFormControl && emailFormControl.value && password) {
-        const data = { userDetails: { firstName, lastName, email: emailFormControl.value, password } };
+      if (name && emailFormControl && emailFormControl.value && password) {
+        const data = { userDetails: { name, email: emailFormControl.value, password } };
         this.authService.createUser(data).subscribe({
           next: (res: ICreateUserDetails) => {
             if (res && res.createUser && res.createUser.email) {
+              // this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Your account has been created successfully. Exciting times ahead!' });
               this.authService.setRegistrationEmail(res.createUser.email);
-              this.router.navigate(['/login']);
             }
           },
           error: (error) => {
@@ -321,6 +214,31 @@ export class SignUpComponent implements OnInit {
           }
         });
       }
+    }
+  }
+
+  showRegistrationSuccessToast() {
+    this.toastMessageService.add({ key: 'registrationSuccess', sticky: true, severity: 'custom' });
+    this.timerSubscription = interval(1000).pipe(takeWhile(() => this.timer > 0), finalize(() => this.onRedirect('dashboard'))).subscribe(() => { this.timer--; });
+  }
+
+  onRedirect(text: string) {
+    console.log('text ', text);
+    text = '/' + text;
+    setTimeout(() => {
+      this.toastMessageService.clear('registrationSuccess');
+      this.router.navigate([text]);
+    }, 500);
+  }
+
+  onClose(event: any) {
+    console.log('event ', event);
+
+  }
+
+  ngOnDestroy(): void {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
     }
   }
 }

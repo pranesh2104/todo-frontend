@@ -1,12 +1,20 @@
-.signup-card-container {
-  width: 35%;
+.p-inputtext {
+  width: 100%;
 }
 
-
-::ng-deep .email-container .mat-mdc-form-field-subscript-wrapper {
-  display: none;
+::ng-deep .p-card {
+  padding: 4rem;
 }
 
+::ng-deep p-password .p-password-input {
+  width: 300px;
+  padding-inline-start: calc((var(--p-form-field-padding-x)* 2) + var(--p-icon-size));
+
+}
+
+::ng-deep .p-iconfield {
+  width: 300px;
+}
 
 .status-icon {
   font-family: 'Material Icons';
@@ -84,17 +92,17 @@
 
 // Mobile upto (480px)
 @media only screen and (max-width:480px) {
-  .signup-card-container {
-    width: 90%;
-  }
+  // .signup-card-container {
+  //   width: 90%;
+  // }
 
 }
 
 // Tablet (481px to 1024px)
 @media only screen and (min-width:481px) and (max-width:1024px) {
-  .signup-card-container {
-    width: 80%;
-  }
+  // .signup-card-container {
+  //   width: 80%;
+  // }
 }
 
 // Laptop (1025px to 1200px)
