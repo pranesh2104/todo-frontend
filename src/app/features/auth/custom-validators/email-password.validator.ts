@@ -40,7 +40,8 @@ export class CustomValidators {
 
   static checkEmailExist(authService: AuthService, checkingState: ICheckingState, emailExistState: IEmailExistState, isExpectEmailExist: boolean): AsyncValidatorFn | null {
     return (formControl: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!formControl.value) { return of(null); }
+      if (formControl.pristine && formControl.value) return of(null);
+      if (!formControl.value) return of(null);
       return formControl.valueChanges.pipe(
         debounceTime(500),
         distinctUntilChanged(),

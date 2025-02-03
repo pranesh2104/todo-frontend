@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CustomValidators } from '../../custom-validators/email-password.validator';
 import { AuthService } from '../../services/auth.service';
@@ -6,25 +6,24 @@ import { GraphqlClientService } from '../../../../shared/services/graphql-client
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { ISignUpForm, ISignUpState, ICreateUserDetails } from '../../models/auth.model';
 import { CommonModule } from '@angular/common';
-import { ICommonAPIResponse, ICommonResponse } from '@shared/models/shared.model';
+import { ICommonAPIResponse, ICommonSuccessResponse } from '@shared/models/shared.model';
 import { AUTH_STATUS, EMAIL_PATTERN, OTP_RELATED_API_RESPONSE_CODES, PASSWORD_PATTERN } from '../../constants/auth.constant';
 import { CardModule } from 'primeng/card';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import { InputTextModule } from 'primeng/inputtext';
+import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
-import { IconFieldModule } from 'primeng/iconfield';
-import { InputIconModule } from 'primeng/inputicon';
-import { PasswordModule } from 'primeng/password';
-import { ButtonModule } from 'primeng/button';
-import { InputOtpModule } from 'primeng/inputotp';
 import { MessageService } from 'primeng/api';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
+import { Password } from 'primeng/password';
+import { Button } from 'primeng/button';
+import { InputOtp } from 'primeng/inputotp';
 import { Toast } from 'primeng/toast';
 import { finalize, interval, Subscription, takeWhile } from 'rxjs';
+import { CoreAuthService } from '@core/services/core-auth.service';
 
 @Component({
   selector: 'app-sign-up',
-  imports: [ButtonModule, Toast, InputOtpModule, CardModule, ReactiveFormsModule, CommonModule, InputGroupModule, InputGroupAddonModule, InputTextModule, Message, IconFieldModule, InputIconModule, PasswordModule, FormsModule],
+  imports: [Button, Toast, CardModule, ReactiveFormsModule, CommonModule, InputText, Message, IconField, InputIcon, Password, FormsModule, InputOtp],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.scss',
   providers: [GraphqlClientService, MessageService]
@@ -67,15 +66,19 @@ export class SignUpComponent implements OnInit {
 
   readonly showOTPError = () => this.state.otp.error !== null;
 
-  private timerSubscription!: Subscription;
+  private timerSubscription: Subscription = new Subscription();
+
+  private observableSubscription: Subscription = new Subscription();
+
+  private readonly coreAuthService = inject(CoreAuthService);
 
   ngOnInit(): void {
     this.initializeForm();
-    this.activeRoute.queryParams.subscribe((queryParams: Params) => {
+    this.observableSubscription.add(this.activeRoute.queryParams.subscribe((queryParams: Params) => {
       if (queryParams && queryParams['email']) {
         this.signupForm.get('email')?.setValue(queryParams['email']);
       }
-    });
+    }));
   }
 
   private initializeForm(): void {
@@ -103,13 +106,13 @@ export class SignUpComponent implements OnInit {
     const nameFormControl = this.signupForm.get('name');
     if (emailFormControl && emailFormControl.value && nameFormControl && nameFormControl.value && (emailFormControl.disabled ? true : emailFormControl?.valid)) {
       this.state.otp.status = AUTH_STATUS.OTP.SENDING;
-      this.authService.sendEmailOTP({ email: emailFormControl.value.toLowerCase(), name: nameFormControl.value }).subscribe({
+      this.observableSubscription.add(this.authService.sendEmailOTP({ email: emailFormControl.value.toLowerCase(), name: nameFormControl.value }).subscribe({
         next: () => this.handleOTPSendSuccess(),
         error: () => {
           this.state.otp.status = AUTH_STATUS.OTP.ERROR;
           this.signupForm.get('email')?.setErrors({ isOTPSendError: true });
         }
-      });
+      }));
     }
     else {
       if (emailFormControl && !emailFormControl.value)
@@ -144,7 +147,7 @@ export class SignUpComponent implements OnInit {
     const email = this.signupForm.get('email')?.value;
     if (otpFormControl && otpFormControl.value && otpFormControl.value.toString().length == 6 && email) {
       this.state.otp.isSubmitting = true;
-      this.authService.verifyOTP({ email, otp: otpFormControl.value.toString() }).subscribe({
+      this.observableSubscription.add(this.authService.verifyOTP({ email, otp: otpFormControl.value.toString() }).subscribe({
         next: (res: ICommonAPIResponse) => {
           this.handleOTPVerificationResponse(res);
         },
@@ -152,7 +155,10 @@ export class SignUpComponent implements OnInit {
           this.state.otp.isSubmitting = false;
           this.state.otp.status = AUTH_STATUS.OTP.ERROR;
         }
-      });
+      }));
+    }
+    else {
+      this.state.otp.error = `Please enter the OTP to proceed.`;
     }
   }
 
@@ -168,7 +174,7 @@ export class SignUpComponent implements OnInit {
     this.state.otp.isSubmitting = false;
   }
 
-  private handleOTPError(verifyOTP: ICommonResponse): void {
+  private handleOTPError(verifyOTP: ICommonSuccessResponse): void {
     switch (verifyOTP.code) {
       case OTP_RELATED_API_RESPONSE_CODES.OTP_EXPIRED:
       case OTP_RELATED_API_RESPONSE_CODES.OTP_NOT_FOUND:
@@ -202,17 +208,18 @@ export class SignUpComponent implements OnInit {
       const password = this.signupForm.value.password;
       if (name && emailFormControl && emailFormControl.value && password) {
         const data = { userDetails: { name, email: emailFormControl.value, password } };
-        this.authService.createUser(data).subscribe({
+        this.observableSubscription.add(this.authService.createUser(data).subscribe({
           next: (res: ICreateUserDetails) => {
-            if (res && res.createUser && res.createUser.email) {
-              // this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Your account has been created successfully. Exciting times ahead!' });
-              this.authService.setRegistrationEmail(res.createUser.email);
+            if (res && res.createUser && res.createUser.user) {
+              this.coreAuthService.setAccessToken(res.createUser.tokens.accessToken);
+              this.coreAuthService.user.next(res.createUser.user);
+              this.showRegistrationSuccessToast();
             }
           },
           error: (error) => {
             console.log('error ', error);
           }
-        });
+        }));
       }
     }
   }
@@ -233,12 +240,14 @@ export class SignUpComponent implements OnInit {
 
   onClose(event: any) {
     console.log('event ', event);
-
   }
 
   ngOnDestroy(): void {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
+    }
+    if (this.observableSubscription) {
+      this.observableSubscription.unsubscribe();
     }
   }
 }

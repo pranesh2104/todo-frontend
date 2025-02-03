@@ -16,6 +16,12 @@
   width: 300px;
 }
 
+::ng-deep p-message {
+  width: 300px;
+  display: block;
+  word-break: break-word;
+}
+
 .status-icon {
   font-family: 'Material Icons';
   opacity: 1;

@@ -1,40 +1,40 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+import { ApolloLink } from '@apollo/client/core';
 import { setContext } from '@apollo/client/link/context';
-/**
- * Class service which is used to set,get and clear the headers for specific url request.
- */
+import { HEADERS_ENUM } from '@core/enums/core.enum';
+import { CryptoService } from './crypto.service';
+
 @Injectable({
   providedIn: 'root'
 })
-
 export class HeaderService {
-  /**
-    * Variable which is used to define the header for url.
-    */
-  headers: { headers: { [key: string]: string } } = {
-    headers: {}
-  };
-  /**
-   * Method used to set headers for GraphQL requests.
-   * This method creates a context for setting the Authorization header using the JWT token
-   * stored in the localStorage. If no token is found, it returns an empty headers object.
-   * @returns {ApolloLink} A context-setting ApolloLink instance with the appropriate headers.
-   */
-  public getheaders() {
+
+  private headers: { headers: { [key: string]: string } } = { headers: {} };
+
+  private cryptoService = inject(CryptoService);
+
+  constructor() { }
+
+  public getHeadersAplloLink(): ApolloLink {
     const auth = setContext(() => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
-      const headerData = Object.keys(this.headers.headers);
-      if (headerData.length && headerData.includes('Authorization')) {
-        return this.headers;
-      }
-      else if (token) {
-        return this.setHeaders('Authorization', token);
-      }
-      else {
-        return this.headers;
-      }
+      // const headerData = Object.keys(this.headers.headers);
+      // if (headerData.length && headerData.includes('Authorization')) {
+      //   return this.headers;
+      // }
+      // else {
+      //   const token = this.storageService.get('at');
+      //   if (token) {
+      //     this.setHeaders('Authorization', token);
+      //     return this.headers;
+      //   }
+      // }
+      return this.headers;
     });
     return auth;
+  }
+
+  public getHeaders() {
+    return this.headers;
   }
   /**
    * Method used to set a header for a specific key in the headers object.
@@ -42,17 +42,25 @@ export class HeaderService {
    * @param {string} value - The value for the header.
    * @returns {object} - The updated headers object.
    */
-  public setHeaders(key: string, value: string) {
-    this.headers['headers'] = Object.assign({}, this.headers['headers'], { [key]: value });
-    return this.headers['headers'];
+  public setHeaders(key: string, value: string): void {
+    // if (key === HEADERS_ENUM.Authorization) {
+    //   const encryptedCredentials = this.cryptoService.encryptToken(value);
+    //   this.headers['headers'] = Object.assign({}, this.headers['headers'], { [key]: 'Bearer ' + encryptedCredentials });
+    // }
+    if (key === HEADERS_ENUM.Registration) {
+      const encryptedCredentials = this.cryptoService.encryptToken(value);
+      this.headers['headers'] = Object.assign({}, this.headers['headers'], { [key]: 'Basic ' + encryptedCredentials });
+    }
+    else {
+      this.headers['headers'] = Object.assign({}, this.headers['headers'], { [key]: value });
+    }
   }
   /**
   * Method used to remove a header for a specific key in the headers object.
   * @param {string} key - The key for the header.
   * @returns {object} - The updated headers object.
   */
-  public removeHeader(key: string) {
+  public removeHeader(key: string): void {
     delete this.headers['headers'][key];
-    return this.headers['headers'];
   }
 }
