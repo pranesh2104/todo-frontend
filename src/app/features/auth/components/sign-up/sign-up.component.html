@@ -11,7 +11,7 @@
     <form [formGroup]="signupForm" class="flex-column align-center-center gap-3.2" style="gap: 15px;">
       <div>
         <p-iconfield>
-          <p-inputicon> <i class="pi pi-user"></i> </p-inputicon>
+          <p-inputicon styleClass="pi pi-user" />
           <input pInputText id="first-name" formControlName="name" type="text" placeholder="First Name"
             autocomplete="name" />
         </p-iconfield>
@@ -79,7 +79,7 @@
       @if (showPasswordFields()) {
       <div>
         <p-iconfield>
-          <p-inputicon style="z-index: 1;"> <i class="pi pi-lock"></i> </p-inputicon>
+          <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
           <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password"
             [feedback]="false" />
         </p-iconfield>
@@ -92,7 +92,7 @@
       </div>
       <div>
         <p-iconfield>
-          <p-inputicon style="z-index: 1;"> <i class="pi pi-lock"></i> </p-inputicon>
+          <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
           <p-password id="repeatPassword" formControlName="repeatPassword" [toggleMask]="true" class="w-full"
             placeholder="Repeat Password" [feedback]="false" />
         </p-iconfield>
@@ -113,32 +113,34 @@
       @if (canResendOTP()) {
       <span style="color: #f44336;">Maximum attempts reached. Please try with same or different email.</span>
       }
-      @else {
+      @else if(!isEmailChangeEnabled){
       <span style="color: gray;font-size: 15px;">A verification code has been sent to your email</span>
       }
       @if(state.otp.status === AUTH_STATUS.OTP.ERROR){
       <span style="color: #f44336;">Something went wrong, please try again later.</span>
       }
+      @if (!isEmailChangeEnabled) {
       <div class="flex-column align-center-center gap-2">
         <p-inputotp formControlName="otp" [length]="6" [integerOnly]="true" [disabled]="state.otp.isDisabled" />
         @if (showOTPError()) {
         <p-message severity="error" variant="simple" size="small"> {{ state.otp.error }}</p-message>
         }
       </div>
+      }
       <div style="gap: 10px;" class="flex-row align-center-center w-full gap-10px">
-        @if (state.otp.remainingAttempts !== 0) {
+        @if (state.otp.remainingAttempts !== 0 && !isEmailChangeEnabled) {
         <p-button [label]=" state.otp.isSubmitting ? 'Verifying...' : 'Verify OTP'" [raised]="true"
           (click)="onVerifyOTP();"
           [disabled]="signupForm.get('otp')?.invalid  || state.otp.isSubmitting || isOTPResending" />
         }
-        @if (canResendOTP()) {
+        @if (canResendOTP() || isEmailChangeEnabled) {
         <p-button [label]="isOTPResending ? 'Resending OTP...' :'Resend OTP'" [raised]="true"
           (click)="isOTPResending = true;onSendOTP();signupForm.get('otp')?.reset();" icon="pi pi-send" iconPos="right"
           [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
         }
-        @if (canResendOTP() || state.otp.status === AUTH_STATUS.OTP.EXPIRED) {
+        <!-- @if (canResendOTP()) { -->
         <p-button label="Change Email" (click)="onChangeEmail()" [raised]="true" />
-        }
+        <!-- } -->
       </div>
       }
       @if (showPasswordFields()) {
@@ -164,7 +166,7 @@
       <p style="text-align: center;">Welcome aboard! Your account has been created successfully.</p>
       <span>You will be redirect to Dashboard in {{timer}} seconds</span>
       <div class="flex-row align-center-center" style="gap: 15px;">
-        <p-button label="Dashboard" (click)="onRedirect('dashboard')" severity="primary" />
+        <p-button label="Dashboard" (click)="onRedirect('app/dashboard')" severity="primary" />
         <p-button label="login" (click)="onRedirect('login')" severity="secondary" />
       </div>
     </section>

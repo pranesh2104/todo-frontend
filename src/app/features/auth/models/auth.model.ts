@@ -1,4 +1,5 @@
 import { FormControl } from "@angular/forms";
+import { IAuthTokens } from "@core/models/core.model";
 
 export interface CreateUserArguments {
   userDetails: UserDetailsInput;
@@ -11,15 +12,9 @@ interface UserDetailsInput {
 }
 
 export interface ICreateUserDetails {
-  createUser: ICreateUserResponse;
+  createUser: ILoginResponse;
 }
 
-interface ICreateUserResponse {
-
-  email: string;
-  name: string;
-  id: number;
-}
 export interface IEmailCheckResponse {
   checkEmail: ICheckEmail;
 }
@@ -27,15 +22,7 @@ export interface IEmailCheckResponse {
 interface ICheckEmail {
   code: 'EMAIL_EXIST' | 'EMAIL_NOT_EXIST';
   message: string;
-}
-
-export interface IOTPForm {
-  digit0: FormControl<string>;
-  digit1: FormControl<string>;
-  digit2: FormControl<string>;
-  digit3: FormControl<string>;
-  digit4: FormControl<string>;
-  digit5: FormControl<string>;
+  success: true;
 }
 
 export interface VerifyOTPArguments {
@@ -79,4 +66,29 @@ export interface UpdatePasswordArguments {
   email: string;
   password: string;
   token: string;
+}
+
+export interface IResetForm {
+  userEmail: FormControl<string>;
+  password: FormControl<string>;
+  repeatPassword: FormControl<string>;
+}
+
+
+export interface ILoginSuccessResponse {
+  login: ILoginResponse;
+}
+
+export interface ILoginResponse {
+  user: IUserReponse;
+  tokens: IAuthTokens;
+}
+
+export interface IGetOneUserResponse {
+  getOneUser: IUserReponse;
+}
+export interface IUserReponse {
+  email: string;
+  name: string;
+  updatedAt: string;
 }

@@ -11,7 +11,7 @@
     <form [formGroup]="signInForm" class="flex-column align-center-center" style="gap: 15px;">
       <div>
         <p-iconfield>
-          <p-inputicon> <i class="pi pi-envelope"></i> </p-inputicon>
+          <p-inputicon styleClass="pi pi-envelope" />
           <input required trimVal pInputText id="email" formControlName="email" type="email" placeholder="Email"
             autocomplete="email" />
         </p-iconfield>
@@ -20,13 +20,16 @@
         }
         @else if (signInForm.get('email')?.dirty && !signInForm.get('email')?.hasError('required') &&
         signInForm.get('email')?.hasError('pattern') ) {
-        <p-message severity="error" variant="simple" size="small"> Invalid Email!
-        </p-message>
+        <p-message severity="error" variant="simple" size="small"> Invalid Email!</p-message>
+        }
+        @else if (signInForm.get('email')?.dirty && !signInForm.get('email')?.hasError('required') &&
+        !signInForm.get('email')?.hasError('pattern') && signInForm.get('email')?.hasError('userNotFound') ) {
+        <p-message severity="error" variant="simple" size="small"> Account Not found </p-message>
         }
       </div>
       <div>
         <p-iconfield>
-          <p-inputicon style="z-index: 1;"> <i class="pi pi-lock"></i> </p-inputicon>
+          <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
           <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password"
             [feedback]="false" />
         </p-iconfield>
@@ -36,6 +39,10 @@
         @else if (signInForm.get('password')?.dirty && !signInForm.get('password')?.hasError('required') &&
         signInForm.get('password')?.hasError('pattern')) {
         <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
+        }
+        @else if (signInForm.get('password')?.dirty && !signInForm.get('password')?.hasError('required') &&
+        !signInForm.get('password')?.hasError('pattern') && signInForm.get('password')?.hasError('passwordMismatch')) {
+        <p-message severity="error" variant="simple" size="small">Incorrect Password </p-message>
         }
       </div>
       <div class="flex-row align-end-center" style="width: 100%;">
@@ -50,3 +57,5 @@
   </p-card>
   }
 </div>
+
+<p-toast />

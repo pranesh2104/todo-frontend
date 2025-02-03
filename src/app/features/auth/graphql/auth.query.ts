@@ -1,9 +1,15 @@
 export const CREATE_USER = `
 mutation CreateUser($userDetails: CreateUserDetails) {
   createUser(userDetails: $userDetails) {
-    email
-    name
-    id
+    tokens {
+      refreshToken
+      accessToken
+    }
+    user {
+      email
+      name
+      updatedAt
+    }
   }
 }`;
 
@@ -52,5 +58,20 @@ mutation UpdatePassword($passwordDetails: UpdatePasswordInput) {
     message
     code
     success
+  }
+}`;
+
+export const LOGIN = `
+mutation Login {
+  login {
+    user {
+      email
+      name
+      updatedAt
+    }
+    tokens {
+      refreshToken
+      accessToken
+    }
   }
 }`;

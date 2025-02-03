@@ -1,0 +1,65 @@
+import { inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { BehaviorSubject, lastValueFrom } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
+import { IRefreshTokenResponse } from '@core/models/core.model';
+import { StorageService } from './storage.service';
+import { IUserReponse } from 'app/features/auth/models/auth.model';
+import { UserService } from './user.service';
+
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CoreAuthService {
+
+
+
+  private userService = inject(UserService);
+
+
+  private readonly platformId = inject(PLATFORM_ID);
+
+  private storageService = inject(StorageService);
+
+  user: BehaviorSubject<IUserReponse | null> = new BehaviorSubject<IUserReponse | null>(null);
+
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'logout') this.logout();
+      });
+    }
+  }
+
+  getAccessToken(): string | null {
+    return this.storageService.get('at');
+  }
+
+  setAccessToken(token: string): void {
+    this.storageService.set('at', token);
+  }
+
+  async getRefreshToken(): Promise<boolean> {
+    try {
+      const newToken: IRefreshTokenResponse = await lastValueFrom(this.userService.getAccessToken());
+      this.setAccessToken(newToken.refreshAccessToken.accessToken);
+      return true;
+    } catch (error) {
+      this.logout();
+      return false;
+    }
+  }
+
+  logout(): void {
+    this.storageService.remove('at');
+  }
+
+  async checkAuthenticateState(): Promise<boolean> {
+    if (this.storageService.get('at')) {
+      return true;
+    }
+    else {
+      return await this.getRefreshToken();;
+    }
+  }
+}

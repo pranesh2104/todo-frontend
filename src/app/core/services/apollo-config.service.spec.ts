@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { GraphqlConfigService } from './graphql-config.service';
+import { ApolloConfigService } from './apollo-config.service';
 
 describe('GraphqlConfigService', () => {
-  let service: GraphqlConfigService;
+  let service: ApolloConfigService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(GraphqlConfigService);
+    service = TestBed.inject(ApolloConfigService);
   });
 
   it('should be created', () => {

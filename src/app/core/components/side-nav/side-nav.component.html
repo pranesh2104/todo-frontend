@@ -1,9 +1,49 @@
-<div style="height: 100%;width: 25%;">
-  <div class="flex-row align-start-center">
-    <img src="" alt="Profile Image">
-    <div class="flex-column align-start-center">
-      <!-- <span>{{name}} </span>
-      <span>{{email}}</span> -->
+<div class="flex min-h-screen bg-gray-50">
+  <div class="w-64 bg-white border-r border-gray-200 p-4">
+    <div class="flex items-center gap-2 mb-8">
+      <div [ngStyle]="getStyles()"
+        class="w-12 h-12 text-lg rounded-full flex items-center justify-center text-white font-semibold">
+        {{ getInitial() }}
+      </div>
+      <!-- <img src="" alt="Profile Image"> -->
+      <div class="w-[80%]">
+        <span>{{user().name}} </span>
+        <span style="font-size: 10px;">{{user().email}}</span>
+      </div>
+    </div>
+    <nav class="space-y-1">
+      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg bg-blue-50 text-blue-600">
+        <i class="pi pi-home"></i> All Tasks
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+        <i class="pi pi-star"></i> Important
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+        <i class="pi pi-calendar"></i> Upcoming
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+        <i class="pi pi-clock"></i> Today
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+        <i class="pi pi-folder"></i> Completed
+      </button>
+    </nav>
+    <div class="mt-8">
+      <h2 class="text-sm font-semibold text-gray-600 mb-2">Tags</h2>
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 px-3 py-2 text-gray-700">
+          <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+          Work
+        </div>
+        <div class="flex items-center gap-2 px-3 py-2 text-gray-700">
+          <div class="w-2 h-2 rounded-full bg-green-500"></div>
+          Personal
+        </div>
+        <div class="flex items-center gap-2 px-3 py-2 text-gray-700">
+          <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+          Meetings
+        </div>
+      </div>
     </div>
   </div>
 </div>
