@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, inject, OnInit, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { IUserReponse } from 'app/features/auth/models/auth.model';
 
@@ -17,16 +17,21 @@ export class SideNavComponent implements OnInit {
 
   private colors: string[] = ['#3B82F6', '#22C55E', '#EAB308', '#EF4444', '#A855F7', '#EC4899'];
 
+  private platformId = inject(PLATFORM_ID);
+
 
   ngOnInit(): void {
-    this.coreAuthService.user.subscribe({
-      next: (userResponse: IUserReponse | null) => {
-        console.log('userResponse ', userResponse);
-        if (userResponse) {
-          this.user.set(userResponse);
+    if (isPlatformBrowser(this.platformId)) {
+      this.coreAuthService.user.subscribe({
+        next: (userResponse: IUserReponse | null) => {
+          console.log('userResponse ', userResponse);
+          if (userResponse) {
+            this.user.set(userResponse);
+          }
         }
-      }
-    });
+
+      });
+    }
   }
 
   getStyles() {

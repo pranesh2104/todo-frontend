@@ -19,8 +19,6 @@ export class ApolloConfigService {
 
     const http = httpLink.create({ uri: graphqlUri, withCredentials: true });
 
-
-
     const erroLink = onError(({ networkError, graphQLErrors, operation }) => {
       if (graphQLErrors) {
         const customError = graphQLErrors.map((error: ICustomGraphQLError) => {
