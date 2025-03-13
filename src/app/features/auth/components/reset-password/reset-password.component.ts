@@ -107,7 +107,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.emailState.status = AUTH_STATUS.EMAIL.SENDING;
     const userEmailFormControl = this.resetForm.get('userEmail');
     if (userEmailFormControl && userEmailFormControl.valid && userEmailFormControl.value) {
-      this.observableSubscription.add(this.authService.sendResetPasswordLink(userEmailFormControl.value).subscribe({
+      this.observableSubscription.add(this.authService.sendResetPasswordLink<ICommonAPIResponse>(userEmailFormControl.value).subscribe({
         next: (res: ICommonAPIResponse) => {
           if (res && res['sendEmailResetPasswordLink'] && res['sendEmailResetPasswordLink'].success) {
             this.isPasswordLinkSended = true;
@@ -138,7 +138,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     const repeatPasswordFormControl = this.resetForm.get('repeatPassword');
     const userEmailFormControl = this.resetForm.get('userEmail');
     if (userEmailFormControl && passwordFormControl && repeatPasswordFormControl && passwordFormControl.valid && repeatPasswordFormControl.valid && userEmailFormControl.value && passwordFormControl.value) {
-      this.observableSubscription.add(this.authService.updatePassword({ email: userEmailFormControl.value, password: passwordFormControl.value, token: this.token }).subscribe({
+      this.observableSubscription.add(this.authService.updatePassword<ICommonAPIResponse>({ passwordDetails: { email: userEmailFormControl.value, password: passwordFormControl.value, token: this.token } }).subscribe({
         next: (res: ICommonAPIResponse) => {
           if (res && res['updatePassword'] && res['updatePassword'].success) {
             this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Your Password has been updated successfully!', life: 3000 });

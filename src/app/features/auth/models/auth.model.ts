@@ -25,9 +25,11 @@ interface ICheckEmail {
   success: true;
 }
 
-export interface VerifyOTPArguments {
-  email: string;
-  otp: string;
+export interface IVerifyOTPArguments {
+  otpDetails: {
+    email: string;
+    otp: string;
+  }
 }
 
 export interface SendEmailOTPArguments {
@@ -62,10 +64,12 @@ interface IOTPCommonState {
   isSubmitting: boolean;
   isDisabled: boolean;
 }
-export interface UpdatePasswordArguments {
-  email: string;
-  password: string;
-  token: string;
+export interface IUpdatePasswordArguments {
+  passwordDetails: {
+    email: string;
+    password: string;
+    token: string;
+  }
 }
 
 export interface IResetForm {
@@ -91,4 +95,8 @@ export interface IUserReponse {
   email: string;
   name: string;
   updatedAt: string;
+}
+
+export interface IVerifyOTPResponse {
+  attempt: string;
 }

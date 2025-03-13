@@ -1,12 +1,14 @@
-import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, TransferState } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
-import { CoreAuthService } from '@core/services/core-auth.service';
-import { IGetOneUserResponse } from 'app/features/auth/models/auth.model';
-import { isPlatformBrowser } from '@angular/common';
+import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
 import { Router, RouterOutlet } from '@angular/router';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
-import { palette } from '@primeng/themes';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
+import { USER_KEY } from '@core/constants/state.constant';
+import { Subscription } from 'rxjs';
+import { CoreAuthService } from '@core/services/core-auth.service';
+// import { SERVER_REQUEST } from 'server.token';
 
 @Component({
   selector: 'app-base-layout',
@@ -14,28 +16,38 @@ import { palette } from '@primeng/themes';
   templateUrl: './base-layout.component.html',
   styleUrl: './base-layout.component.scss'
 })
-export class BaseLayoutComponent implements OnInit {
+export class BaseLayoutComponent implements OnInit, OnDestroy {
 
   private readonly userService = inject(UserService);
 
-  user = inject(CoreAuthService).user;
+  private transferState = inject(TransferState);
+
+  user !: IUserReponse;
+
+  private userData = inject(CoreAuthService).user;
 
   private platformId = inject(PLATFORM_ID);
 
   private router = inject(Router);
 
-  ngOnInit(): void {
-    if (this.user && this.user.value) {
+  // private severToken = inject(SERVER_REQUEST);
 
+  private subscription!: Subscription;
+
+  ngOnInit(): void {
+    if (this.userData && this.userData.value) {
+      console.log('this.userData ', this.userData);
+      this.user = this.userData.value;
     }
     else {
       if (isPlatformBrowser(this.platformId)) {
-        const values1 = palette('#2563EB');
-        console.log(values1);
-
-        this.userService.getCurrentUser().subscribe({
+        this.subscription = this.userService.getCurrentUser().subscribe({
           next: (res: IGetOneUserResponse) => {
-            this.user.next(res.getOneUser);
+            console.log('res ', res);
+            if (isPlatformServer(this.platformId)) {
+              this.transferState.set(USER_KEY, res);
+            }
+            this.user = res.getOneUser;
           },
           error: (error: ICommonErrorResponse) => {
             const parsedError: ICommonResponse = JSON.parse(error.message);
@@ -45,6 +57,12 @@ export class BaseLayoutComponent implements OnInit {
           }
         });
       }
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 }

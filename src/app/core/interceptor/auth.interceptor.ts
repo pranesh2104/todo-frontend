@@ -1,11 +1,11 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, PLATFORM_ID } from '@angular/core';
 import { Router } from '@angular/router';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { HeaderService } from '@core/services/header.service';
 import { BehaviorSubject, catchError, from, switchMap, throwError } from 'rxjs';
-// import { SERVER_REQUEST } from '../../../server.token';
-// import { isPlatformServer } from '@angular/common';
+import { SERVER_REQUEST } from '../../../server.token';
+import { isPlatformServer } from '@angular/common';
 
 let isRefreshing = false;
 
@@ -13,29 +13,25 @@ const refreshSubject = new BehaviorSubject<boolean>(false);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
+  const platformId = inject(PLATFORM_ID);
+
+  if (isPlatformServer(platformId)) {
+    const server = inject(SERVER_REQUEST);
+    // console.log('server from interceptor ', server);
+
+    if (server) {
+      req = req.clone({
+        setHeaders: { Cookie: server?.headers['cookie'] }
+      });
+    }
+    return next(req);
+  }
+
   const coreAuthService = inject(CoreAuthService);
 
   const headerService = inject(HeaderService);
 
   const router = inject(Router);
-
-  // const platformId = inject(PLATFORM_ID);
-
-  // if (isPlatformServer(platformId)) {
-  //   console.log('inside ');
-
-  //   const expressReq = inject(SERVER_REQUEST);
-  //   const cookies = expressReq.headers.cookie || '';
-
-  //   // Clone the request to add cookies
-  //   const clonedReq = req.clone({
-  //     setHeaders: {
-  //       Cookie: cookies
-  //     }
-  //   });
-
-  //   return next(clonedReq);
-  // }
 
   const authReq = addToken(coreAuthService, req, headerService);
 

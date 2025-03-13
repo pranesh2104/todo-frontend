@@ -1,9 +1,5 @@
-export interface ICommonAPIResponse {
-  [key: string]: ICommonResponse
-}
-
-export interface ICommonSuccessResponse extends ICommonResponse {
-  attempt?: string;
+export interface ICommonAPIResponse<T = {}> {
+  [key: string]: T & ICommonResponse;
 }
 
 export interface ICommonErrorResponse {

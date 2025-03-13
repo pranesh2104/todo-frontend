@@ -4,9 +4,9 @@ import { CustomValidators } from '../../custom-validators/email-password.validat
 import { AuthService } from '../../services/auth.service';
 import { GraphqlClientService } from '../../../../shared/services/graphql-client.service';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { ISignUpForm, ISignUpState, ICreateUserDetails } from '../../models/auth.model';
+import { ISignUpForm, ISignUpState, ICreateUserDetails, IVerifyOTPResponse } from '../../models/auth.model';
 import { CommonModule } from '@angular/common';
-import { ICommonAPIResponse, ICommonSuccessResponse } from '@shared/models/shared.model';
+import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { AUTH_STATUS, EMAIL_PATTERN, OTP_RELATED_API_RESPONSE_CODES, PASSWORD_PATTERN } from '../../constants/auth.constant';
 import { CardModule } from 'primeng/card';
 import { InputText } from 'primeng/inputtext';
@@ -147,9 +147,10 @@ export class SignUpComponent implements OnInit {
     const email = this.signupForm.get('email')?.value;
     if (otpFormControl && otpFormControl.value && otpFormControl.value.toString().length == 6 && email) {
       this.state.otp.isSubmitting = true;
-      this.observableSubscription.add(this.authService.verifyOTP({ email, otp: otpFormControl.value.toString() }).subscribe({
-        next: (res: ICommonAPIResponse) => {
-          this.handleOTPVerificationResponse(res);
+      this.observableSubscription.add(this.authService.verifyOTP<ICommonAPIResponse<IVerifyOTPResponse>>({ otpDetails: { email, otp: otpFormControl.value.toString() } }).subscribe({
+        next: (res: ICommonAPIResponse<IVerifyOTPResponse>) => {
+          if (res)
+            this.handleOTPVerificationResponse(res);
         },
         error: () => {
           this.state.otp.isSubmitting = false;
@@ -162,37 +163,39 @@ export class SignUpComponent implements OnInit {
     }
   }
 
-  private handleOTPVerificationResponse(res: ICommonAPIResponse): void {
-    if (res?.['verifyOTP']?.success &&
+  private handleOTPVerificationResponse(res: ICommonAPIResponse<IVerifyOTPResponse>): void {
+    if (res['verifyOTP']?.success &&
       res['verifyOTP'].code === OTP_RELATED_API_RESPONSE_CODES.OTP_VERIFIED) {
       this.setPasswordControlAndValidator();
       this.state.otp.status = AUTH_STATUS.OTP.VERIFIED;
       this.state.email.isVerified = true;
-    } else if (res?.['verifyOTP']) {
-      this.handleOTPError(res['verifyOTP']);
+    } else if (res['verifyOTP']) {
+      this.handleOTPError(res);
     }
     this.state.otp.isSubmitting = false;
   }
 
-  private handleOTPError(verifyOTP: ICommonSuccessResponse): void {
-    switch (verifyOTP.code) {
-      case OTP_RELATED_API_RESPONSE_CODES.OTP_EXPIRED:
-      case OTP_RELATED_API_RESPONSE_CODES.OTP_NOT_FOUND:
-        this.state.otp.error = null;
-        this.state.otp.isDisabled = true;
-        this.state.otp.status = AUTH_STATUS.OTP.EXPIRED;
-        break;
-      case OTP_RELATED_API_RESPONSE_CODES.INVALID_OTP:
-        this.state.otp.error = `Invalid verification code. ${verifyOTP.attempt} attempt remaining`;
-        this.state.otp.remainingAttempts = Number(verifyOTP.attempt);
-        break;
-      case OTP_RELATED_API_RESPONSE_CODES.OTP_EXCEED:
-        this.state.otp.remainingAttempts = 0;
-        this.state.otp.error = null;
-        this.state.otp.isDisabled = true;
-        break;
+  private handleOTPError(res: ICommonAPIResponse<IVerifyOTPResponse>): void {
+    if (res && res['verifyOTP']) {
+      switch (res['verifyOTP'].code) {
+        case OTP_RELATED_API_RESPONSE_CODES.OTP_EXPIRED:
+        case OTP_RELATED_API_RESPONSE_CODES.OTP_NOT_FOUND:
+          this.state.otp.error = null;
+          this.state.otp.isDisabled = true;
+          this.state.otp.status = AUTH_STATUS.OTP.EXPIRED;
+          break;
+        case OTP_RELATED_API_RESPONSE_CODES.INVALID_OTP:
+          this.state.otp.error = `Invalid verification code. ${res['verifyOTP'].attempt} attempt remaining`;
+          this.state.otp.remainingAttempts = Number(res['verifyOTP'].attempt);
+          break;
+        case OTP_RELATED_API_RESPONSE_CODES.OTP_EXCEED:
+          this.state.otp.remainingAttempts = 0;
+          this.state.otp.error = null;
+          this.state.otp.isDisabled = true;
+          break;
+      }
+      this.signupForm.get('otp')?.reset();
     }
-    this.signupForm.get('otp')?.reset();
   }
 
   setPasswordControlAndValidator() {

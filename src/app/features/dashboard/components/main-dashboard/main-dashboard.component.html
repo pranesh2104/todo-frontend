@@ -6,7 +6,8 @@
       <input type="text" placeholder="Search tasks..."
         class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" />
     </div>
-    <button class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+    <button class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      (click)="onCreateTask()">
       <i class="pi pi-plus"></i>
       Add Task
     </button>
@@ -16,24 +17,36 @@
       <h2 class="text-xl font-semibold mb-4">All Tasks</h2>
       <div class="space-y-4">
         @for (task of tasks; track $index) {
-        <div key={task.id} class="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50">
-          <input type="checkbox" checked={task.completed} class="h-5 w-5 text-blue-500" />
-          <div className="flex-1">
-            <h3 class="{'font-medium' ${task.completed ? 'text-gray-400 line-through' : 'text-gray-700'} }">
+        <div class="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 ">
+          <input type="checkbox" [checked]=task.isCompleted
+            class="h-5 w-5 text-blue-500 focus:ring-1 focus:ring-blue-400" />
+          <div class="flex-1">
+            <h3 class="font-medium" [ngClass]="task.isCompleted ? 'text-gray-400 line-through' :'text-gray-700'">
               {{task.title}}
             </h3>
             <div class="flex items-center gap-2 mt-1">
-              <span class="text-sm text-gray-500">{{task.dueDate}}</span>
-              <span class="{`px-2 py-1 text-xs rounded-full ${ task.priority==='high' ? 'bg-red-100 text-red-600' :
-                task.priority==='medium' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600' }`}">
-                {{task.priority}}
+              <span class="text-sm text-gray-500"
+                [ngClass]="{'text-red-500' : isDateExpired(task.dueDate)}">{{task.dueDate | date }}</span>
+              <!-- Redesigned priority indicator -->
+              <span class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md" [ngClass]="task.priority==='high' ? 'bg-red-100 text-red-700 border border-red-300' :
+            task.priority==='medium' ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' : 
+            'bg-green-100 text-green-700 border border-green-300'">
+                {{task.priority | titlecase}}
               </span>
-              <span className="text-sm text-gray-500">{{task.tag}}</span>
+
+              <!-- Tags with different style -->
+              @for (tag of task.tags; track $index) {
+              <div
+                class="flex items-center px-3 py-1 rounded-full text-xs font-medium hover:bg-gray-200 transition-all duration-150 ease-in-out"
+                [ngStyle]="tag | tagBgStyle">
+                <i class="text-xs pi pi-tag mr-1" style="font-size: 0.75rem !important;"></i>
+                <span>{{tag.name}}</span>
+              </div>
+              }
             </div>
           </div>
-          <button className="text-gray-400 hover:text-gray-600">
-            <i class="pi pi-ellipsis-v"></i>
-          </button>
+          <span class="pi pi-pencil cursor-pointer text-gray-600 hover:text-blue-500" (click)="onEdit(task)"></span>
+          <i class="pi pi-trash cursor-pointer text-gray-600 hover:text-red-500" (click)="onDelete(task.id)"></i>
         </div>
         }
       </div>
@@ -43,8 +56,8 @@
   @else {
   <div class="flex-1 p-8">
     <div class="flex justify-between items-center mb-8">
-      <h2 class="text-xl font-semibold">Welcome to TaskTide! 👋</h2>
-      <button
+      <h2 class="text-xl font-semibold">Welcome to TaskTide! 👋 </h2>
+      <button (click)="onCreateTask()"
         class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
         <i class="pi pi-plus"></i>
         Create Your First Task
@@ -107,3 +120,218 @@
   </div>
   }
 </div>
+
+<p-menu #menu [model]="menuItems" [popup]="true" />
+
+<p-toast />
+
+<p-dialog [(visible)]="taskDialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
+  styleClass="w-full max-w-3xl" [closeOnEscape]="true" [dismissableMask]="true" header="Create New Task"
+  (visibleChange)="onDialogClose($event)">
+  @if (taskForm) {
+  <form [formGroup]="taskForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <!-- Main Task Form -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Title - Full Width -->
+      <div class="col-span-full">
+        <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+        <input required pInputText id="title" formControlName="title" class="w-full"
+          placeholder="Enter task title..." />
+        @if (taskForm.get('title')?.dirty && taskForm.get('title')?.hasError('required')) {
+        <p-message severity="error" variant="simple" size="small"> Title is required!</p-message>
+        }
+      </div>
+
+      <!-- Priority -->
+      <div class="space-y-1">
+        <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+        <p-select id="priority" inputId="priority" [options]="priorities" formControlName="priority" optionLabel="name"
+          optionValue="value" placeholder="Select priority" styleClass="w-full" [showClear]="true" appendTo="body">
+        </p-select>
+      </div>
+
+      <!-- Due Date -->
+      <div class="space-y-1">
+        <label for="dueDate" class="block text-sm font-medium text-gray-700">Due Date</label>
+        <p-datepicker formControlName="dueDate" placeholder="Due Date" id="dueDate" showIcon iconDisplay="input"
+          class="w-full" dateFormat="dd.mm.yy" appendTo="body" [minDate]="today" [defaultDate]="today"
+          (onSelect)="checkDate()" hourFormat="24" showClear />
+        <div *ngIf="isDateExpired(taskForm.get('dueDate')?.value)" class="expired-date-indicator">
+          <i class="pi pi-exclamation-triangle"></i> Due date has passed
+        </div>
+      </div>
+
+      <!-- Description - Full Width -->
+      <div class="col-span-full space-y-1">
+        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea rows="3" cols="30" pTextarea class="w-full" formControlName="description"
+          placeholder="Add description..." id="description"></textarea>
+      </div>
+
+      <!-- Comments - Full Width -->
+      <!-- <div class="col-span-full space-y-1">
+        <label class="block text-sm font-medium text-gray-700">Comments</label>
+        <textarea pInputTextarea formControlName="comment" class="w-full" rows="2" placeholder="Add comments...">
+        </textarea>
+      </div> -->
+
+      <div class="col-span-full space-y-1">
+        <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+        <p-autocomplete formControlName="tags" [suggestions]="filteredSuggestions" class="block w-full" id="tags"
+          (completeMethod)="filterSuggestionsChips($event)" optionLabel="name" appendTo="body" completeOnFocus="true"
+          multiple="true" focusOnHover="true" dataKey="name">
+          <ng-template let-suggestion #item>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full mr-2" [ngStyle]="{'background-color': suggestion.color}"></span>
+              <div>{{ suggestion.name }}</div>
+            </div>
+          </ng-template>
+          <ng-template pTemplate="selectedItem" let-suggestion>
+            <div class="flex items-center px-2 py-1 rounded-full text-sm" [ngStyle]="suggestion | tagBgStyle">
+              <span>{{ suggestion.name }}</span>
+              <button type="button" class="ml-1 hover:text-red-600 focus:outline-none" (click)="removeChip(suggestion)">
+                <span class="sr-only">Remove</span>
+                <i class="pi pi-times" style="font-size: 0.7rem;"></i>
+              </button>
+            </div>
+          </ng-template>
+          <ng-template #header>
+            <div class="font-medium px-3 py-2">Available Tags</div>
+          </ng-template>
+          <ng-template #footer>
+            <div class="px-3 py-3">
+              <p-button label="Add New Tag" fluid severity="secondary" text size="small" icon="pi pi-plus"
+                (onClick)="onOpenTagDialog()" />
+            </div>
+          </ng-template>
+        </p-autocomplete>
+        @if (taskForm.get('tags')?.dirty && taskForm.get('tags')?.hasError('required')) {
+        <p-message severity="error" variant="simple" size="small"> Tags is required!</p-message>
+        }
+      </div>
+    </div>
+
+    <!-- Subtasks Section -->
+    <div formArrayName="subTasks" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-medium text-gray-900">Subtasks</h3>
+        <p-button icon="pi pi-plus" label="Add Subtask" (onClick)="addSubTask()" severity="secondary" [text]="true">
+        </p-button>
+      </div>
+
+      <p-accordion value="0">
+        @for (subtask of subTasks.controls; track subtask; let i = $index) {
+        <p-accordion-panel [value]="i">
+          <div [formGroupName]="i" class="pl-6 pr-6 border-l-2 border-gray-200 pt-4 space-y-4">
+            <p-accordion-header>
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-gray-700">Sub task {{ i + 1 }}</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <div (click)="$event.stopPropagation()">
+                    <button type="button" class="p-button p-button-danger p-button-text"
+                      (mousedown)="$event.stopPropagation()"
+                      (click)="$event.stopPropagation(); $event.preventDefault(); removeSubTask(i)">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+
+                  <ng-template #toggleicon let-active="active">
+                    <i *ngIf="active" class="pi pi-angle-up"></i>
+                    <i *ngIf="!active" class="pi pi-angle-down"></i>
+                  </ng-template>
+                </div>
+              </div>
+            </p-accordion-header>
+            <p-accordion-content class="block">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Subtask Title -->
+                <div class="col-span-full">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input required pInputText formControlName="title" class="w-full"
+                    placeholder="Enter subtask title..." />
+                </div>
+
+                <!-- Subtask Priority -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                  <p-select [options]="priorities" formControlName="priority" optionLabel="name" optionValue="value"
+                    placeholder="Select priority" styleClass="w-full" [showClear]="true" appendTo="body">
+                  </p-select>
+                </div>
+
+                <!-- Subtask Due Date -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                  <p-datepicker formControlName="dueDate" placeholder="Due Date" id="dueDate" showIcon
+                    iconDisplay="input" class="w-full" dateFormat="dd.mm.yy" appendTo="body" [minDate]="today"
+                    [defaultDate]="today" />
+                </div>
+
+                <!-- Subtask Description -->
+                <div class="col-span-full">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea rows="3" cols="30" pTextarea class="w-full" formControlName="description"
+                    placeholder="Add description..."></textarea>
+                </div>
+
+                <!-- Subtask Comments -->
+                <!-- <div class="col-span-full">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Comments</label>
+                  <textarea rows="2" cols="30" pTextarea class="w-full" formControlName="comment"
+                    placeholder="Add comments..."></textarea>
+                </div> -->
+
+              </div>
+            </p-accordion-content>
+          </div>
+        </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+  </form>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" (onClick)="hideDialog()" severity="secondary" [text]="true">
+      </p-button>
+      <p-button [label]="isEditDialog ? 'Update' :'Create'" (onClick)="isEditDialog ?  onEditSubmit() :  onSubmit()"
+        [loading]="submitting">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="tagDialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [closeOnEscape]="true"
+  [dismissableMask]="true" header="Create New Tag">
+  @if (tagForm) {
+  <form [formGroup]="tagForm" (ngSubmit)="onAddTag()" class="flex flex-col gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Tag name -->
+      <div class="col-span-full">
+        <label for="tagName" class="block text-sm font-medium text-gray-700 mb-1">Tag Name</label>
+        <input id="tagName" required pInputText formControlName="name" class="w-full" placeholder="Enter Tag name..." />
+      </div>
+
+      <!-- Tag Color -->
+      <div class="col-span-full">
+        <label for="tagColor" class="block text-sm font-medium text-gray-700 mb-1">Tag Color</label>
+        <p-colorpicker id="tagColor" formControlName="color" appendTo="body" />
+      </div>
+    </div>
+  </form>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" (onClick)="tagDialogVisible = false;" severity="secondary" [text]="true">
+      </p-button>
+      <p-button label="Create Tag" (onClick)="onAddTag()" [loading]="submitting">
+      </p-button>
+    </div>
+  </ng-template>
+
+</p-dialog>
