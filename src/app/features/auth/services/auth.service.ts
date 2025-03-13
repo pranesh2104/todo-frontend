@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GraphqlClientService } from '../../../shared/services/graphql-client.service';
 import { CHECK_EMAIL, CREATE_USER, LOGIN, SEND_EMAIL_OTP, SEND_RESET_PASSWORD_LINK, UPDATE_PASSWORD, VERIFY_OTP } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
-import { CreateUserArguments, ICreateUserDetails, IEmailCheckResponse, ILoginSuccessResponse, SendEmailOTPArguments, UpdatePasswordArguments, VerifyOTPArguments } from '../models/auth.model';
+import { CreateUserArguments, ICreateUserDetails, IEmailCheckResponse, ILoginSuccessResponse, SendEmailOTPArguments, IUpdatePasswordArguments, IVerifyOTPArguments } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -16,23 +16,23 @@ export class AuthService {
   }
 
   checkEmailExist(email: string): Observable<IEmailCheckResponse> {
-    return this.graphqlClientService.executeQuery(CHECK_EMAIL, { email });
+    return this.graphqlClientService.executeQuery<IEmailCheckResponse>(CHECK_EMAIL, { email });
   }
 
   sendEmailOTP(userDetails: SendEmailOTPArguments) {
     return this.graphqlClientService.executeMutation(SEND_EMAIL_OTP, { userDetails })
   }
 
-  verifyOTP(otpDetails: VerifyOTPArguments) {
-    return this.graphqlClientService.executeMutation(VERIFY_OTP, { otpDetails });
+  verifyOTP<T>(otpDetails: IVerifyOTPArguments) {
+    return this.graphqlClientService.executeMutation<T, IVerifyOTPArguments>(VERIFY_OTP, otpDetails);
   }
 
-  sendResetPasswordLink(email: string) {
-    return this.graphqlClientService.executeMutation(SEND_RESET_PASSWORD_LINK, { email });
+  sendResetPasswordLink<T>(email: string) {
+    return this.graphqlClientService.executeMutation<T, { email: string }>(SEND_RESET_PASSWORD_LINK, { email });
   }
 
-  updatePassword(passwordDetails: UpdatePasswordArguments) {
-    return this.graphqlClientService.executeMutation(UPDATE_PASSWORD, { passwordDetails });
+  updatePassword<T>(passwordDetails: IUpdatePasswordArguments) {
+    return this.graphqlClientService.executeMutation<T, IUpdatePasswordArguments>(UPDATE_PASSWORD, passwordDetails);
   }
 
   login(): Observable<ILoginSuccessResponse> {

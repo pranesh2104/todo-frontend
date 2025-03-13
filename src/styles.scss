@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer primeng {
+  :root {
+    --primary-color: #2563eb;
+    --primary-color-text: white;
+    --surface-hover: rgba(37, 99, 235, 0.1);
+  }
+}
+
 html,
 body {
   height: 100%;
@@ -238,4 +246,24 @@ body {
 .anchorTag {
   text-decoration: none;
   color: rgb(1, 107, 248);
+}
+
+.p-tooltip {
+  max-width: 250px;
+}
+
+.p-tooltip .p-tooltip-text {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.750rem;
+  line-height: 1.4;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
+  background-color: #333;
+  color: #fff;
+}
+
+.p-tooltip .p-tooltip-arrow {
+  border-width: 5px;
+  top: 15px;
+  display: none;
 }

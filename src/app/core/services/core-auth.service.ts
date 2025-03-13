@@ -3,8 +3,9 @@ import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { IRefreshTokenResponse } from '@core/models/core.model';
 import { StorageService } from './storage.service';
-import { IUserReponse } from 'app/features/auth/models/auth.model';
+// import { IUserReponse } from 'app/features/auth/models/auth.model';
 import { UserService } from './user.service';
+import { IUserReponse } from 'app/features/auth/models/auth.model';
 
 
 @Injectable({
@@ -12,10 +13,7 @@ import { UserService } from './user.service';
 })
 export class CoreAuthService {
 
-
-
   private userService = inject(UserService);
-
 
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -45,6 +43,7 @@ export class CoreAuthService {
       this.setAccessToken(newToken.refreshAccessToken.accessToken);
       return true;
     } catch (error) {
+      console.log('error ', error);
       this.logout();
       return false;
     }

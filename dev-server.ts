@@ -1,10 +1,12 @@
+import '@angular/compiler';
 import { APP_BASE_HREF } from '@angular/common';
-import { CommonEngine } from '@angular/ssr/node';
+import { CommonEngine, createNodeRequestHandler } from '@angular/ssr/node';
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 import bootstrap from './src/main.server';
 import { REQUEST } from '@angular/core';
+
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -19,10 +21,7 @@ export function app(): express.Express {
   server.set('views', browserDistFolder);
 
   // Example Express Rest API endpoints
-  server.get('*', (req, res, next) => {
-    res.locals['request'] = req;  // Make request available to Angular
-    next();
-  });
+  // server.get('/api/**', (req, res) => { });
   // Serve static files from /browser
   server.get('**', express.static(browserDistFolder, {
     maxAge: '1y',
@@ -30,29 +29,28 @@ export function app(): express.Express {
   }));
 
   // All regular routes use the Angular engine
-  server.get('**', (req, res, next) => {
-    const { protocol, originalUrl, baseUrl, headers } = req;
+
+  server.get('**', createNodeRequestHandler((req, res, next) => {
 
     commonEngine
       .render({
-        bootstrap,
+        bootstrap: bootstrap,
         documentFilePath: indexHtml,
-        url: `${protocol}://${headers.host}${originalUrl}`,
         publicPath: browserDistFolder,
         providers: [
-          { provide: APP_BASE_HREF, useValue: baseUrl },
+          { provide: APP_BASE_HREF, useValue: '/' },
           { provide: REQUEST, useValue: req }
         ],
       })
-      .then((html) => res.send(html))
+      .then((html) => res.end(html))
       .catch((err) => next(err));
-  });
+  }));
 
   return server;
 }
 
 function run(): void {
-  const port = process.env['PORT'] || 4000;
+  const port = process.env['PORT'] || 5200;
 
   // Start up the Node server
   const server = app();
