@@ -4,7 +4,7 @@ import { IUserReponse } from 'app/features/auth/models/auth.model';
 
 @Component({
   selector: 'app-side-nav',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './side-nav.component.html',
   styleUrl: './side-nav.component.scss'
 })
