@@ -19,6 +19,7 @@ export const GET_ALL_TASKS_TAGS = `query GetAllTasksAndTags {
       createdAt
     }
     tags {
+      id
       name
       color
     }
@@ -46,6 +47,7 @@ export const CREATE_TASK = `mutation CreateTask($taskDetails: CreateTaskInput) {
       isCompleted
       priority
       tags {
+        id
         name
         color
       }
@@ -88,6 +90,7 @@ export const UPDATE_TASK = `mutation UpdateTask($updateTaskDetails: UpdateTaskIn
       updatedAt
       title
       tags {
+        id
         name
         color
       }
