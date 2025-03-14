@@ -133,7 +133,6 @@ export class MainDashboardComponent implements OnInit {
   onSubmit() {
     const title = this.taskForm.get('title');
     if (this.taskForm.valid && this.taskForm.value && title && title.value) {
-      console.log('this.taskForm.value ', this.taskForm.value);
       let taskInput: ICreateTaskInput = { taskDetails: convertFormToTaskDetails(this.taskForm.value as FormTaskDetails) };
       this.submitting = true;
       taskInput = removeTypename(taskInput);
@@ -145,11 +144,10 @@ export class MainDashboardComponent implements OnInit {
             this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Added successfully', life: 3000 });
           }
         },
-        error: (error) => {
+        error: () => {
           this.submitting = false;
           this.hideDialog();
           this.toastMessageService.add({ severity: 'error', detail: 'Task Added failed', life: 3000, summary: 'Error' });
-          console.error('error while creat task ', error);
         }
       });
     }
@@ -191,6 +189,8 @@ export class MainDashboardComponent implements OnInit {
       const currentValue = tagFormControl?.value || [];
       const updatedValue = currentValue.filter(tag => tag.name !== chip.name);
       tagFormControl.setValue(updatedValue);
+      tagFormControl.markAsDirty();
+      tagFormControl.updateValueAndValidity();
     }
   }
 
@@ -239,17 +239,16 @@ export class MainDashboardComponent implements OnInit {
 
         simpleChanges = removeTypename(simpleChanges);
         simpleChanges.tags = removeDuplicateTag(simpleChanges.tags, ogTask.tags || []);
-        console.log({ simpleChanges, subtaskChanges });
-        // Standard update with changed fields
-        this.taskService.updateTask({ updateTaskDetails: { id: id.value, taskChanges: simpleChanges, subTaskChanges: subtaskChanges } }).subscribe({
+        this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, taskChanges: simpleChanges, subTaskChanges: subtaskChanges } }).subscribe({
           next: (res) => {
-            this.hideDialog();
-            this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
-            console.log('update res ', res);
+            if (res && res['updateTask'] && res['updateTask'].success) {
+              this.hideDialog();
+              this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
+            }
           },
-          error: (error) => {
-            console.log('update error ', error);
-
+          error: () => {
+            this.hideDialog();
+            this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
           }
         });
       }
@@ -261,13 +260,13 @@ export class MainDashboardComponent implements OnInit {
   }
 
   onDelete(taskId: string) {
-    console.log('task Id ', taskId);
-    this.taskService.deleteTask(taskId).subscribe({
+    this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
       next: (res) => {
-        console.log('res ', res);
+        if (res && res['deleteTask'] && res['deleteTask'].success)
+          this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Deleted successfully', life: 3000 });
       },
-      error: (error) => {
-        console.log('error ', error);
+      error: () => {
+        this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
       }
     });
   }
@@ -289,8 +288,6 @@ export class MainDashboardComponent implements OnInit {
 
   onDialogClose(event: any) {
     if (!event) {
-      console.log('eevnt ', event);
-      console.log('onDialogCLose');
       this.taskForm.reset();
       this.minDate = new Date();
       const subTasks = this.taskForm.get('subTasks') as FormArray;
