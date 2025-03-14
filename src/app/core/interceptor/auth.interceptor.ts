@@ -17,7 +17,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   if (isPlatformServer(platformId)) {
     const server = inject(SERVER_REQUEST);
-    // console.log('server from interceptor ', server);
 
     if (server) {
       req = req.clone({
@@ -37,7 +36,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError(error => {
-      console.log('interceptor error ', error);
       if (error && error.status === 401 && !isRefreshing) {
         return handle401Error(authReq, next, coreAuthService, router, headerService);
       }

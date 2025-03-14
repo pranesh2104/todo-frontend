@@ -88,6 +88,7 @@ export class TaskService {
   updateTask<T>(updateTaskDetails: IUpdateTaskInput) {
     return this.graphqlClientService.executeMutation<T, IUpdateTaskInput>(UPDATE_TASK, updateTaskDetails);
   }
+  // { cacheConfig: { updateStrategy: 'update', query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task' } }
 
   deleteTask<T>(taskId: string) {
     return this.graphqlClientService.executeMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId }, { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task', updateStrategy: 'delete', id: taskId } });
@@ -110,7 +111,6 @@ export class TaskService {
 
     Object.keys(controls).forEach(key => {
       const control = controls[key];
-      console.log('key ', key);
       if (!control || !control.dirty) return;
 
       if (key !== 'tags') {
@@ -130,10 +130,8 @@ export class TaskService {
       }
       else {
         if (originalTask.tags && originalTask.tags.length && control && control.value && control.value.length) {
-          removed = originalTask.tags.filter((tag) => !control.value.some((formTag: ITaskTagInput) => formTag.name === tag.name));
-          console.log('removedTags ', removed);
-          added = control.value.filter((formTag: ITaskTagInput) => !originalTask.tags?.some((tag) => tag.name === formTag.name));
-          console.log('addedTags ', added);
+          removed = originalTask.tags.filter((tag) => !control.value.some((formTag: ITaskTagInput) => formTag.name === tag.name)).map((t) => t.id);
+          added = control.value.filter((formTag: ITaskTagInput) => !originalTask.tags?.some((tag) => tag.name === formTag.name)).map((t: ITaskTagInput) => t.id);
           changes[key] = { added, removed };
         }
 

@@ -115,9 +115,13 @@ export interface ITaskChanges {
   dueDate?: string,
   description?: string,
   comment?: string;
-  tags?: ITaskTagInput[]
+  tags?: ITagChangesInput;
 }
 
+interface ITagChangesInput {
+  added: string[];
+  removed: string[]
+}
 export interface ISubTaskChanges {
   removed: string[],
   modified: IModifySubTaskInput[],
