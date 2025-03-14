@@ -35,54 +35,12 @@ export class GraphqlClientService {
     }).valueChanges.pipe(map(response => this.handleResponse<T>(response)));
   }
 
-  // executeMutation<T>(mutation: string, variables: { [key: string]: any }, updateCache?: (cache: any, result: FetchResult<any>) => void): Observable<T> {
-  //   return this.apollo.mutate<T>({
-  //     mutation: gql`${mutation}`,
-  //     variables: variables,
-  //     fetchPolicy: 'network-only',
-
-  //     ... (updateCache && { update: (cache, result) => updateCache(cache, result) })
-  //   }).pipe(map(response => this.handleResponse<T>(response)));
-  // }
-
   private handleResponse<T>(response: ApolloQueryResult<T> | MutationResult<T>): T {
     if (response && response.data) {
       return response.data;
     }
     throw new Error('No data received');
   }
-
-  // executeMutation<T, V extends Record<string, any>>(mutation: string, variables: V, options?: { cacheConfig?: { query: string; listField: keyof T; } }): Observable<T> {
-  //   return this.apollo.mutate<T>({
-  //     mutation: gql`${mutation}`,
-  //     variables,
-  //     ...(options?.cacheConfig && {
-  //       update: this.genericCacheUpdater<T>(options.cacheConfig.query, options.cacheConfig.listField)
-  //     }),
-  //     fetchPolicy: 'network-only'
-  //   }).pipe(map(response => this.handleResponse<T>(response)));
-  // }
-
-  // private genericCacheUpdater<T>(query: string, listField: keyof T) {
-  //   return (cache: ApolloCache<any>, { data }: FetchResult<any>) => {
-  //     if (!data) return;
-
-  //     const newItem = Object.values(data)[0]; // Assumes first key holds mutation result
-
-  //     cache.updateQuery<{ [K in keyof T]?: any }>(
-  //       { query: gql`${query}` },
-  //       (existingData) => {
-  //         if (!existingData || !existingData[listField]) return existingData;
-
-  //         return {
-  //           ...existingData,
-  //           [listField]: [...(existingData[listField] as any[]), newItem]
-  //         };
-  //       }
-  //     );
-  //   };
-  // }
-
 
   executeMutation<T, V extends Record<string, any>>(mutation: string, variables: V, options?: { cacheConfig?: CacheUpdateOptions<T>; }): Observable<T> {
     return this.apollo.mutate<T>({
@@ -174,8 +132,6 @@ export class GraphqlClientService {
    * @param itemToDelete - Item to be deleted
    */
   private deleteListItem(existingList: any[], itemId: string | undefined): any[] {
-    console.log('inside itemId', itemId);
-
     return existingList.filter(item => item.id !== itemId);
   }
 }
