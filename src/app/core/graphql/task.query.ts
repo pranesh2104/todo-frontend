@@ -25,6 +25,7 @@ export const GET_ALL_TASKS_TAGS = `query GetAllTasksAndTags {
     }
     updatedAt
     createdAt
+    isImportant
   }
   getAllTags {
     id
@@ -112,6 +113,7 @@ export const UPDATE_TASK = `mutation UpdateTask($updateTaskDetails: UpdateTaskIn
       description
       createdAt
       comment
+      isImportant
     }
   }
 }`;

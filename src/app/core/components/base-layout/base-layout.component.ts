@@ -36,7 +36,6 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (this.userData && this.userData.value) {
-      console.log('this.userData ', this.userData);
       this.user = this.userData.value;
     }
     else {

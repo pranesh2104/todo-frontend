@@ -6,6 +6,8 @@ import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTaskInput
 import { TASK_KEY } from '../constants/task.state.consant';
 import { of, Observable } from 'rxjs';
 import { FormArray, FormGroup } from '@angular/forms';
+// import { ApolloCache } from '@apollo/client/cache';
+// import { gql } from 'apollo-angular';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +23,7 @@ export class TaskService {
 
   getAllTasks(): Observable<IAllTaskResponse> {
     if (this.transferState.hasKey(TASK_KEY)) {
+      console.log('inside');
       const taskData = this.transferState.get<IAllTaskResponse | null>(TASK_KEY, null);
       if (taskData === null)
         return this.graphqlClientService.executeWatchQuery<IAllTaskResponse>(GET_ALL_TASKS_TAGS, {});
@@ -32,7 +35,7 @@ export class TaskService {
   }
 
   // createTask<T>(taskDetails: ICreateTaskInput) {
-  // return this.graphqlClientService.executeMutation<T>(CREATE_TASK, taskDetails, (cache: ApolloCache<any>, { data }) => {
+  // return this.graphqlClientService.executeMutation<T,>(CREATE_TASK, taskDetails, (cache: ApolloCache<any>, { data }) => {
   //   if (!data) return;
   //   const newTask = data.createTask.task;
   //   console.log('newTask ', newTask);
@@ -44,7 +47,6 @@ export class TaskService {
   //   const existingData = cache.readQuery<IAllTaskResponse>({ query: gql`${GET_ALL_TASKS_TAGS}` });
 
   //   if (!existingData) return;
-
 
   //   cache.writeQuery({
   //     query: gql`${GET_ALL_TASKS_TAGS}`,
@@ -59,6 +61,7 @@ export class TaskService {
   createTask<T>(taskDetails: ICreateTaskInput) {
     return this.graphqlClientService.executeMutation<T, ICreateTaskInput>(CREATE_TASK, taskDetails, { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task' } });
   }
+  // { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task' } }
 
   // createTag<T>(tagDetails: ICreateTagDetails): Observable<T> {
   //   return this.graphqlClientService.executeMutation<T>(CREATE_TAG, tagDetails, (cache: ApolloCache<any>, { data }) => {
@@ -83,16 +86,19 @@ export class TaskService {
   createTag<T>(tagDetails: ICreateTagDetails): Observable<T> {
     return this.graphqlClientService.executeMutation<T, ICreateTagDetails>(CREATE_TAG, tagDetails, { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTags', responseKey: 'tag' } });
   }
-
+  // { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTags', responseKey: 'tag' } }
 
   updateTask<T>(updateTaskDetails: IUpdateTaskInput) {
     return this.graphqlClientService.executeMutation<T, IUpdateTaskInput>(UPDATE_TASK, updateTaskDetails);
   }
+  // { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', updateStrategy: 'update', idFieldName: 'id' }
   // { cacheConfig: { updateStrategy: 'update', query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task' } }
 
   deleteTask<T>(taskId: string) {
-    return this.graphqlClientService.executeMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId }, { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task', updateStrategy: 'delete', id: taskId } });
+    return this.graphqlClientService.executeMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId });
   }
+
+  // { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task', updateStrategy: 'delete', id: taskId } }
 
   /**
   * Extracts only the changed values from a FormGroup
@@ -210,6 +216,8 @@ export class TaskService {
         }
         // No ID or null ID - new subtask
         else if (control.dirty) {
+          console.log('contorl ', control.value);
+          delete control.value.id;
           added.push(control.value);
         }
       }

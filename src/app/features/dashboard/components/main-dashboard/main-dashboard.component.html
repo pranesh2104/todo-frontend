@@ -45,8 +45,12 @@
               }
             </div>
           </div>
-          <span class="pi pi-pencil cursor-pointer text-gray-600 hover:text-blue-500" (click)="onEdit(task)"></span>
-          <i class="pi pi-trash cursor-pointer text-gray-600 hover:text-red-500" (click)="onDelete(task.id)"></i>
+          <i [ngClass]="task.isImportant ? 'pi-star-fill' : 'pi-star'"
+            class="pi cursor-pointer text-grey-600 hover:text-yellow-500" (click)="onImportant(task)" role="button"></i>
+          <i class="pi pi-pencil cursor-pointer text-gray-600 hover:text-blue-500" (click)="onEdit(task)"
+            role="button"></i>
+          <i class="pi pi-trash cursor-pointer text-gray-600 hover:text-red-500" (click)="onDelete(task.id)"
+            role="button"></i>
         </div>
         }
       </div>
@@ -125,6 +129,7 @@
 
 <p-toast />
 
+<!-- Task Dialog -->
 <p-dialog [(visible)]="taskDialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
   styleClass="w-full max-w-3xl" [closeOnEscape]="true" [dismissableMask]="true" header="Create New Task"
   (visibleChange)="onDialogClose($event)" #taskDialog>
@@ -157,7 +162,8 @@
           class="w-full" dateFormat="dd.mm.yy" appendTo="body" [minDate]="today" [defaultDate]="today"
           (onSelect)="checkDate()" hourFormat="24" showClear />
         <div *ngIf="isDateExpired(taskForm.get('dueDate')?.value)" class="expired-date-indicator">
-          <i class="pi pi-exclamation-triangle"></i> Due date has passed
+          <i class="pi pi-exclamation-triangle"></i> Due date {{ taskForm.get('dueDate')?.value | date }}
+          has passed
         </div>
       </div>
 
@@ -305,6 +311,7 @@
   </ng-template>
 </p-dialog>
 
+<!-- Tag Dialog -->
 <p-dialog [(visible)]="tagDialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [closeOnEscape]="true"
   [dismissableMask]="true" header="Create New Tag" #tagDialog>
   @if (tagForm) {

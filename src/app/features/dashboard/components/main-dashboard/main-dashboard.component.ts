@@ -200,6 +200,16 @@ export class MainDashboardComponent implements OnInit {
     this.patchValue(task);
   }
 
+  onImportant(task: IGetAllTask) {
+    task.isImportant = !task.isImportant;
+    // this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: task.id, isImportant: task.isImportant } }).subscribe({
+    //   next: (res) => {
+
+    //   }
+    // });
+
+  }
+
   patchValue(task: IGetAllTask) {
     task = removeTypename(task);
     if (task.dueDate)
@@ -237,9 +247,9 @@ export class MainDashboardComponent implements OnInit {
           );
         }
 
-        simpleChanges = removeTypename(simpleChanges);
+        // simpleChanges = removeTypename(simpleChanges);
         simpleChanges.tags = removeDuplicateTag(simpleChanges.tags, ogTask.tags || []);
-        this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, taskChanges: simpleChanges, subTaskChanges: subtaskChanges } }).subscribe({
+        this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
           next: (res) => {
             if (res && res['updateTask'] && res['updateTask'].success) {
               this.hideDialog();
@@ -275,16 +285,11 @@ export class MainDashboardComponent implements OnInit {
     if (!date) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (typeof date === 'string')
+    if (typeof date === 'string') {
       date = new Date(date);
-    const isExpired = date < today;
-    if (isExpired) {
-      this.today = new Date(date);
-      this.minDate = new Date(date);
     }
-    return isExpired;
+    return date < today;
   }
-
 
   onDialogClose(event: any) {
     if (!event) {
