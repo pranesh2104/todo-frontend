@@ -19,6 +19,11 @@
   width: 100%;
 }
 
+::ng-deep .p-confirmpopup:before {
+  top: 100%;
+  transform: rotate(180deg);
+}
+
 .p-button-rounded {
   min-width: 36px !important;
   min-height: 36px !important;

@@ -11,9 +11,9 @@ import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AccordionModule } from 'primeng/accordion';
 import { IAllTaskResponse, ICreateTagResponse, ICreateTaskInput, ICreateTaskResponse, IGetAllTask, ISubTaskInput, ISubTaskForm, ITaskTagInput, ITagForm, ITaskForm } from '../../models/task.model';
-import { convertFormToTaskDetails, FormTaskDetails } from '../../utils/task.util';
+import { convertFormToTaskDetails, FormTaskDetails, isControlEmpty } from '../../utils/task.util';
 import { Toast } from 'primeng/toast';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MenuItem, MessageService, ConfirmationService } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
@@ -23,14 +23,15 @@ import { TooltipModule } from 'primeng/tooltip';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TagBgStylePipe } from "../../pipes/tag-bg-style.pipe";
 import { removeDuplicateTag, removeTypename } from '@core/utils/graphql-utils';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
 
 
 @Component({
   selector: 'app-main-dashboard',
-  imports: [CommonModule, Dialog, AutoCompleteModule, ButtonModule, TooltipModule, Message, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, Menu, TagBgStylePipe],
+  imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, ButtonModule, TooltipModule, Message, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, Menu, TagBgStylePipe],
   templateUrl: './main-dashboard.component.html',
   styleUrl: './main-dashboard.component.scss',
-  providers: [MessageService]
+  providers: [MessageService, ConfirmationService]
 })
 export class MainDashboardComponent implements OnInit {
 
@@ -65,8 +66,11 @@ export class MainDashboardComponent implements OnInit {
 
   isEditDialog: boolean = false;
 
+  private toastMessageService = inject(MessageService);
 
-  constructor(private fb: FormBuilder, private toastMessageService: MessageService) { }
+  private confirmationService = inject(ConfirmationService);
+
+  constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
     this.taskService.getAllTasks().subscribe({
@@ -116,13 +120,36 @@ export class MainDashboardComponent implements OnInit {
 
   removeSubTask(index: number) {
     this.subTasks.removeAt(index);
+    this.taskForm.markAsDirty();
   }
 
   showDialog() {
     this.taskDialogVisible = true;
   }
 
-  hideDialog() {
+  onCancel(event: Event) {
+    if (!this.taskForm.dirty) {
+      this.hideTaskDialog();
+    } else if (!isControlEmpty(this.taskForm) && this.taskForm.dirty) {
+      this.confirmationService.confirm({
+        target: event.target as EventTarget,
+        message: 'You have unsaved changes.',
+        icon: 'pi pi-exclamation-triangle',
+        rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
+        acceptButtonProps: { label: 'Save' },
+        accept: () => {
+          if (this.isEditDialog) this.onEditSubmit();
+          else this.onSubmit();
+        },
+        reject: () => { this.hideTaskDialog(); }
+      })
+    }
+    else if (isControlEmpty(this.taskForm)) {
+      this.hideTaskDialog();
+    }
+  }
+
+  private hideTaskDialog() {
     this.taskDialogVisible = false;
     this.taskForm.reset();
     while (this.subTasks.length) {
@@ -140,16 +167,19 @@ export class MainDashboardComponent implements OnInit {
         next: (res: ICommonAPIResponse<ICreateTaskResponse>) => {
           if (res && res['createTask'] && res['createTask'].success) {
             this.submitting = false;
-            this.hideDialog();
+            this.hideTaskDialog();
             this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Added successfully', life: 3000 });
           }
         },
         error: () => {
           this.submitting = false;
-          this.hideDialog();
+          this.hideTaskDialog();
           this.toastMessageService.add({ severity: 'error', detail: 'Task Added failed', life: 3000, summary: 'Error' });
         }
       });
+    }
+    else if (this.taskForm.invalid) {
+      this.toastMessageService.add({ severity: 'warn', detail: 'Some required fields are missing.', life: 3000, summary: 'Warning' });
     }
   }
 
@@ -252,12 +282,12 @@ export class MainDashboardComponent implements OnInit {
         this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
           next: (res) => {
             if (res && res['updateTask'] && res['updateTask'].success) {
-              this.hideDialog();
+              this.hideTaskDialog();
               this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
             }
           },
           error: () => {
-            this.hideDialog();
+            this.hideTaskDialog();
             this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
           }
         });
