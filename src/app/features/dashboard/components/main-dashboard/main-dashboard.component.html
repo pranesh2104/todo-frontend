@@ -16,9 +16,9 @@
     <div class="p-6">
       <h2 class="text-xl font-semibold mb-4">All Tasks</h2>
       <div class="space-y-4">
-        @for (task of tasks; track $index) {
+        @for (task of tasks;let index = $index; track $index) {
         <div class="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 ">
-          <input type="checkbox" [checked]=task.isCompleted
+          <input type="checkbox" [checked]="task.isCompleted" (click)="onTaskStatusUpdate(task, false)"
             class="h-5 w-5 text-blue-500 focus:ring-1 focus:ring-blue-400" />
           <div class="flex-1">
             <h3 class="font-medium" [ngClass]="task.isCompleted ? 'text-gray-400 line-through' :'text-gray-700'">
@@ -45,8 +45,8 @@
               }
             </div>
           </div>
-          <i [ngClass]="task.isImportant ? 'pi-star-fill' : 'pi-star'"
-            class="pi cursor-pointer text-grey-600 hover:text-yellow-500" (click)="onImportant(task)" role="button"></i>
+          <i [ngClass]="task.isImportant ? 'pi-star-fill text-yellow-500' : 'pi-star text-grey-600'"
+            class="pi cursor-pointer hover:text-yellow-500" (click)="onTaskStatusUpdate(task, true)" role="button"></i>
           <i class="pi pi-pencil cursor-pointer text-gray-600 hover:text-blue-500" (click)="onEdit(task)"
             role="button"></i>
           <i class="pi pi-trash cursor-pointer text-gray-600 hover:text-red-500" (click)="onDelete(task.id)"
@@ -161,8 +161,8 @@
       <div class="space-y-1">
         <label for="dueDate" class="block text-sm font-medium text-gray-700">Due Date</label>
         <p-datepicker formControlName="dueDate" placeholder="Due Date" id="dueDate" showIcon iconDisplay="input"
-          class="w-full" dateFormat="dd.mm.yy" appendTo="body" [minDate]="today" [defaultDate]="today"
-          (onSelect)="checkDate()" hourFormat="24" showClear />
+          class="w-full" dateFormat="dd.mm.yy" appendTo="body" [minDate]="today" [defaultDate]="today" hourFormat="24"
+          showClear />
         <div *ngIf="isDateExpired(taskForm.get('dueDate')?.value)" class="expired-date-indicator">
           <i class="pi pi-exclamation-triangle"></i> Due date {{ taskForm.get('dueDate')?.value | date }}
           has passed

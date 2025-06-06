@@ -126,3 +126,11 @@ export const DELETE_TASK = `mutation DeleteTask($taskId: String) {
     success
   }
 }`;
+
+export const UPDATE_TASK_STATUS = `mutation UpdateTaskStatus($taskStatus: UpdateTaskStatusInput) {
+  updateTaskStatus(taskStatus: $taskStatus) {
+    code
+    message
+    success
+  }
+}`;

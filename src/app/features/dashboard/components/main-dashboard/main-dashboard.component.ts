@@ -66,9 +66,9 @@ export class MainDashboardComponent implements OnInit {
 
   isEditDialog: boolean = false;
 
-  private toastMessageService = inject(MessageService);
+  private readonly toastMessageService = inject(MessageService);
 
-  private confirmationService = inject(ConfirmationService);
+  private readonly confirmationService = inject(ConfirmationService);
 
   constructor(private fb: FormBuilder) { }
 
@@ -230,14 +230,20 @@ export class MainDashboardComponent implements OnInit {
     this.patchValue(task);
   }
 
-  onImportant(task: IGetAllTask) {
-    task.isImportant = !task.isImportant;
-    // this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: task.id, isImportant: task.isImportant } }).subscribe({
-    //   next: (res) => {
-
-    //   }
-    // });
-
+  onTaskStatusUpdate(task: IGetAllTask, isImportant: boolean) {
+    let updateValue: { isImportant?: boolean, isCompleted?: boolean } = {};
+    if (isImportant) updateValue.isImportant = !task.isImportant;
+    else updateValue.isCompleted = !task.isCompleted;
+    this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
+      next: (res) => {
+        if (res && res['updateTaskStatus'] && res['updateTaskStatus'].success)
+          this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
+      },
+      error: (e) => {
+        console.error('OnImportant Error :', e);
+        this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
+      }
+    });
   }
 
   patchValue(task: IGetAllTask) {
@@ -293,10 +299,6 @@ export class MainDashboardComponent implements OnInit {
         });
       }
     }
-  }
-
-  checkDate() {
-    console.log('selected Due Date ');
   }
 
   onDelete(taskId: string) {

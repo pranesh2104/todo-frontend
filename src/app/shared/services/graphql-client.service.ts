@@ -18,9 +18,11 @@ interface CacheUpdateOptions<T> {
   query: string;
   listField: string;
   updateStrategy?: 'merge' | 'delete';
-  responseKey: string;
+  responseKey?: string;
   customUpdate?: (existingData: T, newData: any) => T;
-  id?: string
+  id?: string;
+  useModify?: boolean;
+  middleVariable?: string;
 }
 
 interface ExistingRefs {
@@ -66,7 +68,7 @@ export class GraphqlClientService {
       mutation: gql`${mutation}`,
       variables,
       fetchPolicy: 'network-only',
-      ...(options?.cacheConfig && { update: this.createCacheUpdater<T>(options.cacheConfig) })
+      ...(options?.cacheConfig && { update: this.createCacheUpdater<T>(options.cacheConfig, variables) })
     }).pipe(
       map(response => this.handleResponse<T>(response))
     );
@@ -181,7 +183,7 @@ export class GraphqlClientService {
   //   return existingList.filter(item => item.id !== itemId);
   // }
 
-  private createCacheUpdater<T>(cacheConfig: CacheUpdateOptions<T>) {
+  private createCacheUpdater<T>(cacheConfig: CacheUpdateOptions<T>, variables: Record<string, any>) {
     return (cache: ApolloCache<any>, { data }: FetchResult<any>) => {
       if (!data) return;
 
@@ -189,43 +191,63 @@ export class GraphqlClientService {
       if (!mutationResult) return;
 
       try {
-        cache.updateQuery<T>(
-          { query: gql`${cacheConfig.query}` },
-          (existingData: any) => {
-            if (!existingData) return existingData;
+        if (cacheConfig.useModify) {
+          let itemId;
+          if (cacheConfig.middleVariable) {
+            itemId = variables[cacheConfig.middleVariable]['taskId'];
+            delete variables[cacheConfig.middleVariable]['taskId'];
+            variables = variables[cacheConfig.middleVariable]
+          }
+          const updatedFields = Object.entries(variables).reduce((acc, [key, value]) => {
+            if (value !== 'undefined' && value !== null && value !== undefined)
+              acc[key] = () => value;
+            return acc;
+          }, {} as Record<string, (existing: any) => any>);
 
-            // console.log({ existingData, mutationResult, data });
+          cache.modify({
+            id: cache.identify({ id: itemId, __typename: 'TaskResponse' }),
+            fields: updatedFields
+          });
+        }
+        else {
+          cache.updateQuery<T>(
+            { query: gql`${cacheConfig.query}` },
+            (existingData: any) => {
+              if (!existingData) return existingData;
 
-            const existingList = existingData[cacheConfig.listField]
+              // console.log({ existingData, mutationResult, data });
 
-            if (!existingList) return existingData;
+              const existingList = existingData[cacheConfig.listField]
 
-            if (cacheConfig.customUpdate) {
+              if (!existingList) return existingData;
+
+              if (cacheConfig.customUpdate) {
+                return {
+                  ...existingData,
+                  [cacheConfig.listField]: cacheConfig.customUpdate(existingList, cacheConfig.responseKey ? mutationResult[cacheConfig.responseKey] : '')
+                };
+              }
+              if (!cacheConfig.responseKey) return null;
+              // Default update strategies
+              let updatedList: any[];
+              switch (cacheConfig.updateStrategy) {
+                case 'merge':
+                  updatedList = this.mergeListItems(existingList, mutationResult[cacheConfig.responseKey]);
+                  break;
+                case 'delete':
+                  updatedList = this.deleteListItem(existingList, cacheConfig.id);
+                  break;
+                default:
+                  updatedList = [...existingList, mutationResult[cacheConfig.responseKey]];
+              }
+
               return {
                 ...existingData,
-                [cacheConfig.listField]: cacheConfig.customUpdate(existingList, mutationResult[cacheConfig.responseKey])
+                [cacheConfig.listField]: updatedList
               };
             }
-
-            // Default update strategies
-            let updatedList: any[];
-            switch (cacheConfig.updateStrategy) {
-              case 'merge':
-                updatedList = this.mergeListItems(existingList, mutationResult[cacheConfig.responseKey]);
-                break;
-              case 'delete':
-                updatedList = this.deleteListItem(existingList, cacheConfig.id);
-                break;
-              default:
-                updatedList = [...existingList, mutationResult[cacheConfig.responseKey]];
-            }
-
-            return {
-              ...existingData,
-              [cacheConfig.listField]: updatedList
-            };
-          }
-        );
+          );
+        }
       } catch (error) {
         console.error('Cache update failed:', error);
       }

@@ -1,7 +1,7 @@
 import { inject, Injectable, TransferState } from '@angular/core';
-import { CREATE_TAG, CREATE_TASK, DELETE_TASK, GET_ALL_TASKS_TAGS, UPDATE_TASK } from '@core/graphql/task.query';
+import { CREATE_TAG, CREATE_TASK, DELETE_TASK, GET_ALL_TASKS_TAGS, UPDATE_TASK_STATUS, UPDATE_TASK } from '@core/graphql/task.query';
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
-import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTaskInput, IGetAllTask, ITaskTagInput, IUpdateTaskInput } from '../models/task.model';
+import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTaskInput, IGetAllTask, ITaskTagInput, IUpdateTaskInput, IUpdateTaskStatusInput } from '../models/task.model';
 // import { ApolloCache, gql, } from '@apollo/client/core';
 import { TASK_KEY } from '../constants/task.state.consant';
 import { of, Observable } from 'rxjs';
@@ -96,6 +96,12 @@ export class TaskService {
 
   deleteTask<T>(taskId: string) {
     return this.graphqlClientService.executeMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId });
+  }
+
+  updateTaskStatus<T>(taskStatus: IUpdateTaskStatusInput) {
+    return this.graphqlClientService.executeMutation<T, IUpdateTaskStatusInput>(UPDATE_TASK_STATUS, taskStatus, {
+      cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', useModify: true, middleVariable: 'taskStatus' }
+    });
   }
 
   // { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task', updateStrategy: 'delete', id: taskId } }
