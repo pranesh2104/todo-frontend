@@ -43,3 +43,13 @@ export function isControlEmpty(control: AbstractControl): boolean {
 
   return true;
 }
+
+export function isDateExpired(date: string | Date | null | undefined): boolean {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
+  return date < today;
+}

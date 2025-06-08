@@ -23,7 +23,6 @@ export class TaskService {
 
   getAllTasks(): Observable<IAllTaskResponse> {
     if (this.transferState.hasKey(TASK_KEY)) {
-      console.log('inside');
       const taskData = this.transferState.get<IAllTaskResponse | null>(TASK_KEY, null);
       if (taskData === null)
         return this.graphqlClientService.executeWatchQuery<IAllTaskResponse>(GET_ALL_TASKS_TAGS, {});
