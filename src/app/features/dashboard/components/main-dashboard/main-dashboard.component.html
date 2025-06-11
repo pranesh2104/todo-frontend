@@ -14,7 +14,7 @@
   </div>
   <div class="bg-white rounded-xl shadow-sm">
     <div class="p-6">
-      <h2 class="text-xl font-semibold mb-4">All Tasks</h2>
+      <h2 class="text-xl font-semibold mb-4">{{headerText()}} Tasks</h2>
       <div class="space-y-4">
         @for (task of filteredTasks;let index = $index; track $index) {
         <div class="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 ">

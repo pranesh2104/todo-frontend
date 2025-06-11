@@ -19,6 +19,7 @@ import { Dialog } from 'primeng/dialog';
 import { TaskService } from '../../services/task.service';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { isDateExpired } from '../../utils/task.util';
+import { PRIORITIES } from '@core/constants/common.constant';
 
 @Component({
   selector: 'app-form-component',
@@ -40,7 +41,7 @@ export class FormComponent {
 
   tagForm!: FormGroup<ITagForm>;
 
-  priorities = [{ value: 'high', name: 'High' }, { value: 'medium', name: 'Medium' }, { value: 'low', name: 'Low' }];
+  priorities = PRIORITIES;
 
   filteredSuggestions: ITaskTagInput[] = [];
 

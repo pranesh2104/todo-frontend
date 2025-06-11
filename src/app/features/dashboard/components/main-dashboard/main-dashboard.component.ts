@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { TaskService } from '../../services/task.service';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
@@ -14,7 +14,7 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TagBgStylePipe } from "../../pipes/tag-bg-style.pipe";
 import { removeDuplicateTag, removeTypename } from '@core/utils/graphql-utils';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 import { FormComponent } from '../form-component/form-component.component';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { AccordionModule } from 'primeng/accordion';
@@ -24,6 +24,9 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { DatePickerModule } from 'primeng/datepicker';
+import { FormModifyService } from '../../services/form-modify.service';
+import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
+import { isDateAfter, isSameDate } from '../../utils/date.util';
 
 
 @Component({
@@ -31,7 +34,8 @@ import { DatePickerModule } from 'primeng/datepicker';
   imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
   templateUrl: './main-dashboard.component.html',
   styleUrl: './main-dashboard.component.scss',
-  providers: [MessageService, ConfirmationService]
+  providers: [MessageService, ConfirmationService, FormModifyService],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainDashboardComponent implements OnInit {
 
@@ -51,31 +55,84 @@ export class MainDashboardComponent implements OnInit {
 
   private readonly taskService = inject(TaskService);
 
+  private readonly formModifyService = inject(FormModifyService);
+
   private readonly toastMessageService = inject(MessageService);
 
   private readonly confirmationService = inject(ConfirmationService);
 
   @ViewChild('formComponent', { static: false }) formComponent !: FormComponent;
 
+  private cdr = inject(ChangeDetectorRef);
+
+  headerText = signal<string>('All');
+
+  private subscribeArr = new Subscription();
+
   constructor() { }
 
   ngOnInit(): void {
-    this.taskService.getAllTasks().subscribe({
+    this.subscribeArr.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
         this.tasks = res.getAllTasks;
         this.filteredTasks = res.getAllTasks;
         this.tags = [...res.getAllTags];
+        this.cdr.detectChanges();
         console.log('all task response ', res);
       },
       error: (error) => {
         console.error('all task error ', error);
       }
-    });
+    }));
+
+    this.subscribeArr.add(this.taskService.filter$.pipe(distinctUntilChanged()).subscribe({
+      next: (res: IFilter) => {
+        if (!this.tasks?.length) return;
+        switch (res.filterBy) {
+          case 'tag':
+            this.handleTagFilter(res);
+            break;
+          case 'property':
+            this.handlePropertyFilter(res);
+            break;
+          case 'priority':
+            this.handlePriorityFilter(res);
+            break;
+        }
+        this.cdr.detectChanges();
+      }
+    }));
     this.handleSearch();
   }
 
   showDialog() {
     this.taskDialogVisible = true;
+  }
+
+  private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {
+    const tagName = this.tags.find(t => t.id === filter.tagId)?.name;
+    if (tagName) this.headerText.update(() => tagName);
+    this.filteredTasks = this.tasks.filter(task => task.tags?.some(t => t.id === filter.tagId));
+  }
+
+  private handlePropertyFilter(filter: Extract<IFilter, { filterBy: 'property' }>) {
+    const headerMap: Record<FilterValues, string> = { all: 'All', important: 'Important', completed: 'Completed', today: 'Today', upcoming: 'Upcoming' };
+
+    this.headerText.update(() => headerMap[filter.property] || filter.property);
+    const now = new Date();
+    const filterMap: Record<FilterValues, (task: IGetAllTask) => boolean> = {
+      all: () => true,
+      important: task => task.isImportant,
+      completed: task => task.isCompleted,
+      today: task => { return task.dueDate && typeof task.dueDate === 'string' ? isSameDate(task.dueDate, now) : false; },
+      upcoming: task => { return task.dueDate && typeof task.dueDate === 'string' ? isDateAfter(task.dueDate, now) : false; }
+    };
+
+    this.filteredTasks = this.tasks.filter(filterMap[filter.property]);
+  }
+
+  private handlePriorityFilter(filter: Extract<IFilter, { filterBy: 'priority' }>) {
+    this.filteredTasks = this.tasks.filter(task => task.priority === filter.priority);
   }
 
   onCancel(event: Event) {
@@ -108,7 +165,7 @@ export class MainDashboardComponent implements OnInit {
       let taskInput: ICreateTaskInput = { taskDetails: convertFormToTaskDetails(this.formComponent.taskForm.value as FormTaskDetails) };
       this.submitting = true;
       taskInput = removeTypename(taskInput);
-      this.taskService.createTask<ICommonAPIResponse<ICreateTaskResponse>>(taskInput).subscribe({
+      this.subscribeArr.add(this.taskService.createTask<ICommonAPIResponse<ICreateTaskResponse>>(taskInput).subscribe({
         next: (res: ICommonAPIResponse<ICreateTaskResponse>) => {
           if (res && res['createTask'] && res['createTask'].success) {
             this.submitting = false;
@@ -123,7 +180,7 @@ export class MainDashboardComponent implements OnInit {
           this.taskDialogVisible = false;
           this.toastMessageService.add({ severity: 'error', detail: 'Task Added failed', life: 3000, summary: 'Error' });
         }
-      });
+      }));
     }
     else if (this.formComponent.taskForm.invalid) {
       this.toastMessageService.add({ severity: 'warn', detail: 'Some required fields are missing.', life: 3000, summary: 'Warning' });
@@ -144,7 +201,7 @@ export class MainDashboardComponent implements OnInit {
     let updateValue: { isImportant?: boolean, isCompleted?: boolean } = {};
     if (isImportant) updateValue.isImportant = !task.isImportant;
     else updateValue.isCompleted = !task.isCompleted;
-    this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
+    this.subscribeArr.add(this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
       next: (res) => {
         if (res && res['updateTaskStatus'] && res['updateTaskStatus'].success)
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
@@ -153,7 +210,7 @@ export class MainDashboardComponent implements OnInit {
         console.error('OnImportant Error :', e);
         this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
       }
-    });
+    }));
   }
 
   onFormSubmit(isFormSubmitted: boolean) {
@@ -175,12 +232,12 @@ export class MainDashboardComponent implements OnInit {
     if (id && id.value) {
       const ogTask = this.tasks.find(task => task.id === id.value);
       if (ogTask) {
-        let simpleChanges = this.taskService.getChangedValues(this.formComponent.taskForm, ogTask);
+        let simpleChanges = this.formModifyService.getChangedValues(this.formComponent.taskForm, ogTask);
         let subtaskChanges;
         if (simpleChanges && simpleChanges.subTasks)
           delete simpleChanges.subTasks;
         if (this.formComponent.taskForm.get('subTasks')?.dirty) {
-          subtaskChanges = this.taskService.getSubtasksChanges(
+          subtaskChanges = this.formModifyService.getSubtasksChanges(
             this.formComponent.taskForm.get('subTasks') as FormArray,
             ogTask || {}
           );
@@ -188,7 +245,7 @@ export class MainDashboardComponent implements OnInit {
 
         // simpleChanges = removeTypename(simpleChanges);
         simpleChanges.tags = removeDuplicateTag(simpleChanges.tags, ogTask.tags || []);
-        this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
+        this.subscribeArr.add(this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
           next: (res) => {
             if (res && res['updateTask'] && res['updateTask'].success) {
               this.formComponent.hideTaskDialog();
@@ -201,13 +258,13 @@ export class MainDashboardComponent implements OnInit {
             this.taskDialogVisible = false;
             this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
           }
-        });
+        }));
       }
     }
   }
 
   onDelete(taskId: string) {
-    this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
+    this.subscribeArr.add(this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
       next: (res) => {
         if (res && res['deleteTask'] && res['deleteTask'].success)
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Deleted successfully', life: 3000 });
@@ -215,7 +272,7 @@ export class MainDashboardComponent implements OnInit {
       error: () => {
         this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
       }
-    });
+    }));
   }
 
   isDateExpired(date: string | Date | null | undefined): boolean {
@@ -227,7 +284,7 @@ export class MainDashboardComponent implements OnInit {
   }
 
   handleSearch() {
-    this.searchControl.valueChanges.pipe(debounceTime(1500), distinctUntilChanged()).subscribe({
+    this.subscribeArr.add(this.searchControl.valueChanges.pipe(debounceTime(1500), distinctUntilChanged()).subscribe({
       next: (searchText) => {
         const trimmedText = typeof searchText === 'string' ? searchText.trim() : '';
         if (!trimmedText) {
@@ -238,7 +295,12 @@ export class MainDashboardComponent implements OnInit {
             task.description?.toLowerCase().includes(trimmedText.toLowerCase())
           );
         }
+        this.cdr.detectChanges();
       }
-    });
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this.subscribeArr.unsubscribe();
   }
 }

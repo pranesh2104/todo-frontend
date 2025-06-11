@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, TransferState } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, PLATFORM_ID, TransferState } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
@@ -14,7 +14,8 @@ import { CoreAuthService } from '@core/services/core-auth.service';
   selector: 'app-base-layout',
   imports: [SideNavComponent, RouterOutlet],
   templateUrl: './base-layout.component.html',
-  styleUrl: './base-layout.component.scss'
+  styleUrl: './base-layout.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BaseLayoutComponent implements OnInit, OnDestroy {
 
@@ -34,6 +35,8 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
 
   private subscription!: Subscription;
 
+  private cdr = inject(ChangeDetectorRef);
+
   ngOnInit(): void {
     if (this.userData && this.userData.value) {
       this.user = this.userData.value;
@@ -47,6 +50,7 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
               this.transferState.set(USER_KEY, res);
             }
             this.user = res.getOneUser;
+            this.cdr.markForCheck();
           },
           error: (error: ICommonErrorResponse) => {
             const parsedError: ICommonResponse = JSON.parse(error.message);
