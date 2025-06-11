@@ -3,7 +3,7 @@
   <div class="flex justify-between items-center mb-8">
     <div class="relative">
       <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-      <input type="text" placeholder="Search tasks..." id="search_box" [formControl]="searchControl"
+      <input type="text" placeholder="Search tasks..." id="search_box" [formControl]="searchControl" tabindex="0"
         class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" />
     </div>
     <button class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
@@ -45,12 +45,12 @@
               }
             </div>
           </div>
-          <i [ngClass]="task.isImportant ? 'pi-star-fill text-yellow-500' : 'pi-star text-grey-600'"
+          <i [ngClass]="task.isImportant ? 'pi-star-fill text-yellow-500' : 'pi-star text-grey-600'" tabindex="0"
             class="pi cursor-pointer hover:text-yellow-500" (click)="onTaskStatusUpdate(task, true)" role="button"></i>
-          <i class="pi pi-pencil cursor-pointer text-gray-600 hover:text-blue-500" (click)="onEdit(task)"
-            role="button"></i>
+          <i class="pi pi-pencil cursor-pointer text-gray-600 hover:text-blue-500" (click)="onEdit(task)" role="button"
+            tabindex="0"></i>
           <i class="pi pi-trash cursor-pointer text-gray-600 hover:text-red-500" (click)="onDelete(task.id)"
-            role="button"></i>
+            role="button" tabindex="0"></i>
         </div>
         }
       </div>
