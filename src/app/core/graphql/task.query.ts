@@ -134,3 +134,11 @@ export const UPDATE_TASK_STATUS = `mutation UpdateTaskStatus($taskStatus: Update
     success
   }
 }`;
+
+export const DELETE_TAG = `mutation DeleteTag($tagId: String) {
+  deleteTag(tagId: $tagId) {
+    code
+    message
+    success
+  }
+}`;

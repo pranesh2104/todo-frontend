@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, input, output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ICreateTagResponse, IGetAllTask, ISubTaskForm, ISubTaskInput, ITagForm, ITaskForm, ITaskTagInput } from '../../models/task.model';
+import { IGetAllTask, ISubTaskForm, ISubTaskInput, ITaskForm, ITaskTagInput } from '../../models/task.model';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { AccordionModule } from 'primeng/accordion';
@@ -16,14 +16,12 @@ import { TagBgStylePipe } from '../../pipes/tag-bg-style.pipe';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { removeTypename } from '@core/utils/graphql-utils';
 import { Dialog } from 'primeng/dialog';
-import { TaskService } from '../../services/task.service';
-import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { isDateExpired } from '../../utils/task.util';
 import { PRIORITIES } from '@core/constants/common.constant';
 
 @Component({
   selector: 'app-form-component',
-  imports: [CommonModule, AutoCompleteModule, Dialog, ButtonModule, ChipModule, Message, MultiSelectModule, ColorPickerModule, AccordionModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
+  imports: [CommonModule, AutoCompleteModule, ButtonModule, ChipModule, Message, MultiSelectModule, ColorPickerModule, AccordionModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
   templateUrl: './form-component.component.html',
   styleUrl: './form-component.component.scss'
 })
@@ -39,8 +37,6 @@ export class FormComponent {
 
   taskForm!: FormGroup<ITaskForm>;
 
-  tagForm!: FormGroup<ITagForm>;
-
   priorities = PRIORITIES;
 
   filteredSuggestions: ITaskTagInput[] = [];
@@ -54,8 +50,6 @@ export class FormComponent {
   taskDialogVisible: boolean = false;
 
   tagDialogVisible: boolean = false;
-
-  private readonly taskService = inject(TaskService);
 
   constructor(private fb: FormBuilder) { }
 
@@ -129,14 +123,6 @@ export class FormComponent {
     }
   }
 
-  onOpenTagDialog() {
-    this.tagDialogVisible = true;
-    this.tagForm = this.fb.group<ITagForm>({
-      name: this.fb.control<string>('', { nonNullable: true }),
-      color: this.fb.control<string>('', { nonNullable: true })
-    });
-  }
-
   removeChip(chip: ITaskTagInput) {
     const tagFormControl = this.taskForm.get('tags');
     if (tagFormControl) {
@@ -169,17 +155,12 @@ export class FormComponent {
     }
   }
 
-  onAddTag() {
-    const tagFormValue = this.tagForm.value;
-    if (this.tagForm.valid && tagFormValue && tagFormValue.name && tagFormValue.color && tagFormValue.name.length && tagFormValue.color.length) {
-      this.taskService.createTag<ICommonAPIResponse<ICreateTagResponse>>({ tagDetails: tagFormValue as ITaskTagInput }).subscribe({
-        next: (res: ICommonAPIResponse<ICreateTagResponse>) => {
-          if (res && res['createTag'] && res['createTag'].success) {
-            this.tagDialogVisible = false;
-          }
-        }
-      });
-    }
+
+  ngDoCheck(): void {
+    //Called every time that the input properties of a component or a directive are checked. Use it to extend change detection by performing a custom check.
+    //Add 'implements DoCheck' to the class.
+    console.log('Form Component Checked');
+
   }
 
   onFormSubmit() {

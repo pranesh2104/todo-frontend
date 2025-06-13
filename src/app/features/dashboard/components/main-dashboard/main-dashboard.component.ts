@@ -27,6 +27,8 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { FormModifyService } from '../../services/form-modify.service';
 import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
 import { isDateAfter, isSameDate } from '../../utils/date.util';
+import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -69,6 +71,8 @@ export class MainDashboardComponent implements OnInit {
 
   private subscribeArr = new Subscription();
 
+  private router = inject(Router);
+
   constructor() { }
 
   ngOnInit(): void {
@@ -80,7 +84,11 @@ export class MainDashboardComponent implements OnInit {
         this.cdr.detectChanges();
         console.log('all task response ', res);
       },
-      error: (error) => {
+      error: (error: ICommonErrorResponse) => {
+        const parsedError: ICommonResponse = JSON.parse(error.message);
+        if (parsedError.code === 'USER_NOT_FOUND') {
+          this.router.navigate(['/login']);
+        }
         console.error('all task error ', error);
       }
     }));
@@ -105,8 +113,8 @@ export class MainDashboardComponent implements OnInit {
     this.handleSearch();
   }
 
-  showDialog() {
-    this.taskDialogVisible = true;
+  ngDoCheck(): void {
+    console.log('Main dashboard Component Checked');
   }
 
   private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {
@@ -270,7 +278,7 @@ export class MainDashboardComponent implements OnInit {
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Deleted successfully', life: 3000 });
       },
       error: () => {
-        this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
+        this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Deleted Failed', life: 2000 });
       }
     }));
   }
@@ -295,6 +303,8 @@ export class MainDashboardComponent implements OnInit {
             task.description?.toLowerCase().includes(trimmedText.toLowerCase())
           );
         }
+        console.log('inside Handle Search');
+
         this.cdr.detectChanges();
       }
     }));

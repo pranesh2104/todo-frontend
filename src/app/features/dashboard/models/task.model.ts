@@ -150,6 +150,9 @@ interface IAddSubTaskInput {
 export interface IDeleteTaskInput {
   taskId: string;
 }
+export interface IDeleteTagInput {
+  tagId: string;
+}
 
 export interface IUpdateTaskStatusInput {
   taskStatus: {

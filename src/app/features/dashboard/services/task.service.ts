@@ -1,7 +1,7 @@
 import { inject, Injectable, TransferState } from '@angular/core';
-import { CREATE_TAG, CREATE_TASK, DELETE_TASK, GET_ALL_TASKS_TAGS, UPDATE_TASK_STATUS, UPDATE_TASK } from '@core/graphql/task.query';
+import { CREATE_TAG, CREATE_TASK, DELETE_TASK, GET_ALL_TASKS_TAGS, UPDATE_TASK_STATUS, UPDATE_TASK, DELETE_TAG } from '@core/graphql/task.query';
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
-import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTaskInput, IUpdateTaskInput, IUpdateTaskStatusInput } from '../models/task.model';
+import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTagInput, IDeleteTaskInput, IUpdateTaskInput, IUpdateTaskStatusInput } from '../models/task.model';
 import { TASK_KEY } from '../constants/task.state.consant';
 import { of, Observable, BehaviorSubject } from 'rxjs';
 import { IFilter } from '@core/constants/side-nav.constant';
@@ -105,6 +105,10 @@ export class TaskService {
     return this.graphqlClientService.executeMutation<T, IUpdateTaskStatusInput>(UPDATE_TASK_STATUS, taskStatus, {
       cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', useModify: true, middleVariable: 'taskStatus' }
     });
+  }
+
+  deleteTag<T>(tagId: string) {
+    return this.graphqlClientService.executeMutation<T, IDeleteTagInput>(DELETE_TAG, { tagId });
   }
 
   // { cacheConfig: { query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task', updateStrategy: 'delete', id: taskId } }

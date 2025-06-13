@@ -1,18 +1,26 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PRIORITIES } from '@core/constants/common.constant';
 import { FilterValues, IFilter, SIDE_NAV_ITEMS } from '@core/constants/side-nav.constant';
+import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { IUserReponse } from 'app/features/auth/models/auth.model';
-import { IAllTaskResponse, ITaskTagInput } from 'app/features/dashboard/models/task.model';
+import { IAllTaskResponse, ICreateTagResponse, ITagForm, ITaskTagInput } from 'app/features/dashboard/models/task.model';
 import { TaskService } from 'app/features/dashboard/services/task.service';
+import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { ColorPickerModule } from 'primeng/colorpicker';
+import { Dialog } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-side-nav',
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule, Dialog, ButtonModule, ColorPickerModule, InputTextModule],
   templateUrl: './side-nav.component.html',
   styleUrl: './side-nav.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [MessageService]
 })
 export class SideNavComponent implements OnInit, OnDestroy {
 
@@ -29,6 +37,13 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   private cdr = inject(ChangeDetectorRef);
 
+  tagDialogVisible = false;
+
+  tagForm: FormGroup<ITagForm> = new FormGroup({
+    name: new FormControl<string>('', { nonNullable: true }),
+    color: new FormControl<string>('', { nonNullable: true })
+  });
+
   private readonly taskService = inject(TaskService);
 
   filterItems = SIDE_NAV_ITEMS;
@@ -39,6 +54,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   selectedFilterItem !: string;
 
+  // private readonly toastMessageService = inject(MessageService);
+
   // private platformId = inject(PLATFORM_ID);
 
   ngOnInit(): void {
@@ -46,7 +63,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       next: (res: IAllTaskResponse) => {
         this.tags.set([...res.getAllTags]);
         console.log('from side nav', this.tags());
-        // this.cdr.markForCheck();
+        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('all task error ', error);
@@ -81,6 +98,33 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   onFilterPriority(priority: string) {
     this.taskService.setFilter({ filterBy: 'priority', priority });
+  }
+
+  onAddTag() {
+    const tagFormValue = this.tagForm.value;
+    if (this.tagForm.valid && tagFormValue && tagFormValue.name && tagFormValue.color && tagFormValue.name.length && tagFormValue.color.length) {
+      this.subscribeArr.add(this.taskService.createTag<ICommonAPIResponse<ICreateTagResponse>>({ tagDetails: tagFormValue as ITaskTagInput }).subscribe({
+        next: (res: ICommonAPIResponse<ICreateTagResponse>) => {
+          if (res && res['createTag'] && res['createTag'].success) {
+            this.tagDialogVisible = false;
+          }
+        }
+      }));
+    }
+  }
+
+  onDeleteTag(tagId: string | undefined) {
+    if (!tagId) return;
+    this.taskService.deleteTag<ICommonAPIResponse>(tagId).subscribe({
+      next: (res) => {
+        if (res && res['deleteTag'] && res['deleteTag'].success) {
+          // this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
+        }
+      },
+      error: () => {
+        // this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Tag Deleted Failed', life: 2000 });
+      }
+    });
   }
 
   private getColorFromName(): string {
