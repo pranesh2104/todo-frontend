@@ -16,7 +16,8 @@
     <div class="space-y-1">
       <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
       <p-select id="priority" inputId="priority" [options]="priorities" formControlName="priority" optionLabel="name"
-        optionValue="value" placeholder="Select priority" styleClass="w-full" [showClear]="true" appendTo="body">
+        optionValue="value" placeholder="Select priority" focusOnHover="true" styleClass="w-full" [showClear]="true"
+        appendTo="body">
       </p-select>
     </div>
 
@@ -25,7 +26,7 @@
       <label for="dueDate" class="block text-sm font-medium text-gray-700">Due Date</label>
       <p-datepicker formControlName="dueDate" placeholder="Due Date" id="dueDate" showIcon iconDisplay="input"
         [showTime]="false" class="w-full" dateFormat="dd.mm.yy" appendTo="body" [minDate]="today" [defaultDate]="today"
-        hourFormat="24" showClear />
+        hourFormat="24" />
       <div *ngIf="isDateExpired(taskForm.get('dueDate')?.value)" class="expired-date-indicator">
         <i class="pi pi-exclamation-triangle"></i> Due date {{ taskForm.get('dueDate')?.value | date }}
         has passed
@@ -50,7 +51,7 @@
     <div class="col-span-full space-y-1">
       <label for="tags" class="block text-sm font-medium text-gray-700">Tags <span class="text-red-500">*</span></label>
       <p-autocomplete formControlName="tags" [suggestions]="filteredSuggestions" class="block w-full" id="tags"
-        (completeMethod)="filterSuggestionsChips($event)" optionLabel="name" [appendTo]="" completeOnFocus="true"
+        (completeMethod)="filterSuggestionsChips($event)" optionLabel="name" appendTo="body" completeOnFocus="true"
         multiple="true" focusOnHover="true" dataKey="name">
         <!-- [appendTo]="taskDialog" -->
         <ng-template let-suggestion #item>

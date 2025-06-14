@@ -1,7 +1,14 @@
 :host {
-  --p-colorpicker-preview-width: 50%;
+  --p-colorpicker-preview-width: 24px;
+  --p-colorpicker-preview-height: 24px;
+  --p-colorpicker-preview-border-radius: 50%;
+  --p-inputtext-invalid-placeholder-color: #64748b !important;
 }
 
 ::ng-deep .p-inputtext {
   width: 100%;
+}
+
+input.ng-invalid.ng-dirty {
+  border-color: #cbd5e1;
 }

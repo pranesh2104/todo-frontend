@@ -113,10 +113,6 @@ export class MainDashboardComponent implements OnInit {
     this.handleSearch();
   }
 
-  ngDoCheck(): void {
-    console.log('Main dashboard Component Checked');
-  }
-
   private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {
     const tagName = this.tags.find(t => t.id === filter.tagId)?.name;
     if (tagName) this.headerText.update(() => tagName);

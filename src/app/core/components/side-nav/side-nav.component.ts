@@ -10,13 +10,12 @@ import { TaskService } from 'app/features/dashboard/services/task.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { ColorPickerModule } from 'primeng/colorpicker';
-import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-side-nav',
-  imports: [CommonModule, ReactiveFormsModule, Dialog, ButtonModule, ColorPickerModule, InputTextModule],
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule, ColorPickerModule, InputTextModule],
   templateUrl: './side-nav.component.html',
   styleUrl: './side-nav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,8 +36,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   private cdr = inject(ChangeDetectorRef);
 
-  tagDialogVisible = false;
-
   tagForm: FormGroup<ITagForm> = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true }),
     color: new FormControl<string>('', { nonNullable: true })
@@ -54,7 +51,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   selectedFilterItem !: string;
 
-  // private readonly toastMessageService = inject(MessageService);
+  private readonly toastMessageService = inject(MessageService);
 
   // private platformId = inject(PLATFORM_ID);
 
@@ -106,10 +103,16 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.subscribeArr.add(this.taskService.createTag<ICommonAPIResponse<ICreateTagResponse>>({ tagDetails: tagFormValue as ITaskTagInput }).subscribe({
         next: (res: ICommonAPIResponse<ICreateTagResponse>) => {
           if (res && res['createTag'] && res['createTag'].success) {
-            this.tagDialogVisible = false;
+            this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
+            this.tagForm.reset();
           }
         }
       }));
+    }
+    else {
+      if (!tagFormValue.color) {
+        this.toastMessageService.add({ severity: 'warn', detail: 'Tag color missing.', life: 3000, summary: 'Warning' });
+      }
     }
   }
 
@@ -118,11 +121,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.taskService.deleteTag<ICommonAPIResponse>(tagId).subscribe({
       next: (res) => {
         if (res && res['deleteTag'] && res['deleteTag'].success) {
-          // this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
+          this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
         }
       },
       error: () => {
-        // this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Tag Deleted Failed', life: 2000 });
+        this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Tag Deleted Failed', life: 2000 });
       }
     });
   }
