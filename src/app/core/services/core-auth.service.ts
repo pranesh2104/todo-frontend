@@ -43,7 +43,6 @@ export class CoreAuthService {
       this.setAccessToken(newToken.refreshAccessToken.accessToken);
       return true;
     } catch (error) {
-      console.log('error ', error);
       this.logout();
       return false;
     }

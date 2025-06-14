@@ -72,6 +72,7 @@ export interface IGetAllTask {
   description: string | null;
   dueDate: Date | string | null;
   isCompleted: boolean;
+  isImportant: boolean,
   priority: string;
   tags: ITaskTagInput[] & { id: string } | null;
   updatedAt: Date | string | null;
@@ -102,10 +103,9 @@ export interface IUpdateTaskInput {
   updateTaskDetails: IUpdateTaskDetails;
 }
 
-export interface IUpdateTaskDetails {
+export interface IUpdateTaskDetails extends ITaskChanges {
   id: string;
-  subTaskChanges: ISubTaskChanges;
-  taskChanges: ITaskChanges;
+  subTask?: ISubTaskChanges;
 }
 
 export interface ITaskChanges {
@@ -115,9 +115,14 @@ export interface ITaskChanges {
   dueDate?: string,
   description?: string,
   comment?: string;
-  tags?: ITaskTagInput[]
+  tags?: ITagChangesInput;
+  isImportant?: boolean;
 }
 
+interface ITagChangesInput {
+  added: string[];
+  removed: string[]
+}
 export interface ISubTaskChanges {
   removed: string[],
   modified: IModifySubTaskInput[],
@@ -144,4 +149,15 @@ interface IAddSubTaskInput {
 
 export interface IDeleteTaskInput {
   taskId: string;
+}
+export interface IDeleteTagInput {
+  tagId: string;
+}
+
+export interface IUpdateTaskStatusInput {
+  taskStatus: {
+    taskId: string;
+    isImportant?: boolean;
+    isCompleted?: boolean;
+  }
 }

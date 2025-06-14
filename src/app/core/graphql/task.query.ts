@@ -19,11 +19,13 @@ export const GET_ALL_TASKS_TAGS = `query GetAllTasksAndTags {
       createdAt
     }
     tags {
+      id
       name
       color
     }
     updatedAt
     createdAt
+    isImportant
   }
   getAllTags {
     id
@@ -46,6 +48,7 @@ export const CREATE_TASK = `mutation CreateTask($taskDetails: CreateTaskInput) {
       isCompleted
       priority
       tags {
+        id
         name
         color
       }
@@ -88,6 +91,7 @@ export const UPDATE_TASK = `mutation UpdateTask($updateTaskDetails: UpdateTaskIn
       updatedAt
       title
       tags {
+        id
         name
         color
       }
@@ -109,6 +113,7 @@ export const UPDATE_TASK = `mutation UpdateTask($updateTaskDetails: UpdateTaskIn
       description
       createdAt
       comment
+      isImportant
     }
   }
 }`;
@@ -118,6 +123,22 @@ export const DELETE_TASK = `mutation DeleteTask($taskId: String) {
   deleteTask(taskId: $taskId) {
     message
     code
+    success
+  }
+}`;
+
+export const UPDATE_TASK_STATUS = `mutation UpdateTaskStatus($taskStatus: UpdateTaskStatusInput) {
+  updateTaskStatus(taskStatus: $taskStatus) {
+    code
+    message
+    success
+  }
+}`;
+
+export const DELETE_TAG = `mutation DeleteTag($tagId: String) {
+  deleteTag(tagId: $tagId) {
+    code
+    message
     success
   }
 }`;

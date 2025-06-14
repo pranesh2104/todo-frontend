@@ -1,9 +1,9 @@
 <div class="flex min-h-screen bg-gray-50">
   <div class="w-64 bg-white border-r border-gray-200 p-4">
-    <div class="flex items-center gap-2 mb-8">
-      <div [ngStyle]="getStyles()"
+    <div class="flex items-center gap-2 mb-3">
+      <div style="display: flex;" [ngStyle]="{'background-color': userBGColor()}"
         class="w-12 h-12 text-lg rounded-full flex items-center justify-center text-white font-semibold">
-        {{ getInitial() }}
+        {{ userData()?.name?.charAt(0)?.toUpperCase() || '?' }}
       </div>
       <!-- <img src="" alt="Profile Image"> -->
       <div class="w-[80%]">
@@ -11,39 +11,80 @@
         <span style="font-size: 10px;">{{userData()?.email}}</span>
       </div>
     </div>
-    <nav class="space-y-1">
-      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg bg-blue-50 text-blue-600">
-        <i class="pi pi-home"></i> All Tasks
+    <div class="space-y-1">
+      @for (item of filterItems;let index = $index;track $index) {
+      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg" tabindex="0"
+        (click)="onFilterSelect(item)"
+        [ngClass]="selectedFilterItem === item.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
+        <i [class]="'pi ' + 'pi-'+item.icon"></i> {{item.name}}
       </button>
-      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-        <i class="pi pi-star"></i> Important
-      </button>
-      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-        <i class="pi pi-calendar"></i> Upcoming
-      </button>
-      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-        <i class="pi pi-clock"></i> Today
-      </button>
-      <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-        <i class="pi pi-folder"></i> Completed
-      </button>
-    </nav>
-    <div class="mt-8">
-      <h2 class="text-sm font-semibold text-gray-600 mb-2">Tags</h2>
+      }
+    </div>
+    <div class="mt-5">
+      <h2 class="text-sm font-semibold text-gray-600 mb-2">Priority</h2>
       <div class="space-y-1">
-        <div class="flex items-center gap-2 px-3 py-2 text-gray-700">
-          <div class="w-2 h-2 rounded-full bg-blue-500"></div>
-          Work
-        </div>
-        <div class="flex items-center gap-2 px-3 py-2 text-gray-700">
-          <div class="w-2 h-2 rounded-full bg-green-500"></div>
-          Personal
-        </div>
-        <div class="flex items-center gap-2 px-3 py-2 text-gray-700">
-          <div class="w-2 h-2 rounded-full bg-purple-500"></div>
-          Meetings
-        </div>
+        @for (priority of priorities; track $index) {
+        <button tabindex="0" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 rounded-lg"
+          [ngClass]="selectedFilterItem === priority.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'"
+          (click)="onFilterPriority(priority.value)">
+          <div class="w-2 h-2 rounded-full" [ngStyle]="{'background-color': priority.color}">
+          </div>
+          {{priority.name}}
+        </button>
+        }
       </div>
     </div>
+    @if(tags() && tags().length){
+    <div class="mt-5">
+      <div class="flex justify-between items-center">
+        <h2 class="text-sm font-semibold text-gray-600 mb-2">Tags</h2>
+        <i class="pi pi-plus cursor-pointer" (click)="tagDialogVisible = true;"></i>
+      </div>
+      <div class="space-y-1">
+        @for (tag of tags(); track $index) {
+        <button tabindex="0" class="w-full flex items-center justify-between gap-2 px-3 py-2 text-gray-700 rounded-lg"
+          (click)="onFilterTag(tag?.id)"
+          [ngClass]="selectedFilterItem === tag?.id ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full" [ngStyle]="{'background-color': tag.color}"></div>
+            {{tag.name}}
+          </div>
+          <i class="pi pi-trash hover:text-red-500 cursor-pointer"
+            (click)="$event.stopPropagation();onDeleteTag(tag.id)"></i>
+        </button>
+        }
+      </div>
+    </div>
+    }
   </div>
 </div>
+
+
+<p-dialog [(visible)]="tagDialogVisible" [modal]="true" [draggable]="false" [resizable]="false" [closeOnEscape]="true"
+  [dismissableMask]="true" header="Create New Tag" #tagDialog appendTo="body">
+  @if (tagForm) {
+  <form [formGroup]="tagForm" (ngSubmit)="onAddTag()" class="flex flex-col gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Tag name -->
+      <div class="col-span-full">
+        <label for="tagName" class="block text-sm font-medium text-gray-700 mb-1">Tag Name</label>
+        <input id="tagName" required pInputText formControlName="name" class="w-full" placeholder="Enter Tag name..." />
+      </div>
+
+      <!-- Tag Color -->
+      <div class="col-span-full">
+        <label for="tagColor" class="block text-sm font-medium text-gray-700 mb-1">Tag Color</label>
+        <p-colorpicker id="tagColor" formControlName="color" appendTo="body" inputId="tagColor" />
+      </div>
+    </div>
+  </form>
+  }
+  <ng-template pTemplate="footer">
+    <div class="flex justify-end gap-2">
+      <p-button label="Cancel" (onClick)="tagDialogVisible = false;" severity="secondary" [text]="true">
+      </p-button>
+      <p-button label="Create Tag" (onClick)="onAddTag()">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>

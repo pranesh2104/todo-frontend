@@ -233,7 +233,6 @@ export class SignUpComponent implements OnInit {
   }
 
   onRedirect(text: string) {
-    console.log('text ', text);
     text = '/' + text;
     setTimeout(() => {
       this.toastMessageService.clear('registrationSuccess');

@@ -1,3 +1,4 @@
+import { AbstractControl, FormArray, FormControl, FormGroup } from '@angular/forms';
 import { ISubTaskInput, ITaskDetailsInput, ITaskTagInput } from "../models/task.model";
 
 
@@ -25,4 +26,30 @@ export function convertFormToTaskDetails(form: FormTaskDetails): ITaskDetailsInp
       priority: sub.priority ?? null
     }))
   };
+}
+
+export function isControlEmpty(control: AbstractControl): boolean {
+  if (control instanceof FormControl) {
+    return control.value === null || control.value === '' || control.value === undefined;
+  }
+
+  if (control instanceof FormGroup) {
+    return Object.values(control.controls).every(isControlEmpty);
+  }
+
+  if (control instanceof FormArray) {
+    return control.controls.every(isControlEmpty);
+  }
+
+  return true;
+}
+
+export function isDateExpired(date: string | Date | null | undefined): boolean {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  if (typeof date === 'string') {
+    date = new Date(date);
+  }
+  return date < today;
 }
