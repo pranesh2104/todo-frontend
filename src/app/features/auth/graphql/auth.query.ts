@@ -1,10 +1,6 @@
 export const CREATE_USER = `
 mutation CreateUser($userDetails: CreateUserDetails) {
   createUser(userDetails: $userDetails) {
-    tokens {
-      refreshToken
-      accessToken
-    }
     user {
       email
       name
@@ -68,10 +64,6 @@ mutation Login {
       email
       name
       updatedAt
-    }
-    tokens {
-      refreshToken
-      accessToken
     }
   }
 }`;

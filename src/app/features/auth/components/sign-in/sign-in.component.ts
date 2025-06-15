@@ -53,10 +53,8 @@ export class SignInComponent implements OnDestroy {
       this.headerService.setHeaders('Registration', `${emailFormControl.value}:${passwordFormControl.value}`);
       this.obervableSubscription.add(this.authService.login().subscribe({
         next: (loginResponse: ILoginSuccessResponse) => {
-          if (loginResponse && loginResponse.login && loginResponse.login.tokens && loginResponse) {
+          if (loginResponse && loginResponse.login) {
             this.headerService.removeHeader('Registration');
-            // this.headerService.setHeaders('Authorization', loginResponse.login.tokens.accessToken);
-            this.coreAuthService.setAccessToken(loginResponse.login.tokens.accessToken);
             this.coreAuthService.user.next(loginResponse.login.user);
             this.router.navigate(['/app/dashboard']);
           }

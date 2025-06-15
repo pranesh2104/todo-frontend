@@ -15,7 +15,8 @@ export class StorageService {
   get(key: string): string | null {
     if (!this.isBrowser) return null;
     try {
-      return localStorage.getItem(key);
+      return this.getCookie(key);
+      // return localStorage.getItem(key);
     } catch (error) {
       console.error('LocalStorage access error:', error);
       return null;
@@ -23,7 +24,7 @@ export class StorageService {
   }
 
   has(key: string): boolean {
-    return this.isBrowser ? localStorage.getItem(key) !== null : false;
+    return this.isBrowser ? this.getCookie(key) !== null : false;
   }
 
   set(key: string, value: string): void {
@@ -42,5 +43,11 @@ export class StorageService {
 
   clear(): void {
     if (this.isBrowser) localStorage.clear();
+  }
+
+  getCookie(name: string) {
+    const cookies = document.cookie.split('; ');
+    const cookie = cookies.find(c => c.startsWith(name + '='));
+    return cookie ? cookie.split('=')[1] : null;
   }
 }

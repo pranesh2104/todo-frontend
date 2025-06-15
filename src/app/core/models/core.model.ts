@@ -7,19 +7,10 @@ export interface ICustomGraphQLError extends GraphQLFormattedError {
 }
 
 
-export interface IAuthTokens {
-  accessToken: string;
-  refreshToken?: string;
-}
-
 export interface DecodedToken {
   sub: string;
   exp: number;
   jti: string;
   type: string;
   iat: number;
-}
-
-export interface IRefreshTokenResponse {
-  refreshAccessToken: IAuthTokens;
 }

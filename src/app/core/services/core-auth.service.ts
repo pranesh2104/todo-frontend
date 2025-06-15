@@ -1,7 +1,6 @@
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { BehaviorSubject, lastValueFrom } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
-import { IRefreshTokenResponse } from '@core/models/core.model';
 import { StorageService } from './storage.service';
 // import { IUserReponse } from 'app/features/auth/models/auth.model';
 import { UserService } from './user.service';
@@ -30,7 +29,7 @@ export class CoreAuthService {
   }
 
   getAccessToken(): string | null {
-    return this.storageService.get('at');
+    return this.storageService.get('sessionId');
   }
 
   setAccessToken(token: string): void {
@@ -39,9 +38,10 @@ export class CoreAuthService {
 
   async getRefreshToken(): Promise<boolean> {
     try {
-      const newToken: IRefreshTokenResponse = await lastValueFrom(this.userService.getAccessToken());
-      this.setAccessToken(newToken.refreshAccessToken.accessToken);
-      return true;
+      const { success } = await lastValueFrom(this.userService.getAccessToken());
+      // this.setAccessToken(newToken.refreshAccessToken.accessToken);
+      if (success) return true;
+      else return false;
     } catch (error) {
       this.logout();
       return false;
@@ -53,7 +53,7 @@ export class CoreAuthService {
   }
 
   async checkAuthenticateState(): Promise<boolean> {
-    if (this.storageService.get('at')) {
+    if (this.storageService.get('sessionId')) {
       return true;
     }
     else {

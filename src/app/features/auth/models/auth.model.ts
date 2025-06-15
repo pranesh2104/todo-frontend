@@ -1,5 +1,4 @@
 import { FormControl } from "@angular/forms";
-import { IAuthTokens } from "@core/models/core.model";
 
 export interface CreateUserArguments {
   userDetails: UserDetailsInput;
@@ -85,7 +84,6 @@ export interface ILoginSuccessResponse {
 
 export interface ILoginResponse {
   user: IUserReponse;
-  tokens: IAuthTokens;
 }
 
 export interface IGetOneUserResponse {

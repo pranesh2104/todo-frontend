@@ -1,7 +1,6 @@
 import { inject, Injectable, TransferState } from '@angular/core';
 import { USER_KEY } from '@core/constants/state.constant';
-import { GET_ACCESS_TOKEN, GET_ALL_USER, GET_CURRENT_USER } from '@core/graphql/user.query';
-import { IRefreshTokenResponse } from '@core/models/core.model';
+import { UPDATE_SESSION_TOKEN, GET_ALL_USER, GET_CURRENT_USER } from '@core/graphql/user.query';
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
 import { IGetOneUserResponse } from 'app/features/auth/models/auth.model';
 import { Observable, of } from 'rxjs';
@@ -32,7 +31,7 @@ export class UserService {
     }
   }
 
-  getAccessToken(): Observable<IRefreshTokenResponse> {
-    return this.graphqlClientService.executeMutation(GET_ACCESS_TOKEN, {})
+  getAccessToken(): Observable<{ success: boolean }> {
+    return this.graphqlClientService.executeMutation(UPDATE_SESSION_TOKEN, {})
   }
 }

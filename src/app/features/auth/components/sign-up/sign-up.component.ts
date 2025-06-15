@@ -214,7 +214,7 @@ export class SignUpComponent implements OnInit {
         this.observableSubscription.add(this.authService.createUser(data).subscribe({
           next: (res: ICreateUserDetails) => {
             if (res && res.createUser && res.createUser.user) {
-              this.coreAuthService.setAccessToken(res.createUser.tokens.accessToken);
+              // this.coreAuthService.setAccessToken(res.createUser.tokens.accessToken);
               this.coreAuthService.user.next(res.createUser.user);
               this.showRegistrationSuccessToast();
             }

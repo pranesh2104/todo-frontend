@@ -16,9 +16,9 @@ query GetOneUser {
   }
 }`;
 
-export const GET_ACCESS_TOKEN = `
-mutation RefreshAccessToken {  
-  refreshAccessToken { 
-   accessToken 
-  } 
+export const UPDATE_SESSION_TOKEN = `
+mutation RotateAuthTokens {
+  rotateAuthTokens {
+    success
+  }
 }`;
