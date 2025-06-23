@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/todo/server/server.mjs",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/todo/browser/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/todo/server/server.mjs"
+    }
+  ]
+}
