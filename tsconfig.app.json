@@ -10,8 +10,6 @@
   "files": [
     "src/main.ts",
     "src/main.server.ts",
-    "server.ts",
-    "dev-server.ts",
     "src/server.ts"
   ],
   "include": [

@@ -1,10 +1,9 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
-import { inject, PLATFORM_ID } from '@angular/core';
+import { inject, PLATFORM_ID, REQUEST } from '@angular/core';
 import { Router } from '@angular/router';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { HeaderService } from '@core/services/header.service';
 import { BehaviorSubject, catchError, from, switchMap, throwError } from 'rxjs';
-import { SERVER_REQUEST } from '../../../server.token';
 import { isPlatformServer } from '@angular/common';
 
 let isRefreshing = false;
@@ -16,12 +15,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
   if (isPlatformServer(platformId)) {
-    const server = inject(SERVER_REQUEST);
-
-    if (server) {
-      req = req.clone({
-        setHeaders: { Cookie: server?.headers['cookie'] }
-      });
+    const server = inject(REQUEST);
+    const cookie = server?.headers.get('cookie');
+    if (server && cookie) {
+      req = req.clone({ setHeaders: { Cookie: cookie } });
     }
     return next(req);
   }

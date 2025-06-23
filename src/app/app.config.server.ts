@@ -1,16 +1,13 @@
-import { mergeApplicationConfig, ApplicationConfig, REQUEST } from '@angular/core';
+import { mergeApplicationConfig, ApplicationConfig } from '@angular/core';
 import { provideServerRendering } from '@angular/platform-server';
 import { appConfig } from './app.config';
-import { SERVER_REQUEST } from 'server.token';
+import { provideServerRouting } from '@angular/ssr';
+import { serverRoutes } from './app.routes.server';
 
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(),
-    {
-      provide: SERVER_REQUEST,
-      useFactory: (req: any) => req,
-      deps: [REQUEST]
-    },
+    provideServerRouting(serverRoutes)
   ]
 };
 
