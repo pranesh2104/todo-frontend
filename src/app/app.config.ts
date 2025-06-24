@@ -6,11 +6,11 @@ import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideApollo } from 'apollo-angular';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeng/themes/aura';
 import { ApolloConfigService } from '@core/services/apollo-config.service';
 import { authInterceptor } from '@core/interceptor/auth.interceptor';
 import { environment } from 'env/env';
 import { EnvironmentToken } from './env.token';
+import { BluePreset } from './primePreset';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -22,7 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideApollo(ApolloConfigService.setApolloConfig),
     providePrimeNG({
       theme: {
-        preset: Aura,
+        preset: BluePreset,
         options: {
           prefix: 'p', darkModeSelector: '.my-app-dark',
         }

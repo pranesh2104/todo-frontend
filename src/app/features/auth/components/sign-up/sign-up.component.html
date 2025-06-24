@@ -34,11 +34,11 @@
           @if (state.email.status === AUTH_STATUS.EMAIL.CHECKING) {
           <p-inputicon styleClass="pi pi-spinner pi-spin" />
           }
-          @else if (state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailAvailable === true &&
+          @else if (state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === true &&
           signupForm.get('email')?.value) {
           <p-inputicon styleClass="pi pi-check" style="color: limegreen;" />
           }
-          @else if(state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailAvailable === false &&
+          @else if(state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === false &&
           signupForm.get('email')?.value) {
           <p-inputicon styleClass="pi pi-times" style="color: lightcoral;" />
           }
@@ -51,7 +51,7 @@
         <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple"
           size="small"> Invalid Email!</p-message>
         }
-        @else if (signupForm.get('email')?.hasError('emailExists') && signupForm.get('email')?.dirty) {
+        @else if (signupForm.get('email')?.hasError('emailRegistered') && signupForm.get('email')?.dirty) {
         <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple"
           size="small"> This email is already registered</p-message>
         }
@@ -72,7 +72,7 @@
         <p-button label="Change Email" (click)="onChangeEmail()" />
         }
         <p-button [label]="state.otp.status === AUTH_STATUS.OTP.SENDING ? 'Sending OTP...' : 'Send OTP'"
-          (click)="onSendOTP()" [raised]="true" icon="pi pi-send" iconPos="right"
+          (click)="onSendOTP()" [raised]="true" icon="pi pi-send" iconPos="right" [disabled]="!signupForm.valid"
           [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
       </div>
       }
@@ -145,13 +145,13 @@
       <div style="gap: 10px;" class="flex-row align-center-center w-full gap-10px">
         @if (state.otp.remainingAttempts !== 0 && !isEmailChangeEnabled) {
         <p-button [label]=" state.otp.isSubmitting ? 'Verifying...' : 'Verify OTP'" [raised]="true"
-          (click)="onVerifyOTP();"
+          (click)="onVerifyOTP();" [disabled]="!signupForm.valid"
           [disabled]="signupForm.get('otp')?.invalid  || state.otp.isSubmitting || isOTPResending" />
         }
         @if (canResendOTP() || isEmailChangeEnabled) {
         <p-button [label]="isOTPResending ? 'Resending OTP...' :'Resend OTP'" [raised]="true"
           (click)="isOTPResending = true;onSendOTP();signupForm.get('otp')?.reset();" icon="pi pi-send" iconPos="right"
-          [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
+          [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" [disabled]="!signupForm.valid" />
         }
         <!-- @if (canResendOTP()) { -->
         <p-button label="Change Email" (click)="onChangeEmail()" [raised]="true" />
@@ -161,7 +161,7 @@
       @if (showPasswordFields()) {
       <div class="flex-row align-center-center">
         <p-button label="Sign Up" (click)="onUserRegister()" [raised]="true" type="submit"
-          [disabled]="state.otp.status !== AUTH_STATUS.OTP.VERIFIED" />
+          [disabled]="state.otp.status !== AUTH_STATUS.OTP.VERIFIED" [disabled]="!signupForm.valid" />
       </div>
       }
     </form>

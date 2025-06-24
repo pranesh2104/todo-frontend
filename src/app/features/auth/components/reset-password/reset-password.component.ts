@@ -32,7 +32,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
    */
   emailState: IEmailCommonState = {
     status: AUTH_STATUS.EMAIL.INITIAL,
-    isEmailAvailable: false
+    isEmailRegistered: false
   }
   /**
    * Store the token.
@@ -51,12 +51,12 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   resetForm: FormGroup<IResetForm> = new FormGroup({
     userEmail: new FormControl<string>('', {
       validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
-      asyncValidators: CustomValidators.checkEmailExist(this.authService,
+      asyncValidators: CustomValidators.checkEmailAvailability(this.authService,
         { setCheckingState: (checkState: string) => this.emailState.status = checkState },
         {
-          setEmailExistState: (emailExistState: boolean) => {
-            console.log({ emailExistState });
-            this.emailState.isEmailAvailable = emailExistState
+          setEmailRegisterState: (isEmailRegistered: boolean) => {
+            console.log({ isEmailRegistered });
+            this.emailState.isEmailRegistered = isEmailRegistered;
           }
         },
         false)
@@ -99,10 +99,10 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.isVerifyingPage = false;
     this.resetForm.get('userEmail')?.setValue(email);
     this.resetForm.get('userEmail')?.updateValueAndValidity();
-    this.observableSubscription.add(this.authService.checkEmailExist(email).subscribe({
+    this.observableSubscription.add(this.authService.checkEmailAvailable(email).subscribe({
       next: (checkEmailResponse: IEmailCheckResponse) => {
-        if (checkEmailResponse && checkEmailResponse.checkEmail && checkEmailResponse.checkEmail.code === 'EMAIL_EXIST') {
-          this.emailState.isEmailAvailable = true;
+        if (checkEmailResponse && checkEmailResponse.checkEmail && checkEmailResponse.checkEmail.code === 'EMAIL_REGISTERED') {
+          this.emailState.isEmailRegistered = true;
         }
       }
     }));

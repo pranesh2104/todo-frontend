@@ -38,7 +38,7 @@ export class SignUpComponent implements OnInit {
       status: AUTH_STATUS.EMAIL.INITIAL,
       isVerified: false,
       isChangeEnabled: false,
-      isEmailAvailable: false
+      isEmailRegistered: false
     },
     otp: {
       status: AUTH_STATUS.OTP.INITIAL,
@@ -87,9 +87,9 @@ export class SignUpComponent implements OnInit {
       name: new FormControl('', { validators: [Validators.required, Validators.pattern(/^[a-zA-Z]+$/)], nonNullable: true }),
       email: new FormControl('', {
         validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
-        asyncValidators: CustomValidators.checkEmailExist(this.authService,
+        asyncValidators: CustomValidators.checkEmailAvailability(this.authService,
           { setCheckingState: (checkState: string) => this.state.email.status = checkState },
-          { setEmailExistState: (emailExistState: boolean) => this.state.email.isEmailAvailable = emailExistState },
+          { setEmailRegisterState: (isEmailRegistered: boolean) => this.state.email.isEmailRegistered = isEmailRegistered },
           true
         )
       }),
@@ -224,7 +224,7 @@ export class SignUpComponent implements OnInit {
             const parsedError: ICommonResponse = JSON.parse(error.message);
             console.log('error ', error);
             if (parsedError) {
-              if (parsedError.code === SIGNUP_API_RESPONSE_CODE.EMAIL_EXIST) {
+              if (parsedError.code === SIGNUP_API_RESPONSE_CODE.EMAIL_NOT_AVAILABLE) {
                 this.toastMessageService.add({ severity: 'warn', summary: 'Email Already Registered', detail: 'This email is already registered. Try signing in instead.', life: 4000 });
               }
             }

@@ -15,7 +15,7 @@ export class AuthService {
     return this.graphqlClientService.executeMutation(CREATE_USER, userDetails);
   }
 
-  checkEmailExist(email: string): Observable<IEmailCheckResponse> {
+  checkEmailAvailable(email: string): Observable<IEmailCheckResponse> {
     return this.graphqlClientService.executeQuery<IEmailCheckResponse>(CHECK_EMAIL, { email });
   }
 

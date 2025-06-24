@@ -5,14 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer primeng {
-  :root {
-    --primary-color: #2563eb;
-    --primary-color-text: white;
-    --surface-hover: rgba(37, 99, 235, 0.1);
-  }
-}
-
 html,
 body {
   height: 100%;

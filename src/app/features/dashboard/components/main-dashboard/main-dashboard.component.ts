@@ -197,9 +197,9 @@ export class MainDashboardComponent implements OnInit {
   }
 
   onEdit(task: IGetAllTask) {
-    this.isEditDialog = true;
     this.taskDialogVisible = true;
-    this.formComponent.patchValue(task);
+    this.isEditDialog = true;
+    setTimeout(() => { this.formComponent.patchValue(task); }, 100);
   }
 
   onTaskStatusUpdate(task: IGetAllTask, isImportant: boolean) {
