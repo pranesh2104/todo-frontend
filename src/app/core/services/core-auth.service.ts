@@ -29,7 +29,7 @@ export class CoreAuthService {
   }
 
   getAccessToken(): string | null {
-    return this.storageService.get('sessionId');
+    return this.storageService.get('session');
   }
 
   setAccessToken(token: string): void {
@@ -53,7 +53,7 @@ export class CoreAuthService {
   }
 
   async checkAuthenticateState(): Promise<boolean> {
-    if (this.storageService.get('sessionId')) {
+    if (this.storageService.get('session')) {
       return true;
     }
     else {
