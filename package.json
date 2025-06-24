@@ -10,7 +10,8 @@
     "test": "ng test",
     "build:stats": "ng build --stats-json",
     "lint": "ng lint",
-    "serve:ssr": "node dist/todo/server/server.mjs"
+    "serve:ssr": "node dist/todo/server/server.mjs",
+    "build:run": "ng build --configuration=production && ng run todo:server:production"
   },
   "private": true,
   "dependencies": {

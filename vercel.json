@@ -4,10 +4,6 @@
     {
       "src": "dist/todo/server/server.mjs",
       "use": "@vercel/node"
-    },
-    {
-      "src": "dist/todo/browser/**/*",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
