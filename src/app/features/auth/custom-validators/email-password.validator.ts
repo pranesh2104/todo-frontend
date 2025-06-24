@@ -54,6 +54,8 @@ export class CustomValidators {
               const isEmailExist = checkEmailResponse.checkEmail.code === 'EMAIL_EXIST';
               formControl.markAsTouched();
               emailExistState.setEmailExistState(!isEmailExist);
+              console.log({ isExpectEmailExist, isEmailExist });
+
               if (isExpectEmailExist && isEmailExist)
                 return { emailExists: true };
               else if (!isEmailExist && !isExpectEmailExist)

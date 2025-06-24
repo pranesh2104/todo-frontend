@@ -6,8 +6,8 @@ import { GraphqlClientService } from '../../../../shared/services/graphql-client
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { ISignUpForm, ISignUpState, ICreateUserDetails, IVerifyOTPResponse } from '../../models/auth.model';
 import { CommonModule } from '@angular/common';
-import { ICommonAPIResponse } from '@shared/models/shared.model';
-import { AUTH_STATUS, EMAIL_PATTERN, OTP_RELATED_API_RESPONSE_CODES, PASSWORD_PATTERN } from '../../constants/auth.constant';
+import { ICommonAPIResponse, ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
+import { AUTH_STATUS, EMAIL_PATTERN, OTP_RELATED_API_RESPONSE_CODES, PASSWORD_PATTERN, SIGNUP_API_RESPONSE_CODE } from '../../constants/auth.constant';
 import { CardModule } from 'primeng/card';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
@@ -20,10 +20,11 @@ import { InputOtp } from 'primeng/inputotp';
 import { Toast } from 'primeng/toast';
 import { finalize, interval, Subscription, takeWhile } from 'rxjs';
 import { CoreAuthService } from '@core/services/core-auth.service';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-sign-up',
-  imports: [Button, Toast, CardModule, ReactiveFormsModule, CommonModule, InputText, Message, IconField, InputIcon, Password, FormsModule, InputOtp],
+  imports: [Button, Toast, CardModule, ReactiveFormsModule, DividerModule, CommonModule, InputText, Message, IconField, InputIcon, Password, FormsModule, InputOtp],
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.scss',
   providers: [GraphqlClientService, MessageService]
@@ -219,8 +220,14 @@ export class SignUpComponent implements OnInit {
               this.showRegistrationSuccessToast();
             }
           },
-          error: (error) => {
+          error: (error: ICommonErrorResponse) => {
+            const parsedError: ICommonResponse = JSON.parse(error.message);
             console.log('error ', error);
+            if (parsedError) {
+              if (parsedError.code === SIGNUP_API_RESPONSE_CODE.EMAIL_EXIST) {
+                this.toastMessageService.add({ severity: 'warn', summary: 'Email Already Registered', detail: 'This email is already registered. Try signing in instead.', life: 4000 });
+              }
+            }
           }
         }));
       }

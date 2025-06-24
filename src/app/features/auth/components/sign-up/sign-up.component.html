@@ -4,7 +4,7 @@
     <ng-template #header>
       <div class="flex-column align-center-center">
         <h3>Create Your Account</h3>
-        <span style="margin-bottom: 10px;">Have an account? <a class="anchorTag" href="./login">Login
+        <span style="margin-bottom: 10px;">Have an account? <a class="anchorTag" href="./signin">Login
             now</a></span>
       </div>
     </ng-template>
@@ -80,8 +80,23 @@
       <div>
         <p-iconfield>
           <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
-          <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password"
-            [feedback]="false" />
+          <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full"
+            placeholder="Password">
+            <ng-template #header>
+              <div class="font-semibold text-xm mb-4">Pick a password</div>
+            </ng-template>
+            <ng-template #footer>
+              <p-divider />
+              <ul class="pl-2 ml-2 my-0 leading-normal">
+                <li>At least one lowercase</li>
+                <li>At least one uppercase</li>
+                <li>At least one numeric</li>
+                <li>Minimum 8 characters</li>
+              </ul>
+            </ng-template>
+          </p-password>
+          <!-- <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password"
+            [feedback]="false" /> -->
         </p-iconfield>
         @if (signupForm.get('password')?.hasError('required')) {
         <p-message severity="error" variant="simple" size="small"> Password is required!</p-message>
@@ -145,7 +160,7 @@
       }
       @if (showPasswordFields()) {
       <div class="flex-row align-center-center">
-        <p-button label="Sign Up" (click)="onUserRegister()" [raised]="true"
+        <p-button label="Sign Up" (click)="onUserRegister()" [raised]="true" type="submit"
           [disabled]="state.otp.status !== AUTH_STATUS.OTP.VERIFIED" />
       </div>
       }
@@ -167,7 +182,7 @@
       <span>You will be redirect to Dashboard in {{timer}} seconds</span>
       <div class="flex-row align-center-center" style="gap: 15px;">
         <p-button label="Dashboard" (click)="onRedirect('app/dashboard')" severity="primary" />
-        <p-button label="login" (click)="onRedirect('login')" severity="secondary" />
+        <p-button label="Signin" (click)="onRedirect('signin')" severity="secondary" />
       </div>
     </section>
   </ng-template>

@@ -58,7 +58,7 @@ const handle401Error = (req: HttpRequest<unknown>, next: HttpHandlerFn, coreAuth
     catchError(err => {
       isRefreshing = false;
       coreAuthService.logout();
-      router.navigate(['/login']);
+      router.navigate(['/signin']);
       return throwError(() => err);
     })
   );

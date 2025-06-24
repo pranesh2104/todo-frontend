@@ -53,7 +53,12 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
       asyncValidators: CustomValidators.checkEmailExist(this.authService,
         { setCheckingState: (checkState: string) => this.emailState.status = checkState },
-        { setEmailExistState: (emailExistState: boolean) => { this.emailState.isEmailAvailable = emailExistState } },
+        {
+          setEmailExistState: (emailExistState: boolean) => {
+            console.log({ emailExistState });
+            this.emailState.isEmailAvailable = emailExistState
+          }
+        },
         false)
     }),
     password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
@@ -130,7 +135,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   }
 
   onRedirect() {
-    this.router.navigate(['../login']);
+    this.router.navigate(['../signin']);
   }
 
   onUpdatePassword() {

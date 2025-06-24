@@ -55,7 +55,7 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
           error: (error: ICommonErrorResponse) => {
             const parsedError: ICommonResponse = JSON.parse(error.message);
             if (parsedError.code === 'USER_NOT_FOUND') {
-              this.router.navigate(['/login']);
+              this.router.navigate(['/signin']);
             }
           }
         });

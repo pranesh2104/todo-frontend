@@ -64,6 +64,7 @@ export class SignInComponent implements OnDestroy {
           if (parsedError) {
             if (parsedError.code === SIGNIN_API_RESPONSE_CODE.USER_NOT_FOUND) {
               this.signInForm.get('email')?.setErrors({ userNotFound: true });
+              this.toastService.add({ severity: 'info', detail: 'Email not found. Please check your email or create a new account.', life: 4000, summary: 'Sign In Failed' });
             }
             else if (parsedError.code === SIGNIN_API_RESPONSE_CODE.PASSWORD_MISMATCH) {
               this.signInForm.get('password')?.setErrors({ passwordMismatch: true });
