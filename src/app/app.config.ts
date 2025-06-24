@@ -9,10 +9,13 @@ import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
 import { ApolloConfigService } from '@core/services/apollo-config.service';
 import { authInterceptor } from '@core/interceptor/auth.interceptor';
+import { environment } from 'env/env';
+import { EnvironmentToken } from './env.token';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
+    { provide: EnvironmentToken, useValue: environment },
     provideClientHydration(),
     provideHttpClient(withInterceptors([authInterceptor]), withFetch()),
     provideAnimationsAsync(),

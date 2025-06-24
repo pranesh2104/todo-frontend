@@ -4,6 +4,7 @@ import { onError } from '@apollo/client/link/error';
 import { HttpLink } from 'apollo-angular/http';
 import { ICustomGraphQLError } from '@core/models/core.model';
 import { HeaderService } from './header.service';
+import { EnvironmentToken } from 'app/env.token';
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +12,12 @@ import { HeaderService } from './header.service';
 export class ApolloConfigService {
 
   static setApolloConfig() {
-    const graphqlUri = 'http://localhost:5300/graphql'
 
     const headers: ApolloLink = inject(HeaderService).getHeadersAplloLink();
 
     const httpLink = inject(HttpLink);
+
+    const graphqlUri = inject(EnvironmentToken).graphqlUri;
 
     const http = httpLink.create({ uri: graphqlUri, withCredentials: true });
 
