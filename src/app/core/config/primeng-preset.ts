@@ -1,7 +1,8 @@
+import { PrimeNGConfigType } from "primeng/config";
 import { definePreset } from '@primeng/themes';
 import Aura from '@primeng/themes/aura';
 
-export const BluePreset = definePreset(Aura, {
+const BluePreset = definePreset(Aura, {
   semantic: {
     primary: {
       50: '{blue.50}',
@@ -32,3 +33,11 @@ export const BluePreset = definePreset(Aura, {
     }
   }
 });
+
+export const primeNgPreset: PrimeNGConfigType = {
+  theme: {
+    preset: BluePreset,
+    options: { prefix: 'p', darkModeSelector: '.my-app-dark' }
+  },
+  ripple: true
+}

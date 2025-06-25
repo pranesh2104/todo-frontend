@@ -1,5 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
@@ -10,24 +10,18 @@ import { ApolloConfigService } from '@core/services/apollo-config.service';
 import { authInterceptor } from '@core/interceptor/auth.interceptor';
 import { environment } from 'env/env';
 import { EnvironmentToken } from './env.token';
-import { BluePreset } from './primePreset';
+import { primeNgPreset } from '@core/config/primeng-preset';
+import { CustomTitleStrategy } from '@core/config/custom-title-strategy';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
     { provide: EnvironmentToken, useValue: environment },
+    { provide: TitleStrategy, useClass: CustomTitleStrategy },
     provideClientHydration(),
     provideHttpClient(withInterceptors([authInterceptor]), withFetch()),
     provideAnimationsAsync(),
     provideApollo(ApolloConfigService.setApolloConfig),
-    providePrimeNG({
-      theme: {
-        preset: BluePreset,
-        options: {
-          prefix: 'p', darkModeSelector: '.my-app-dark',
-        }
-      },
-      ripple: true
-    })
+    providePrimeNG(primeNgPreset)
   ]
 };

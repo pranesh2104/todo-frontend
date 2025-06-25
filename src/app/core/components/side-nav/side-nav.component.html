@@ -6,9 +6,12 @@
         {{ userData()?.name?.charAt(0)?.toUpperCase() || '?' }}
       </div>
       <!-- <img src="" alt="Profile Image"> -->
-      <div class="w-[80%]">
-        <span>{{userData()?.name}} </span>
-        <span style="font-size: 10px;">{{userData()?.email}}</span>
+      <div class="w-4/5 flex items-center justify-between">
+        <div class="flex flex-col">
+          <span>{{userData()?.name}} </span>
+          <span style="font-size: 10px;">{{userData()?.email}}</span>
+        </div>
+        <i class="pi pi-cog text-base hover:text-blue-500 cursor-pointer"></i>
       </div>
     </div>
     <div class="space-y-1">

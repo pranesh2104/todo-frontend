@@ -7,7 +7,8 @@ export const routes: Routes = [
     path: 'app', loadComponent: () => import('../app/core/components/base-layout/base-layout.component').then((c) => c.BaseLayoutComponent),
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', loadComponent: () => import('../app/features/dashboard/components/main-dashboard/main-dashboard.component').then((c) => c.MainDashboardComponent) }
+      { path: 'dashboard', title: 'Dashboard', loadComponent: () => import('../app/features/dashboard/components/main-dashboard/main-dashboard.component').then((c) => c.MainDashboardComponent) },
+      { path: 'profile', loadComponent: () => import('../app/features/profile/profile/profile.component').then((c) => c.ProfileComponent) }
     ]
   },
   { path: 'signup', loadComponent: () => import('../app/features/auth/components/sign-up/sign-up.component').then((c) => c.SignUpComponent), data: { title: 'SignUp' } },
