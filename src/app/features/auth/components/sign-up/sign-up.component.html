@@ -11,12 +11,11 @@
     <div>
       <p-iconfield>
         <p-inputicon styleClass="pi pi-user" />
-        <input pInputText id="first-name" formControlName="name" type="text" placeholder="First Name"
-          autocomplete="name" />
+        <input pInputText id="first-name" formControlName="name" type="text" placeholder="Name" autocomplete="name" />
       </p-iconfield>
       @if (signupForm.get('name')?.dirty && signupForm.get('name')?.hasError('required')) {
       <p-message severity="error" variant="simple" size="small" hideTransitionOptions="0ms"
-        showTransitionOptions="0ms">First name is
+        showTransitionOptions="0ms">Name is
         required</p-message>
       }
       @else if (signupForm.get('name')?.dirty && !signupForm.get('name')?.hasError('required') &&

@@ -45,7 +45,6 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
       if (isPlatformBrowser(this.platformId)) {
         this.subscription = this.userService.getCurrentUser().subscribe({
           next: (res: IGetOneUserResponse) => {
-            console.log('res ', res);
             if (isPlatformServer(this.platformId)) {
               this.transferState.set(USER_KEY, res);
             }

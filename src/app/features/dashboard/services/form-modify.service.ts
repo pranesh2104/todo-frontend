@@ -123,7 +123,6 @@ export class FormModifyService {
         }
         // No ID or null ID - new subtask
         else if (control.dirty) {
-          console.log('contorl ', control.value);
           delete control.value.id;
           added.push(control.value);
         }

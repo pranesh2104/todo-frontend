@@ -55,8 +55,7 @@ export class SignInComponent implements OnDestroy {
           if (loginResponse && loginResponse.login) {
             this.headerService.removeHeader('Registration');
             this.coreAuthService.user.next(loginResponse.login.user);
-            this.toastService.add({ severity: 'info', detail: 'Email not found. Please check your email or create a new account.', life: 4000, summary: 'Sign In Failed' });
-            // this.router.navigate(['/app/dashboard']);
+            this.router.navigate(['/app/dashboard']);
           }
         },
         error: (error: ICommonErrorResponse) => {

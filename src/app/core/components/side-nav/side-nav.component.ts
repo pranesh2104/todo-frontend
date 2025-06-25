@@ -71,17 +71,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
         this.selectedFilterItem = res.filterBy === 'tag' ? res.tagId : res.filterBy === 'priority' ? res.priority : res.property;
       }
     }));
-    // if (isPlatformBrowser(this.platformId)) {
-    //   this.coreAuthService.user.subscribe({
-    //     next: (userResponse: IUserReponse | null) => {
-    //       console.log('userResponse ', userResponse);
-    //       if (userResponse) {
-    //         this.user.set(userResponse);
-    //       }
-    //     }
-
-    //   });
-    // }
   }
 
   onFilterSelect(item: { name: string; value: FilterValues; icon: string; }) {

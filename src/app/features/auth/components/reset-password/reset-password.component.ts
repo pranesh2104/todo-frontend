@@ -8,7 +8,6 @@ import { IEmailCheckResponse, IEmailCommonState, IResetForm } from '../../models
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { finalize, interval, Subscription, takeWhile } from 'rxjs';
-import { CardModule } from 'primeng/card';
 import { Button } from 'primeng/button';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
@@ -21,7 +20,7 @@ import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, Toast, DividerModule, FormsModule, CommonModule, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
+  imports: [ReactiveFormsModule, RouterLink, Toast, DividerModule, FormsModule, CommonModule, IconField, InputIcon, InputText, Message, Password, Button],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
   providers: [MessageService]
@@ -45,29 +44,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
    * @type {boolean} 
    */
   isPasswordLinkSended: boolean = false;
-  /**|
-   * Stores the Reset Form control.
-   * @type {FormGroup<IResetForm>}
-   */
-  resetForm: FormGroup<IResetForm> = new FormGroup({
-    userEmail: new FormControl<string>('', {
-      validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
-      asyncValidators: CustomValidators.checkEmailAvailability(this.authService,
-        { setCheckingState: (checkState: string) => this.emailState.status = checkState },
-        {
-          setEmailRegisterState: (isEmailRegistered: boolean) => {
-            console.log({ isEmailRegistered });
-            this.emailState.isEmailRegistered = isEmailRegistered;
-          }
-        },
-        false)
-    }),
-    password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
-    repeatPassword: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
-  }, { validators: [CustomValidators.matchPasswordValidator()] });
-  /**
-   * 
-   */
+
   isVerifyingPage: boolean = false;
 
   timer = 10;
@@ -79,6 +56,21 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   private timerSubscription: Subscription = new Subscription();
 
   private observableSubscription = new Subscription();
+  /**
+   * Stores the Reset Form control.
+   * @type {FormGroup<IResetForm>}
+   */
+  resetForm: FormGroup<IResetForm> = new FormGroup({
+    userEmail: new FormControl<string>('', {
+      validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
+      asyncValidators: CustomValidators.checkEmailAvailability(this.authService,
+        { setCheckingState: (checkState: string) => this.emailState.status = checkState },
+        { setEmailRegisterState: (isEmailRegistered: boolean) => { this.emailState.isEmailRegistered = isEmailRegistered; } },
+        false)
+    }),
+    password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
+    repeatPassword: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
+  }, { validators: [CustomValidators.matchPasswordValidator()] });
 
   constructor(private activeRoute: ActivatedRoute, private authService: AuthService, @Inject(PLATFORM_ID) private platformId: object, private router: Router, private toastMessageService: MessageService) { }
 
