@@ -1,7 +1,6 @@
 import { Component, inject, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EMAIL_PATTERN, PASSWORD_PATTERN, SIGNIN_API_RESPONSE_CODE } from '../../constants/auth.constant';
-import { CardModule } from 'primeng/card';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
@@ -14,13 +13,13 @@ import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.mod
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ILoginSuccessResponse } from '../../models/auth.model';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HeaderService } from '@core/services/header.service';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [ReactiveFormsModule, Toast, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
+  imports: [ReactiveFormsModule, Toast, IconField, InputIcon, InputText, Message, Password, Button, RouterLink],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss',
   providers: [MessageService]
@@ -56,7 +55,8 @@ export class SignInComponent implements OnDestroy {
           if (loginResponse && loginResponse.login) {
             this.headerService.removeHeader('Registration');
             this.coreAuthService.user.next(loginResponse.login.user);
-            this.router.navigate(['/app/dashboard']);
+            this.toastService.add({ severity: 'info', detail: 'Email not found. Please check your email or create a new account.', life: 4000, summary: 'Sign In Failed' });
+            // this.router.navigate(['/app/dashboard']);
           }
         },
         error: (error: ICommonErrorResponse) => {

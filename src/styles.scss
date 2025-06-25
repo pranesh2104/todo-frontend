@@ -1,9 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
-@import "https://fonts.googleapis.com/css?family=Montserrat";
+@import "https://fonts.googleapis.com/css?family=Inter";
 @import "primeicons/primeicons.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+
+  a {
+    @apply text-blue-500 font-semibold hover:text-blue-600
+  }
+}
+
+@layer utilities {
+  .er-m {
+    color: #f44336;
+  }
+}
 
 html,
 body {
@@ -12,7 +28,6 @@ body {
 
 body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
 }
 
 .flex-column {

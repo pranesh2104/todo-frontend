@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { AUTH_STATUS, EMAIL_PATTERN, PASSWORD_PATTERN } from '../../constants/auth.constant';
 import { AuthService } from '../../services/auth.service';
@@ -17,10 +17,11 @@ import { Message } from 'primeng/message';
 import { Password } from 'primeng/password';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, Toast, CommonModule, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
+  imports: [ReactiveFormsModule, RouterLink, Toast, DividerModule, FormsModule, CommonModule, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
   providers: [MessageService]
