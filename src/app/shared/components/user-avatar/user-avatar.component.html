@@ -1,0 +1,4 @@
+<div style="display: flex;" [ngStyle]="{'background-color': userBGColor()}"
+  class="w-12 h-12 text-lg rounded-full flex items-center justify-center text-white font-semibold">
+  {{ user()?.name?.charAt(0)?.toUpperCase() || '?' }}
+</div>
