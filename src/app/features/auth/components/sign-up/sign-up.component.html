@@ -34,11 +34,11 @@
           @if (state.email.status === AUTH_STATUS.EMAIL.CHECKING) {
           <p-inputicon styleClass="pi pi-spinner pi-spin" />
           }
-          @else if (state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === true &&
+          @else if (state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === false &&
           signupForm.get('email')?.value) {
           <p-inputicon styleClass="pi pi-check" style="color: limegreen;" />
           }
-          @else if(state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === false &&
+          @else if(state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === true &&
           signupForm.get('email')?.value) {
           <p-inputicon styleClass="pi pi-times" style="color: lightcoral;" />
           }
@@ -72,7 +72,7 @@
         <p-button label="Change Email" (click)="onChangeEmail()" />
         }
         <p-button [label]="state.otp.status === AUTH_STATUS.OTP.SENDING ? 'Sending OTP...' : 'Send OTP'"
-          (click)="onSendOTP()" [raised]="true" icon="pi pi-send" iconPos="right" [disabled]="!signupForm.valid"
+          (click)="onSendOTP()" [raised]="true" icon="pi pi-send" iconPos="right"
           [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
       </div>
       }
