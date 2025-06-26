@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
-import { IUserReponse } from 'app/features/auth/models/auth.model';
+import { Component, computed, inject, input } from '@angular/core';
+import { UserService } from '@core/services/user.service';
 
 @Component({
   selector: 'app-user-avatar',
@@ -10,7 +10,16 @@ import { IUserReponse } from 'app/features/auth/models/auth.model';
 })
 export class UserAvatarComponent {
 
-  user = input<IUserReponse>();
+  size = input.required<'small' | 'medium' | 'large'>();
+
+  classBinding = computed(() => {
+    const s = this.size();
+    if (s === 'small') return 'w-8 h-8';
+    if (s === 'medium') return 'w-12 h-12';
+    return 'w-16 h-16';
+  });
+
+  user = inject(UserService).currentUser;
 
   private colors: string[] = ['#3B82F6', '#22C55E', '#EAB308', '#EF4444', '#A855F7', '#EC4899'];
 

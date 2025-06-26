@@ -1,8 +1,8 @@
-import { inject, Injectable, TransferState } from '@angular/core';
+import { inject, Injectable, signal, TransferState } from '@angular/core';
 import { USER_KEY } from '@core/constants/state.constant';
 import { UPDATE_SESSION_TOKEN, GET_ALL_USER, GET_CURRENT_USER } from '@core/graphql/user.query';
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
-import { IGetOneUserResponse } from 'app/features/auth/models/auth.model';
+import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
 import { Observable, of } from 'rxjs';
 
 @Injectable({
@@ -13,6 +13,8 @@ export class UserService {
 
   private transferState = inject(TransferState);
 
+  currentUser = signal<IUserReponse>({} as IUserReponse);
+
   constructor() { }
 
   getAllUsers() {
@@ -20,15 +22,7 @@ export class UserService {
   }
 
   getCurrentUser(): Observable<IGetOneUserResponse> {
-    if (this.transferState.hasKey(USER_KEY)) {
-      const userData = this.transferState.get<IGetOneUserResponse | null>(USER_KEY, null);
-      if (userData === null)
-        return this.graphqlClientService.executeQuery<IGetOneUserResponse>(GET_CURRENT_USER, {});
-      return of(userData);
-    }
-    else {
-      return this.graphqlClientService.executeQuery<IGetOneUserResponse>(GET_CURRENT_USER, {});
-    }
+    return this.graphqlClientService.executeQuery<IGetOneUserResponse>(GET_CURRENT_USER, {});
   }
 
   getAccessToken(): Observable<{ success: boolean }> {

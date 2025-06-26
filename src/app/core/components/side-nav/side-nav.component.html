@@ -1,10 +1,7 @@
 <div class="flex min-h-screen bg-gray-50">
   <div class="w-64 bg-white border-r border-gray-200 p-4">
     <div class="flex items-center gap-2 mb-3">
-      <div style="display: flex;" [ngStyle]="{'background-color': userBGColor()}"
-        class="w-12 h-12 text-lg rounded-full flex items-center justify-center text-white font-semibold">
-        {{ userData()?.name?.charAt(0)?.toUpperCase() || '?' }}
-      </div>
+      <app-user-avatar size="medium" />
       <!-- <img src="" alt="Profile Image"> -->
       <div class="w-4/5 flex items-center justify-between">
         <div class="flex flex-col">

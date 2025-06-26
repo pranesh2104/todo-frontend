@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PRIORITIES } from '@core/constants/common.constant';
 import { FilterValues, IFilter, SIDE_NAV_ITEMS } from '@core/constants/side-nav.constant';
+import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { IUserReponse } from 'app/features/auth/models/auth.model';
 import { IAllTaskResponse, ICreateTagResponse, ITagForm, ITaskTagInput } from 'app/features/dashboard/models/task.model';
@@ -15,7 +16,7 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-side-nav',
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, ColorPickerModule, InputTextModule],
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule, ColorPickerModule, InputTextModule, UserAvatarComponent],
   templateUrl: './side-nav.component.html',
   styleUrl: './side-nav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

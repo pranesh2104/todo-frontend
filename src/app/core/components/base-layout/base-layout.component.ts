@@ -38,28 +38,19 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    if (this.userData && this.userData.value) {
-      this.user = this.userData.value;
-    }
-    else {
-      if (isPlatformBrowser(this.platformId)) {
-        this.subscription = this.userService.getCurrentUser().subscribe({
-          next: (res: IGetOneUserResponse) => {
-            if (isPlatformServer(this.platformId)) {
-              this.transferState.set(USER_KEY, res);
-            }
-            this.user = res.getOneUser;
-            this.cdr.markForCheck();
-          },
-          error: (error: ICommonErrorResponse) => {
-            const parsedError: ICommonResponse = JSON.parse(error.message);
-            if (parsedError.code === 'USER_NOT_FOUND') {
-              this.router.navigate(['/signin']);
-            }
-          }
-        });
+    this.subscription = this.userService.getCurrentUser().subscribe({
+      next: (res: IGetOneUserResponse) => {
+        this.user = res.getOneUser;
+        this.userService.currentUser.set(this.user);
+        this.cdr.markForCheck();
+      },
+      error: (error: ICommonErrorResponse) => {
+        const parsedError: ICommonResponse = JSON.parse(error.message);
+        if (parsedError.code === 'USER_NOT_FOUND') {
+          this.router.navigate(['/signin']);
+        }
       }
-    }
+    });
   }
 
   ngOnDestroy(): void {
