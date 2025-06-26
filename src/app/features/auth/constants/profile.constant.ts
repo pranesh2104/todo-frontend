@@ -1,0 +1,20 @@
+export const PROFILE_STATUS = {
+  LINK: {
+    INITIAL: 'INITIAL',
+    SENDING: 'SENDING',
+    SENT: 'SENT'
+  },
+  EMAIL: {
+    INITIAL: 'INITIAL',
+    CHANGE: 'CHANGE',
+    VERIFY: 'VERIFY',
+    VERIFIED: 'VERIFIED',
+    CHECKING: 'CHECKING',
+    VALID: 'VALID',
+    INVALID: 'INVALID',
+    CHECKED: 'CHECKED',
+    FAILED: 'FAILED',
+    SENDING: 'SENDING',
+    SENT: 'SENT'
+  }
+}

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GraphqlClientService } from '../../../shared/services/graphql-client.service';
-import { CHECK_EMAIL, CREATE_USER, LOGIN, SEND_EMAIL_OTP, SEND_RESET_PASSWORD_LINK, UPDATE_PASSWORD, VERIFY_OTP } from '../graphql/auth.query';
+import { CHECK_EMAIL, CREATE_USER, LOGIN, SEND_EMAIL_OTP, SEND_RESET_EMAIL_LINK, SEND_RESET_PASSWORD_LINK, UPDATE_PASSWORD, VERIFY_OTP } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
 import { CreateUserArguments, ICreateUserDetails, IEmailCheckResponse, ILoginSuccessResponse, SendEmailOTPArguments, IUpdatePasswordArguments, IVerifyOTPArguments } from '../models/auth.model';
 
@@ -33,6 +33,10 @@ export class AuthService {
 
   updatePassword<T>(passwordDetails: IUpdatePasswordArguments) {
     return this.graphqlClientService.executeMutation<T, IUpdatePasswordArguments>(UPDATE_PASSWORD, passwordDetails);
+  }
+
+  sendChangeEmailLink<T>(email: string) {
+    return this.graphqlClientService.executeMutation<T, { email: string }>(SEND_RESET_EMAIL_LINK, { email });
   }
 
   login(): Observable<ILoginSuccessResponse> {

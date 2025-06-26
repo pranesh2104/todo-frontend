@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { PRIORITIES } from '@core/constants/common.constant';
 import { FilterValues, IFilter, SIDE_NAV_ITEMS } from '@core/constants/side-nav.constant';
 import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
@@ -16,7 +17,7 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-side-nav',
-  imports: [CommonModule, ReactiveFormsModule, ButtonModule, ColorPickerModule, InputTextModule, UserAvatarComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ButtonModule, ColorPickerModule, InputTextModule, UserAvatarComponent],
   templateUrl: './side-nav.component.html',
   styleUrl: './side-nav.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

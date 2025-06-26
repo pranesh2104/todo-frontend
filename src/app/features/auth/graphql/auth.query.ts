@@ -67,3 +67,12 @@ mutation Login {
     }
   }
 }`;
+
+export const SEND_RESET_EMAIL_LINK = `
+mutation SendChangeEmailLink($email: String) {
+  sendChangeEmailLink(email: $email) {
+    code
+    success
+    message
+  }
+}`;
