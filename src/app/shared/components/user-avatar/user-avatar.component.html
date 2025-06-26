@@ -1,4 +1,6 @@
+@if (user() && user().name) {
 <div style="display: flex;" [ngStyle]="{'background-color': userBGColor()}"
   class="text-lg rounded-full flex items-center justify-center text-white font-semibold " [ngClass]="classBinding()">
-  {{ user()?.name?.charAt(0)?.toUpperCase() || '?' }}
+  {{ user().name.charAt(0).toUpperCase() || '?' }}
 </div>
+}

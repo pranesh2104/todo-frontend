@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
 import { CardModule } from 'primeng/card';
@@ -12,7 +12,6 @@ import { Message } from 'primeng/message';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  encapsulation: ViewEncapsulation.ShadowDom
 })
 export class ProfileComponent {
 
