@@ -76,3 +76,21 @@ mutation SendChangeEmailLink($email: String) {
     message
   }
 }`;
+
+export const CHANGE_PASSWORD = `
+mutation ChangePassword($password: String) {
+  changePassword(password: $password) {
+    code
+    message
+    success
+  }
+}`;
+
+export const UPDATE_EMAIL = `
+mutation UpdateEmail($token: String) {
+  updateEmail(token: $token) {
+    code
+    message
+    success
+  }
+}`;

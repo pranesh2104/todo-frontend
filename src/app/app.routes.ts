@@ -14,4 +14,5 @@ export const routes: Routes = [
   { path: 'signup', title: 'Sign Up', loadComponent: () => import('../app/features/auth/components/sign-up/sign-up.component').then((c) => c.SignUpComponent), data: { title: 'SignUp' } },
   { path: 'signin', title: 'Sign In', loadComponent: () => import('../app/features/auth/components/sign-in/sign-in.component').then((c) => c.SignInComponent), data: { title: 'Login' } },
   { path: 'resetPassword', title: 'Reset Password', loadComponent: () => import('../app/features/auth/components/reset-password/reset-password.component').then((c) => c.ResetPasswordComponent), data: { title: 'Reset Password' } },
+  { path: 'reset', title: 'Reset', loadComponent: () => import('@shared/components/common-reset/common-reset.component').then((c) => c.CommonResetComponent), data: { title: 'Reset' } },
 ];

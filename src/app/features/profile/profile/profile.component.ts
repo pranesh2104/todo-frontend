@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, effect, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CryptoService } from '@core/services/crypto.service';
+import { HeaderService } from '@core/services/header.service';
 import { UserService } from '@core/services/user.service';
+import { ICommonAPIResponse, ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
 import { EMAIL_PATTERN } from 'app/features/auth/constants/auth.constant';
 import { PROFILE_STATUS } from 'app/features/auth/constants/profile.constant';
 import { CustomValidators } from 'app/features/auth/custom-validators/email-password.validator';
@@ -43,16 +46,23 @@ export class ProfileComponent implements OnInit {
       isVerify: false,
       isRegistered: false,
       isChangeEnabled: false
+    },
+    password: {
+      status: PROFILE_STATUS.PASSWORD.INITIAL
     }
   }
 
-  userForm !: any;
+  userForm !: FormGroup;
 
   private authService = inject(AuthService);
+
+  private headerService = inject(HeaderService);
 
   private cdr = inject(ChangeDetectorRef);
 
   private observableSubscription = new Subscription();
+
+  private cryptoService = inject(CryptoService);
 
   constructor(private formBuilder: FormBuilder) {
     effect(() => {
@@ -80,10 +90,7 @@ export class ProfileComponent implements OnInit {
           true
         )
       }),
-      currentPassword: new FormControl<string>(''),
-      newPassword: new FormControl<string>({ value: '', disabled: true }),
-      repeatPassword: new FormControl<string>({ value: '', disabled: true }),
-      otp: new FormControl()
+      currentPassword: new FormControl<string>('')
     });
   }
 
@@ -114,6 +121,35 @@ export class ProfileComponent implements OnInit {
     else {
       if (emailFormControl && !emailFormControl.value)
         emailFormControl.markAsDirty();
+    }
+  }
+
+  onChangePassword() {
+    if (this.profileStatus.password.status === PROFILE_STATUS.PASSWORD.SENDING) return;
+    const passwordControl = this.userForm.get('currentPassword');
+    if (passwordControl && passwordControl.value) {
+      this.profileStatus.password.status = PROFILE_STATUS.PASSWORD.SENDING;
+      const encryptedPassword = this.cryptoService.encryptToken(passwordControl.value);
+      this.observableSubscription.add(this.authService.changePassword<ICommonAPIResponse>(encryptedPassword).subscribe({
+        next: (res) => {
+          if (res && res['changePassword'] && res['changePassword'].code === 'RESET_LINK_SENDED') {
+            this.profileStatus.password.status = PROFILE_STATUS.PASSWORD.SENT;
+            passwordControl.reset();
+            this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Email Send Successfully', life: 3000 });
+          }
+        },
+        error: (error: ICommonErrorResponse) => {
+          this.profileStatus.password.status = PROFILE_STATUS.PASSWORD.FAILED;
+          const parsedError: ICommonResponse = JSON.parse(error.message);
+          if (parsedError) {
+            if (parsedError.code === 'PASSWORD_MISMATCH') {
+              this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Passwor Mismatch', life: 3000 });
+            }
+          }
+          // this.profileStatus.link.status = PROFILE_STATUS.LINK.ERROR;
+          // this.userForm.get('email')?.setErrors({ isOTPSendError: true });
+        }
+      }));
     }
   }
 }

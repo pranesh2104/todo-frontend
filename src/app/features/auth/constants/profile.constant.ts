@@ -16,5 +16,11 @@ export const PROFILE_STATUS = {
     FAILED: 'FAILED',
     SENDING: 'SENDING',
     SENT: 'SENT'
+  },
+  PASSWORD: {
+    INITIAL: 'INITIAL',
+    SENDING: 'SENDING',
+    SENT: 'SENT',
+    FAILED: 'FAILED',
   }
 }

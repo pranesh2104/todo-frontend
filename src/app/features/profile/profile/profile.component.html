@@ -76,7 +76,7 @@
               </div>
               }
               <!-- Send Link Button -->
-              @if (userForm.get('email').valid && !profileStatus.email.isRegistered && profileStatus.email.status ===
+              @if (userForm.get('email')?.valid && !profileStatus.email.isRegistered && profileStatus.email.status ===
               PROFILE_STATUS.EMAIL.CHECKED) {
               <div>
                 <p-button class="w-auto" (onClick)="onSendLink()"
@@ -89,33 +89,31 @@
           </div>
         </div>
       </div>
-      <h3 class="text-xl font-semibold mt-2">Change Password</h3>
+      <h3 class="text-xl font-semibold mt-1">Change Password</h3>
       <p-divider class="!m-2" />
       <div class="flex flex-col mt-3 mb-5">
         <div class="mb-5">
           <h4 class="mb-1">Current Password</h4>
           <div class="flex gap-3 w-full">
             <!-- Current Password -->
-            <p-iconfield>
-              <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
-              <p-password id="password" formControlName="currentPassword" toggleMask="true" class="w-full"
-                placeholder="Current Password" feedback="false" />
-            </p-iconfield>
-            <p-button>Verify</p-button>
-          </div>
-        </div>
-        <div class="flex gap-3 mb-4 w-full">
-          <div class="flex flex-col w-2/4">
-            <!-- New Password -->
-            <h4 class="mb-1">New Password</h4>
-            <p-password formControlName="newPassword" feedback="false" toggleMask="true" id="newPassword"
-              class="w-full" />
-          </div>
-          <div class="flex flex-col w-2/4">
-            <!-- Repeat Password -->
-            <h4 class="mb-1">Confirm New Password</h4>
-            <p-password formControlName="repeatPassword" feedback="false" toggleMask="true" id="newPassword"
-              class="w-full" />
+            <div>
+              <p-iconfield>
+                <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
+                <p-password id="password" formControlName="currentPassword" toggleMask="true" class="w-full"
+                  placeholder="Current Password" feedback="false" />
+              </p-iconfield>
+              <div class="form-error-container max-w-[450px]">
+                @if (profileStatus.password.status === PROFILE_STATUS.PASSWORD.SENT) {
+                <p-message severity="info" variant="simple" size="small" class="text-sm" hideTransitionOptions="0ms"
+                  showTransitionOptions="0ms">
+                  <div>
+                    <span>We will send instructions to this email address: <b>{{currentUser().email}}</b>.</span>
+                  </div>
+                </p-message>
+                }
+              </div>
+            </div>
+            <p-button label="Change Password" (onClick)="onChangePassword()"></p-button>
           </div>
         </div>
         <p-message severity="secondary" showTransitionOptions="0ms">
