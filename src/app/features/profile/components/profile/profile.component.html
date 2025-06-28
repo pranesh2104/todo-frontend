@@ -140,16 +140,11 @@
             </div>
           </div>
         </div>
-        @if (currentPasswordState().status !== PROFILE_STATUS.PASSWORD.VERIFIED) {
-        <p-button label="Change Password" (onClick)="onPasswordDialog()" class="mb-3"
-          [disabled]="!userForm.get('password')?.value || !userForm.get('repeatPassword')?.value || userForm.get('repeatPassword')?.invalid || userForm.get('password')?.invalid"></p-button>
-        }
-        @else if(currentPasswordState().status === PROFILE_STATUS.PASSWORD.VERIFIED){
         <div class="flex gap-4">
-          <p-button label="Change Password" (onClick)="onChangePassword()" class="mb-3 flex-1" />
+          <p-button label="Change Password" (onClick)="onChangePassword()" class="mb-3 flex-1"
+            [disabled]="!userForm.get('password')?.value || !userForm.get('repeatPassword')?.value || userForm.get('repeatPassword')?.invalid || userForm.get('password')?.invalid" />
         </div>
-        }
-        <p-message severity="secondary" showTransitionOptions="0ms">
+        <p-message severity=" secondary" showTransitionOptions="0ms">
           <div class="flex flex-col">
             <p class="text-base font-semibold">Password Requirements</p>
             <ul class="list-disc m-6 pl-2 my-0 leading-normal">
@@ -178,14 +173,8 @@
           </div>
         </p-message>
         <div class="flex items-center w-full justify-end">
-          @if (currentPasswordState().status !== PROFILE_STATUS.PASSWORD.VERIFIED) {
-          <p-button label="Delete Account" icon="pi pi-trash" severity="danger" variant="outlined"
-            (onClick)="OnAccountDialog()" />
-          }
-          @else if(currentPasswordState().status === PROFILE_STATUS.PASSWORD.VERIFIED){
           <p-button label="Delete Account" icon="pi pi-trash" severity="danger" variant="outlined"
             (onClick)="OnDeleteAccount()" />
-          }
         </div>
       </div>
     </div>
@@ -197,7 +186,7 @@
 
 
 <p-dialog [header]="dialogHeader()" [modal]="true" [visible]="showCurrentPasswordDialog()"
-  (onHide)="showCurrentPasswordDialog.set(false);currentPasswordState().status = PROFILE_STATUS.PASSWORD.INITIAL;">
+  (onHide)="showCurrentPasswordDialog.set(false);">
   <span class="p-text-secondary block mb-8">{{dialogContent()}}</span>
   <div class="flex items-start gap-2 flex-col">
     <label for="currentPassword" class="font-semibold">Current Password</label>
@@ -231,7 +220,7 @@
   </div>
   <div class="flex justify-end gap-2">
     <p-button label="Cancel" severity="secondary"
-      (click)="showCurrentPasswordDialog.set(false);currentPassword = '';currentPasswordState().status = PROFILE_STATUS.PASSWORD.INITIAL;" />
+      (click)="showCurrentPasswordDialog.set(false);currentPassword = '';" />
     <p-button [loading]="currentPasswordState().status === PROFILE_STATUS.PASSWORD.SENDING"
       [label]="currentPasswordState().status === PROFILE_STATUS.PASSWORD.SENDING ? 'Verifying' : 'Verify' "
       (onClick)="onVerifyPassword()" [disabled]="!currentPasswordState().isValid" />

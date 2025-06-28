@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
@@ -42,7 +42,8 @@ interface EMAIL_DYNAMIC_DATA {
   selector: 'app-common-reset',
   imports: [CommonModule, CardModule, ButtonModule],
   templateUrl: './common-reset.component.html',
-  styleUrl: './common-reset.component.scss'
+  styleUrl: './common-reset.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CommonResetComponent implements OnInit {
 
@@ -55,7 +56,7 @@ export class CommonResetComponent implements OnInit {
 
   timer = 5;
 
-  resetPageName: 'Email' | 'Password' | '' = '';
+  resetPageName = signal<'Email' | 'Password'>('Email');
 
   private activeRoute = inject(ActivatedRoute);
 
@@ -74,11 +75,11 @@ export class CommonResetComponent implements OnInit {
     this.subscriptions.add(this.activeRoute.queryParams.subscribe({
       next: (params: Params) => {
         if (params['email_token']) {
-          this.resetPageName = 'Email';
+          this.resetPageName.set('Email');
           this.updateEmail(params['email_token']);
         }
         else if (params['pass_token']) {
-          this.resetPageName = 'Password';
+          this.resetPageName.set('Password');
           this.checkPasswordToken();
         }
       }
@@ -104,6 +105,7 @@ export class CommonResetComponent implements OnInit {
         if (res && res['updateEmail']) {
           this.resetState.email.code = res['updateEmail'].code as UPDATE_EMAIL_CODES;
           this.selectedCodeData.set(this.getMessage(this.resetState.email.code as string));
+
           const interval = setInterval(() => {
             this.timer--;
             if (this.timer <= 0) {

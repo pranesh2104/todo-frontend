@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GraphqlClientService } from '../../../shared/services/graphql-client.service';
-import { CHANGE_PASSWORD, CHECK_EMAIL, CREATE_USER, DELETE_ACCOUNT, LOGIN, REQUEST_EMAIL_VERIFICATION, REQUEST_PASSWORD_RESET, SEND_EMAIL_OTP, SEND_RESET_PASSWORD_LINK, SIGNED_OUT, UPDATE_EMAIL, UPDATE_NAME, UPDATE_PASSWORD, VERIFY_OTP, VERIFY_PASSWORD } from '../graphql/auth.query';
+import { CHANGE_PASSWORD, CHECK_EMAIL, CREATE_USER, DELETE_ACCOUNT, LOGIN, REQUEST_EMAIL_VERIFICATION, SEND_EMAIL_OTP, SEND_RESET_PASSWORD_LINK, SIGNED_OUT, UPDATE_EMAIL, UPDATE_NAME, UPDATE_PASSWORD, VERIFY_OTP, VERIFY_PASSWORD } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
 import { CreateUserArguments, ICreateUserDetails, IEmailCheckResponse, ILoginSuccessResponse, SendEmailOTPArguments, IUpdatePasswordArguments, IVerifyOTPArguments } from '../models/auth.model';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
@@ -34,10 +34,6 @@ export class AuthService {
 
   updatePassword<T>(passwordDetails: IUpdatePasswordArguments) {
     return this.graphqlClientService.executeMutation<T, IUpdatePasswordArguments>(UPDATE_PASSWORD, passwordDetails);
-  }
-
-  requestPasswordReset<T>(password: string) {
-    return this.graphqlClientService.executeMutation<T, { password: string }>(REQUEST_PASSWORD_RESET, { password });
   }
 
   updateEmail<ICommonAPIResponse>(token: string) {

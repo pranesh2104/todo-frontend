@@ -77,15 +77,6 @@ mutation InitiateEmailVerification($email: String) {
   }
 }`;
 
-export const REQUEST_PASSWORD_RESET = `
-mutation RequestPasswordReset($password: String) {
-  requestPasswordReset(password: $password) {
-    code
-    message
-    success
-  }
-}`;
-
 // export const UPDATE_EMAIL = `
 // mutation UpdateEmail($token: String) {
 //   updateEmail(token: $token) {
@@ -114,8 +105,8 @@ mutation VerifyPassword($password: String!) {
 }`;
 
 export const UPDATE_EMAIL = `
-mutation UpdateEmail($email: String!) {
-  updateEmail(email: $email) {
+mutation UpdateEmail($token: String!) {
+  updateEmail(token: $token) {
     code
     message
     success
