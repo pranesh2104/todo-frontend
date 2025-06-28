@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { GraphqlClientService } from '../../../shared/services/graphql-client.service';
-import { CHANGE_PASSWORD, CHECK_EMAIL, CREATE_USER, LOGIN, SEND_EMAIL_OTP, SEND_RESET_EMAIL_LINK, SEND_RESET_PASSWORD_LINK, UPDATE_EMAIL, UPDATE_PASSWORD, VERIFY_OTP } from '../graphql/auth.query';
+import { CHANGE_PASSWORD, CHECK_EMAIL, CREATE_USER, DELETE_ACCOUNT, LOGIN, REQUEST_EMAIL_VERIFICATION, REQUEST_PASSWORD_RESET, SEND_EMAIL_OTP, SEND_RESET_PASSWORD_LINK, SIGNED_OUT, UPDATE_EMAIL, UPDATE_NAME, UPDATE_PASSWORD, VERIFY_OTP, VERIFY_PASSWORD } from '../graphql/auth.query';
 import { Observable } from 'rxjs';
 import { CreateUserArguments, ICreateUserDetails, IEmailCheckResponse, ILoginSuccessResponse, SendEmailOTPArguments, IUpdatePasswordArguments, IVerifyOTPArguments } from '../models/auth.model';
+import { ICommonAPIResponse } from '@shared/models/shared.model';
 
 @Injectable({
   providedIn: 'root'
@@ -35,16 +36,40 @@ export class AuthService {
     return this.graphqlClientService.executeMutation<T, IUpdatePasswordArguments>(UPDATE_PASSWORD, passwordDetails);
   }
 
-  sendChangeEmailLink<T>(email: string) {
-    return this.graphqlClientService.executeMutation<T, { email: string }>(SEND_RESET_EMAIL_LINK, { email });
+  requestPasswordReset<T>(password: string) {
+    return this.graphqlClientService.executeMutation<T, { password: string }>(REQUEST_PASSWORD_RESET, { password });
+  }
+
+  updateEmail<ICommonAPIResponse>(token: string) {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, { token: string }>(UPDATE_EMAIL, { token });
+  }
+
+  verifyPasswordToken(token: string) {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, { token: string }>(UPDATE_EMAIL, { token });
   }
 
   changePassword<T>(password: string) {
     return this.graphqlClientService.executeMutation<T, { password: string }>(CHANGE_PASSWORD, { password });
   }
 
-  updateEmail<T>(token: string) {
-    return this.graphqlClientService.executeMutation<T, { token: string }>(UPDATE_EMAIL, { token });
+  verifyPassword(password: string) {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, { password: string }>(VERIFY_PASSWORD, { password });
+  }
+
+  requestEmailVerification(email: string) {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, { email: string }>(REQUEST_EMAIL_VERIFICATION, { email });
+  }
+
+  updateName(name: string) {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, { name: string }>(UPDATE_NAME, { name });
+  }
+
+  signOut() {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, {}>(SIGNED_OUT, {});
+  }
+
+  deleteAccount() {
+    return this.graphqlClientService.executeMutation<ICommonAPIResponse, {}>(DELETE_ACCOUNT, {});
   }
 
   login(): Observable<ILoginSuccessResponse> {

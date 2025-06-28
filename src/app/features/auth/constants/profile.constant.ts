@@ -22,5 +22,8 @@ export const PROFILE_STATUS = {
     SENDING: 'SENDING',
     SENT: 'SENT',
     FAILED: 'FAILED',
+    CHANGED: 'CHANGED',
+    VERIFIED: 'VERIFIED',
+    MISMATCHED: 'MISMATCHED'
   }
 }

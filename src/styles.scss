@@ -30,6 +30,15 @@ body {
   margin: 0;
 }
 
+
+.thin-stroke {
+  font-variation-settings:
+    'GRAD' -25,
+    /* Stroke thinness (-200 to 200) */
+    'wght' 400;
+  /* Optional: adjust overall weight */
+}
+
 .flex-column {
   display: flex;
   flex-direction: column;

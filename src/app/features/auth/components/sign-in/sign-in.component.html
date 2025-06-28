@@ -46,9 +46,10 @@
       }
     </div>
     <div class="flex justify-end items-center w-full">
-      <a class="text-sm"
-        [routerLink]="this.signInForm.get('email')?.valid && this.signInForm.get('email')?.value ? '/resetPassword?email=' + this.signInForm.get('email')?.value : '/resetPassword'">
-        Forgot Password? </a>
+      <a [routerLink]="['/resetPassword']" class="text-sm"
+        [queryParams]="signInForm.get('email')?.valid && signInForm.get('email')?.value ? { email: signInForm.get('email')?.value } : null">
+        Forgot Password?
+      </a>
     </div>
     <div class="flex items-center justify-center">
       <p-button label="Sign In" [raised]="true" (click)="onLogin()" type="submit"></p-button>

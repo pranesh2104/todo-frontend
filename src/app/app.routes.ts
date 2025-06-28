@@ -8,7 +8,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: 'dashboard', title: 'Dashboard', loadComponent: () => import('../app/features/dashboard/components/main-dashboard/main-dashboard.component').then((c) => c.MainDashboardComponent) },
-      { path: 'profile', title: 'Profile', loadComponent: () => import('../app/features/profile/profile/profile.component').then((c) => c.ProfileComponent) }
+      { path: 'profile', title: 'Profile', loadComponent: () => import('./features/profile/components/profile/profile.component').then((c) => c.ProfileComponent) }
     ]
   },
   { path: 'signup', title: 'Sign Up', loadComponent: () => import('../app/features/auth/components/sign-up/sign-up.component').then((c) => c.SignUpComponent), data: { title: 'SignUp' } },

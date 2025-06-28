@@ -28,7 +28,7 @@ import { FormModifyService } from '../../services/form-modify.service';
 import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
 import { isDateAfter, isSameDate } from '../../utils/date.util';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 
 @Component({
@@ -73,6 +73,8 @@ export class MainDashboardComponent implements OnInit {
 
   private router = inject(Router);
 
+  private activedRoute = inject(ActivatedRoute);
+
   constructor() { }
 
   ngOnInit(): void {
@@ -92,25 +94,22 @@ export class MainDashboardComponent implements OnInit {
         }
       }
     }));
-
-    this.subscribeArr.add(this.taskService.filter$.pipe(distinctUntilChanged()).subscribe({
-      next: (res: IFilter) => {
-        if (!this.tasks?.length) return;
-        switch (res.filterBy) {
-          case 'tag':
-            this.handleTagFilter(res);
-            break;
-          case 'property':
-            this.handlePropertyFilter(res);
-            break;
-          case 'priority':
-            this.handlePriorityFilter(res);
-            break;
-        }
-        this.cdr.detectChanges();
-      }
-    }));
     this.handleSearch();
+    this.subscribeArr.add(this.activedRoute.queryParams.subscribe({
+      next: (res) => {
+        if (res['property']) {
+          const value = res['property'];
+          this.handlePropertyFilter({ filterBy: 'property', property: value });
+        }
+        else if (res['tag']) {
+          const value = res['tag'];
+          this.handleTagFilter({ filterBy: 'tag', tagId: value });
+        }
+        else if (res['priority']) {
+          this.handlePriorityFilter({ filterBy: 'priority', priority: res['priority'] });
+        }
+      }
+    }))
   }
 
   private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {

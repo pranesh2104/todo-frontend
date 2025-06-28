@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
+import { PASSWORD_PATTERN } from 'app/features/auth/constants/auth.constant';
+import { CustomValidators } from 'app/features/auth/custom-validators/email-password.validator';
 import { AuthService } from 'app/features/auth/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -59,21 +61,13 @@ export class CommonResetComponent implements OnInit {
 
   private subscription = new Subscription();
 
-  commonForm!: FormGroup;
+  passwordForm!: FormGroup;
 
   private formBuilder = inject(FormBuilder);
 
   private authServie = inject(AuthService);
 
-  selectedCodeData = signal<EMAIL_DYNAMIC_DATA>({
-    icon: 'fa-regular fa-circle-exclamation',
-    title: 'Password Changed!',
-    message: 'This link is invalid as your password was changed. Please sign in to update your email',
-    color: 'text-yellow-600',
-    bgColor: 'bg-white',
-    borderColor: 'border-yellow-200',
-    iconColor: 'text-green-500'
-  });
+  selectedCodeData = signal<EMAIL_DYNAMIC_DATA>({} as EMAIL_DYNAMIC_DATA);
 
 
   ngOnInit(): void {
@@ -85,15 +79,22 @@ export class CommonResetComponent implements OnInit {
         }
         else if (params['pass_token']) {
           this.resetPageName = 'Password';
-          this.initializeForm();
+          this.checkPasswordToken();
         }
       }
     }));
 
   }
 
-  initializeForm() {
+  checkPasswordToken() {
 
+  }
+
+  initializeForm() {
+    this.passwordForm = this.formBuilder.group({
+      password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
+      repeatPassword: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
+    }, { validators: CustomValidators.matchPasswordValidator() });
   }
 
   updateEmail(token: string) {
@@ -122,17 +123,17 @@ export class CommonResetComponent implements OnInit {
     switch (code) {
       case UPDATE_EMAIL_CODES.EMAIL_UPDATED:
         return {
-          icon: 'fa-regular fa-circle-check',
+          icon: 'check_circle',
           title: 'Email Updated Successfully!',
           message: 'Your email address has been successfully updated. You can now use your new email to sign in.',
           color: 'text-green-600',
           bgColor: 'bg-blue-50',
-          borderColor: 'border-blue-200',
+          borderColor: 'border-green-200',
           iconColor: 'text-green-500'
         };
       case UPDATE_EMAIL_CODES.PASSWORD_CHANGED:
         return {
-          icon: 'fa-regular fa-circle-exclamation',
+          icon: 'error',
           title: 'Password Changed!',
           message: 'This link is invalid as your password was changed. Please sign in to update your email',
           color: 'text-yellow-600',
@@ -142,7 +143,7 @@ export class CommonResetComponent implements OnInit {
         };
       case UPDATE_EMAIL_CODES.INVALID_TOKEN:
         return {
-          icon: 'fa-regular fa-circle-xmark',
+          icon: 'cancel',
           title: 'Invalid Verification Link',
           message: 'The verification link is invalid or malformed. Please request a new verification email.',
           color: 'text-red-600',
@@ -152,17 +153,17 @@ export class CommonResetComponent implements OnInit {
         };
       case UPDATE_EMAIL_CODES.MISMATCH_TOKEN:
         return {
-          icon: 'fa-regular fa-circle-exclamation',
+          icon: 'error',
           title: 'Token Mismatch',
           message: 'The verification token doesn\'t match our records. Please ensure you\'re using the correct link from your email.',
-          color: 'text-amber-600',
+          color: 'text-yellow-500',
           bgColor: 'bg-amber-50',
           borderColor: 'border-amber-200',
           iconColor: 'text-amber-500'
         };
       case UPDATE_EMAIL_CODES.TOKEN_EXPIRED:
         return {
-          icon: 'fa-regular fa-circle-exclamation',
+          icon: 'error',
           title: 'Verification Link Expired',
           message: 'This verification link has expired. Please request a new verification email to continue.',
           color: 'text-amber-600',
@@ -172,7 +173,7 @@ export class CommonResetComponent implements OnInit {
         };
       default:
         return {
-          icon: 'fa-regular fa-circle-xmark',
+          icon: 'cancel',
           title: 'Verification Failed',
           message: 'Something went wrong during verification. Please try again or contact support.',
           color: 'text-red-600',

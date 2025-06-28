@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PRIORITIES } from '@core/constants/common.constant';
-import { FilterValues, IFilter, SIDE_NAV_ITEMS } from '@core/constants/side-nav.constant';
+import { FilterValues, SIDE_NAV_ITEMS } from '@core/constants/side-nav.constant';
+import { UserService } from '@core/services/user.service';
 import { UserAvatarComponent } from '@shared/components/user-avatar/user-avatar.component';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
-import { IUserReponse } from 'app/features/auth/models/auth.model';
 import { IAllTaskResponse, ICreateTagResponse, ITagForm, ITaskTagInput } from 'app/features/dashboard/models/task.model';
 import { TaskService } from 'app/features/dashboard/services/task.service';
 import { MessageService } from 'primeng/api';
@@ -25,18 +25,11 @@ import { Subscription } from 'rxjs';
 })
 export class SideNavComponent implements OnInit, OnDestroy {
 
-  userData = input<IUserReponse>();
-
-  private colors: string[] = ['#3B82F6', '#22C55E', '#EAB308', '#EF4444', '#A855F7', '#EC4899'];
-
-  userBGColor = computed(() => {
-    if (this.userData() && this.userData()?.name) return this.getColorFromName();
-    return '#3B82F6';
-  });
-
   private subscribeArr = new Subscription();
 
-  private cdr = inject(ChangeDetectorRef);
+  private userService = inject(UserService);
+
+  currentUser = computed(() => this.userService.currentUser())
 
   tagForm: FormGroup<ITagForm> = new FormGroup({
     name: new FormControl<string>('', { nonNullable: true }),
@@ -55,37 +48,43 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   private readonly toastMessageService = inject(MessageService);
 
-  // private platformId = inject(PLATFORM_ID);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.subscribeArr.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
         this.tags.set([...res.getAllTags]);
         console.log('from side nav', this.tags());
-        // this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('all task error ', error);
       }
     }));
-    this.subscribeArr.add(this.taskService.filter$.subscribe({
-      next: (res: IFilter) => {
-        this.selectedFilterItem = res.filterBy === 'tag' ? res.tagId : res.filterBy === 'priority' ? res.priority : res.property;
-      }
-    }));
+    const queryParams = this.router.url.split('?')[1];
+    if (!queryParams) {
+      this.selectedFilterItem = 'all';
+    }
+    else {
+      const item = queryParams.split('=')[1];
+      this.selectedFilterItem = item;
+    }
   }
 
   onFilterSelect(item: { name: string; value: FilterValues; icon: string; }) {
-    this.taskService.setFilter({ filterBy: 'property', property: item.value });
+    this.router.navigate(['app/dashboard'], { queryParams: { property: item.value } });
+    this.selectedFilterItem = item.value;
   }
 
   onFilterTag(tagId: string | undefined) {
-    if (tagId)
-      this.taskService.setFilter({ filterBy: 'tag', tagId });
+    if (tagId) {
+      this.router.navigate(['app/dashboard'], { queryParams: { tag: tagId } });
+      this.selectedFilterItem = tagId;
+    }
   }
 
   onFilterPriority(priority: string) {
-    this.taskService.setFilter({ filterBy: 'priority', priority });
+    this.router.navigate(['app/dashboard'], { queryParams: { priority: priority } });
+    this.selectedFilterItem = priority;
   }
 
   onAddTag() {
@@ -119,17 +118,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
         this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Tag Deleted Failed', life: 2000 });
       }
     });
-  }
-
-  private getColorFromName(): string {
-    let hash = 0;
-    let color = '#3B82F6'
-    const userName = this.userData()?.name || '';
-    for (let i = 0; i < userName.length; i++) {
-      hash = userName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    color = this.colors[Math.abs(hash) % this.colors.length]!;
-    return color;
   }
 
   ngOnDestroy(): void {

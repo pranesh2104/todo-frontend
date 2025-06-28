@@ -33,7 +33,7 @@ export class CoreAuthService {
   }
 
   setAccessToken(token: string): void {
-    this.storageService.set('at', token);
+    this.storageService.setLocalStorage('at', token);
   }
 
   async getRefreshToken(): Promise<boolean> {

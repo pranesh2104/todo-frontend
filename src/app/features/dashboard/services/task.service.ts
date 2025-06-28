@@ -3,9 +3,7 @@ import { CREATE_TAG, CREATE_TASK, DELETE_TASK, GET_ALL_TASKS_TAGS, UPDATE_TASK_S
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
 import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTagInput, IDeleteTaskInput, IUpdateTaskInput, IUpdateTaskStatusInput } from '../models/task.model';
 import { TASK_KEY } from '../constants/task.state.consant';
-import { of, Observable, BehaviorSubject } from 'rxjs';
-import { IFilter } from '@core/constants/side-nav.constant';
-
+import { of, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -16,14 +14,7 @@ export class TaskService {
 
   private transferState = inject(TransferState);
 
-  private filterSubject = new BehaviorSubject<IFilter>({ filterBy: 'property', property: 'all' });
-  filter$ = this.filterSubject.asObservable();
-
   constructor() { }
-
-  setFilter(filter: IFilter) {
-    this.filterSubject.next(filter);
-  }
 
   getAllTasks(): Observable<IAllTaskResponse> {
     if (this.transferState.hasKey(TASK_KEY)) {

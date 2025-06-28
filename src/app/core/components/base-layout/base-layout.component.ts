@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, PLATFORM_ID, TransferState } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, PLATFORM_ID, signal, TransferState } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
@@ -23,7 +23,7 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
 
   private transferState = inject(TransferState);
 
-  user !: IUserReponse;
+  user = signal<IUserReponse>({} as IUserReponse)
 
   private userData = inject(CoreAuthService).user;
 
@@ -40,8 +40,8 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = this.userService.getCurrentUser().subscribe({
       next: (res: IGetOneUserResponse) => {
-        this.user = res.getOneUser;
-        this.userService.currentUser.set(this.user);
+        this.user.set(res.getOneUser);
+        this.userService.currentUser.set(res.getOneUser);
         this.cdr.markForCheck();
       },
       error: (error: ICommonErrorResponse) => {

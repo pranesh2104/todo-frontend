@@ -1,0 +1,239 @@
+<div class="p-8">
+  <div class="mb-5">
+    <h2 class="text-3xl font-bold mb-2">Profile Settings</h2>
+    <p class="text-gray-500">Manage your account settings and preferences</p>
+  </div>
+  <!-- <p-card> -->
+  @if (userForm) {
+  <div [formGroup]="userForm" class="flex flex-col gap-7">
+    <!-- Personal Info -->
+    <p-card>
+      <h3 class="text-xl font-semibold">Personal Information</h3>
+      <p-divider class="!m-2" />
+      <div class="flex flex-col">
+        <!-- Name -->
+        <div class="flex gap-3 items-center justify-center mt-3 w-full">
+          <div class="w-1/2">
+            <h4 class="mb-1">Name</h4>
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-user" />
+              <input pInputText id="first-name" formControlName="name" type="text" placeholder="Name"
+                autocomplete="name" />
+            </p-iconfield>
+            <div class="form-error-container"></div>
+          </div>
+          <!-- Email -->
+          <div class="w-1/2 flex flex-col items-start">
+            <h4 class="mb-1">Email</h4>
+            <div class="flex flex-wrap w-full gap-4 items-center">
+              <!-- Input Field with Icons -->
+              <div class="flex flex-col flex-1 min-w-[200px]">
+                <p-iconfield>
+                  <p-inputicon styleClass="pi pi-envelope" />
+                  <input type="text" id="email" pInputText formControlName="email" placeholder="Email"
+                    autocomplete="email" class="w-full" />
+                  @if (emailState().status === PROFILE_STATUS.EMAIL.CHECKING) {
+                  <p-inputicon styleClass="pi pi-spinner pi-spin" />
+                  }
+                  @else if (emailState().status === PROFILE_STATUS.EMAIL.CHECKED &&
+                  emailState().isRegistered === false && userForm.get('email')?.value) {
+                  <p-inputicon styleClass="pi pi-check" style="color: limegreen;" />
+                  }
+                  @else if(emailState().status === PROFILE_STATUS.EMAIL.CHECKED &&
+                  emailState().isRegistered === true && userForm.get('email')?.value) {
+                  <p-inputicon styleClass="pi pi-times" style="color: lightcoral;" />
+                  }
+                </p-iconfield>
+                <!-- Error Message -->
+                <div class="form-error-container" [ngClass]="linkState() === PROFILE_STATUS.LINK.SENT ? 'mt-2' : ''">
+                  @if (userForm.get('email')?.hasError('pattern') && userForm.get('email')?.dirty) {
+                  <p-message severity="error" variant="simple" size="small" class="text-sm" hideTransitionOptions="0ms"
+                    showTransitionOptions="0ms">
+                    Invalid Email!
+                  </p-message>
+                  }
+                  @else if (userForm.get('email')?.hasError('emailRegistered') && userForm.get('email')?.dirty) {
+                  <p-message severity="error" variant="simple" size="small" class="text-sm" hideTransitionOptions="0ms"
+                    showTransitionOptions="0ms">
+                    This email is already registered
+                  </p-message>
+                  }
+                  @else if(userForm.get('email')?.dirty && linkState() === PROFILE_STATUS.LINK.SENT &&
+                  !emailTimeLeft()){
+                  <p-message severity="info" variant="simple" size="small" class="text-sm flex items-start">
+                    <div>
+                      <span>A verification link has been sent to: <b> {{userForm.get('email')?.value}}.</b></span>
+                      <span>For security reasons, you may request another email change after 30 minutes.</span>
+                    </div>
+                  </p-message>
+                  }
+                  @else if(emailTimeLeft()){
+                  <p-message severity="info" variant="simple" size="small" class="text-sm flex items-start">
+                    <div>
+                      <span>You may request another email change after {{ emailTimeLeft() }}
+                        minutes.</span>
+                    </div>
+                  </p-message>
+                  }
+                </div>
+              </div>
+              <!-- Change Button -->
+              @if (emailState().status === PROFILE_STATUS.EMAIL.INITIAL || emailState().isRegistered ===
+              true || emailState().status === PROFILE_STATUS.EMAIL.CHECKING) {
+              <div>
+                <p-button class="w-auto" (onClick)="onEmailPassword()" label="Change"
+                  [disabled]="emailTimeLeft() > 0" />
+                <div class="form-error-container"></div>
+              </div>
+              }
+              <!-- Send Link Button -->
+              @if (userForm.get('email')?.valid && !emailState().isRegistered && emailState().status ===
+              PROFILE_STATUS.EMAIL.CHECKED) {
+              <div>
+                <p-button class="w-auto" (onClick)="onRequestEmailVerification()"
+                  [loading]="linkState() === PROFILE_STATUS.LINK.SENDING"
+                  [label]="linkState() === PROFILE_STATUS.LINK.SENDING ? 'Sending...' : 'Send Link'" />
+                <div class="form-error-container"></div>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+        <p-button label="Save Changes" (onClick)="onSaveChanges()"></p-button>
+      </div>
+    </p-card>
+    <!-- Paassword section -->
+    <p-card>
+      <h3 class="text-xl font-semibold">Change Password</h3>
+      <p-divider class="!m-2" />
+      <div class="flex flex-col mt-3 mb-5">
+        <div class="flex gap-3 w-full">
+          <div class="flex flex-col w-2/4">
+            <!-- New Password -->
+            <h4 class="mb-1">New Password</h4>
+            <p-iconfield>
+              <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
+              <p-password formControlName="password" feedback="false" toggleMask="true" id="password" class="w-full" />
+            </p-iconfield>
+            <div class="form-error-container">
+              @if (userForm.get('password')?.hasError('pattern')) {
+              <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
+              }
+            </div>
+          </div>
+          <div class="flex flex-col w-2/4">
+            <!-- Repeat Password -->
+            <h4 class="mb-1">Confirm New Password</h4>
+            <p-iconfield>
+              <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
+              <p-password formControlName="repeatPassword" feedback="false" toggleMask="true" id="repeatPassword"
+                class="w-full" />
+            </p-iconfield>
+            <div class="form-error-container">
+              @if (userForm.get('repeatPassword')?.hasError('pattern')) {
+              <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
+              }
+              @else if (userForm.get('repeatPassword')?.value && userForm.get('repeatPassword')?.hasError('notMatching')
+              && userForm.get('repeatPassword')?.touched) {
+              <p-message severity="error" variant="simple" size="small">Password do not match! </p-message>
+              }
+            </div>
+          </div>
+        </div>
+        @if (currentPasswordState().status !== PROFILE_STATUS.PASSWORD.VERIFIED) {
+        <p-button label="Change Password" (onClick)="onPasswordDialog()" class="mb-3"
+          [disabled]="!userForm.get('password')?.value || !userForm.get('repeatPassword')?.value || userForm.get('repeatPassword')?.invalid || userForm.get('password')?.invalid"></p-button>
+        }
+        @else if(currentPasswordState().status === PROFILE_STATUS.PASSWORD.VERIFIED){
+        <div class="flex gap-4">
+          <p-button label="Change Password" (onClick)="onChangePassword()" class="mb-3 flex-1" />
+        </div>
+        }
+        <p-message severity="secondary" showTransitionOptions="0ms">
+          <div class="flex flex-col">
+            <p class="text-base font-semibold">Password Requirements</p>
+            <ul class="list-disc m-6 pl-2 my-0 leading-normal">
+              <li>At least one lowercase</li>
+              <li>At least one uppercase</li>
+              <li>At least one numeric</li>
+              <li>Minimum 8 characters</li>
+            </ul>
+          </div>
+        </p-message>
+      </div>
+    </p-card>
+    <!-- Account section -->
+    <div class="bg-red-50 border border-red-500 rounded-xl p-4">
+      <h3 class="text-xl font-semibold text-red-500">Account Management</h3>
+      <p-divider class="!m-2" />
+      <div class="flex flex-col gap-3 bg-red-50">
+        <p-button icon="pi pi-sign-out" severity="secondary" label="Sign Out" variant="outlined"
+          (onClick)="onSignOut()" />
+        <p-message severity="warn">
+          <div class="flex gap-2">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span class="text-sm">
+              Deleting your account is permanent and cannot be undone. All your data will be lost.
+            </span>
+          </div>
+        </p-message>
+        <div class="flex items-center w-full justify-end">
+          @if (currentPasswordState().status !== PROFILE_STATUS.PASSWORD.VERIFIED) {
+          <p-button label="Delete Account" icon="pi pi-trash" severity="danger" variant="outlined"
+            (onClick)="OnAccountDialog()" />
+          }
+          @else if(currentPasswordState().status === PROFILE_STATUS.PASSWORD.VERIFIED){
+          <p-button label="Delete Account" icon="pi pi-trash" severity="danger" variant="outlined"
+            (onClick)="OnDeleteAccount()" />
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+
+<p-toast />
+
+
+<p-dialog [header]="dialogHeader()" [modal]="true" [visible]="showCurrentPasswordDialog()"
+  (onHide)="showCurrentPasswordDialog.set(false);currentPasswordState().status = PROFILE_STATUS.PASSWORD.INITIAL;">
+  <span class="p-text-secondary block mb-8">{{dialogContent()}}</span>
+  <div class="flex items-start gap-2 flex-col">
+    <label for="currentPassword" class="font-semibold">Current Password</label>
+    <p-iconfield>
+      <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
+      <p-password inputId="currentPassword" [(ngModel)]="currentPassword" toggleMask="true" class="w-full"
+        placeholder="Current Password" feedback="false" (ngModelChange)="onCPasswordChange($event)" />
+    </p-iconfield>
+    <div class="form-error-container">
+      @if(currentPassword){
+      @if (!currentPasswordState().isValid && currentPasswordState().status !== PROFILE_STATUS.PASSWORD.MISMATCHED) {
+      <p-message severity="error" variant="simple" size="small" class="text-sm" hideTransitionOptions="0ms"
+        showTransitionOptions="0ms">
+        Invalid Password!
+      </p-message>
+      }
+      @else if(currentPasswordState().status === PROFILE_STATUS.PASSWORD.MISMATCHED){
+      <p-message severity="error" variant="simple" size="small" class="text-sm" hideTransitionOptions="0ms"
+        showTransitionOptions="0ms">
+        Mismatched Password!
+      </p-message>
+      }
+      @else if(currentPasswordState().status === PROFILE_STATUS.PASSWORD.VERIFIED){
+      <p-message severity="success" variant="simple" size="small" class="text-sm" hideTransitionOptions="0ms"
+        showTransitionOptions="0ms">
+        Password Verified!
+      </p-message>
+      }
+      }
+    </div>
+  </div>
+  <div class="flex justify-end gap-2">
+    <p-button label="Cancel" severity="secondary"
+      (click)="showCurrentPasswordDialog.set(false);currentPassword = '';currentPasswordState().status = PROFILE_STATUS.PASSWORD.INITIAL;" />
+    <p-button [loading]="currentPasswordState().status === PROFILE_STATUS.PASSWORD.SENDING"
+      [label]="currentPasswordState().status === PROFILE_STATUS.PASSWORD.SENDING ? 'Verifying' : 'Verify' "
+      (onClick)="onVerifyPassword()" [disabled]="!currentPasswordState().isValid" />
+  </div>
+</p-dialog>

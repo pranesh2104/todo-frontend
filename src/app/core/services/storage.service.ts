@@ -27,9 +27,8 @@ export class StorageService {
     return this.isBrowser ? this.getCookie(key) !== null : false;
   }
 
-  set(key: string, value: string): void {
+  setLocalStorage(key: string, value: string): void {
     if (!this.isBrowser) return;
-
     try {
       localStorage.setItem(key, value);
     } catch (error) {
@@ -37,11 +36,16 @@ export class StorageService {
     }
   }
 
+  getLocalStorage(key: string): string | null {
+    if (!this.isBrowser) return null;;
+    return localStorage.getItem(key);
+  }
+
   remove(key: string): void {
     if (this.isBrowser) localStorage.removeItem(key);
   }
 
-  clear(): void {
+  clearLocalStorage(): void {
     if (this.isBrowser) localStorage.clear();
   }
 

@@ -13,7 +13,7 @@ export class UserService {
 
   private transferState = inject(TransferState);
 
-  currentUser = signal<IUserReponse>({} as IUserReponse);
+  readonly currentUser = signal<IUserReponse>({} as IUserReponse);
 
   constructor() { }
 
@@ -27,5 +27,9 @@ export class UserService {
 
   getAccessToken(): Observable<{ success: boolean }> {
     return this.graphqlClientService.executeMutation(UPDATE_SESSION_TOKEN, {})
+  }
+
+  setCurrentUser(update: Partial<IUserReponse>) {
+    this.currentUser.update(prev => ({ ...prev, ...update }));
   }
 }
