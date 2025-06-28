@@ -25,7 +25,7 @@ import { Subscription } from 'rxjs';
 })
 export class SideNavComponent implements OnInit, OnDestroy {
 
-  private subscribeArr = new Subscription();
+  private subscriptions = new Subscription();
 
   private userService = inject(UserService);
 
@@ -51,7 +51,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
   ngOnInit(): void {
-    this.subscribeArr.add(this.taskService.getAllTasks().subscribe({
+    this.subscriptions.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
         this.tags.set([...res.getAllTags]);
         console.log('from side nav', this.tags());
@@ -90,7 +90,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
   onAddTag() {
     const tagFormValue = this.tagForm.value;
     if (this.tagForm.valid && tagFormValue && tagFormValue.name && tagFormValue.color && tagFormValue.name.length && tagFormValue.color.length) {
-      this.subscribeArr.add(this.taskService.createTag<ICommonAPIResponse<ICreateTagResponse>>({ tagDetails: tagFormValue as ITaskTagInput }).subscribe({
+      this.subscriptions.add(this.taskService.createTag<ICommonAPIResponse<ICreateTagResponse>>({ tagDetails: tagFormValue as ITaskTagInput }).subscribe({
         next: (res: ICommonAPIResponse<ICreateTagResponse>) => {
           if (res && res['createTag'] && res['createTag'].success) {
             this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
@@ -108,7 +108,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   onDeleteTag(tagId: string | undefined) {
     if (!tagId) return;
-    this.taskService.deleteTag<ICommonAPIResponse>(tagId).subscribe({
+    this.subscriptions.add(this.taskService.deleteTag<ICommonAPIResponse>(tagId).subscribe({
       next: (res) => {
         if (res && res['deleteTag'] && res['deleteTag'].success) {
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
@@ -117,10 +117,10 @@ export class SideNavComponent implements OnInit, OnDestroy {
       error: () => {
         this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Tag Deleted Failed', life: 2000 });
       }
-    });
+    }));
   }
 
   ngOnDestroy(): void {
-    this.subscribeArr.unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 }

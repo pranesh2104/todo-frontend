@@ -43,14 +43,14 @@ export class SignInComponent implements OnDestroy {
 
   private readonly router = inject(Router);
 
-  private obervableSubscription: Subscription = new Subscription();
+  private subscriptions: Subscription = new Subscription();
 
   onLogin() {
     const emailFormControl = this.signInForm.get('email');
     const passwordFormControl = this.signInForm.get('password');
     if (emailFormControl && passwordFormControl && emailFormControl.valid && passwordFormControl.valid) {
       this.headerService.setHeaders('Registration', `${emailFormControl.value}:${passwordFormControl.value}`);
-      this.obervableSubscription.add(this.authService.login().subscribe({
+      this.subscriptions.add(this.authService.login().subscribe({
         next: (loginResponse: ILoginSuccessResponse) => {
           if (loginResponse && loginResponse.login) {
             this.headerService.removeHeader('Registration');
@@ -82,8 +82,8 @@ export class SignInComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.obervableSubscription) {
-      this.obervableSubscription.unsubscribe();
+    if (this.subscriptions) {
+      this.subscriptions.unsubscribe();
     }
   }
 }

@@ -69,7 +69,7 @@ export class MainDashboardComponent implements OnInit {
 
   headerText = signal<string>('All');
 
-  private subscribeArr = new Subscription();
+  private subscriptions = new Subscription();
 
   private router = inject(Router);
 
@@ -78,7 +78,7 @@ export class MainDashboardComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.subscribeArr.add(this.taskService.getAllTasks().subscribe({
+    this.subscriptions.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
         this.tasks = res.getAllTasks;
         this.filteredTasks = res.getAllTasks;
@@ -95,7 +95,7 @@ export class MainDashboardComponent implements OnInit {
       }
     }));
     this.handleSearch();
-    this.subscribeArr.add(this.activedRoute.queryParams.subscribe({
+    this.subscriptions.add(this.activedRoute.queryParams.subscribe({
       next: (res) => {
         if (res['property']) {
           const value = res['property'];
@@ -168,7 +168,7 @@ export class MainDashboardComponent implements OnInit {
       let taskInput: ICreateTaskInput = { taskDetails: convertFormToTaskDetails(this.formComponent.taskForm.value as FormTaskDetails) };
       this.submitting = true;
       taskInput = removeTypename(taskInput);
-      this.subscribeArr.add(this.taskService.createTask<ICommonAPIResponse<ICreateTaskResponse>>(taskInput).subscribe({
+      this.subscriptions.add(this.taskService.createTask<ICommonAPIResponse<ICreateTaskResponse>>(taskInput).subscribe({
         next: (res: ICommonAPIResponse<ICreateTaskResponse>) => {
           if (res && res['createTask'] && res['createTask'].success) {
             this.submitting = false;
@@ -204,7 +204,7 @@ export class MainDashboardComponent implements OnInit {
     let updateValue: { isImportant?: boolean, isCompleted?: boolean } = {};
     if (isImportant) updateValue.isImportant = !task.isImportant;
     else updateValue.isCompleted = !task.isCompleted;
-    this.subscribeArr.add(this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
+    this.subscriptions.add(this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
       next: (res) => {
         if (res && res['updateTaskStatus'] && res['updateTaskStatus'].success)
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
@@ -248,7 +248,7 @@ export class MainDashboardComponent implements OnInit {
 
         // simpleChanges = removeTypename(simpleChanges);
         simpleChanges.tags = removeDuplicateTag(simpleChanges.tags, ogTask.tags || []);
-        this.subscribeArr.add(this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
+        this.subscriptions.add(this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
           next: (res) => {
             if (res && res['updateTask'] && res['updateTask'].success) {
               this.formComponent.hideTaskDialog();
@@ -267,7 +267,7 @@ export class MainDashboardComponent implements OnInit {
   }
 
   onDelete(taskId: string) {
-    this.subscribeArr.add(this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
+    this.subscriptions.add(this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
       next: (res) => {
         if (res && res['deleteTask'] && res['deleteTask'].success)
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Deleted successfully', life: 3000 });
@@ -287,7 +287,7 @@ export class MainDashboardComponent implements OnInit {
   }
 
   handleSearch() {
-    this.subscribeArr.add(this.searchControl.valueChanges.pipe(debounceTime(1500), distinctUntilChanged()).subscribe({
+    this.subscriptions.add(this.searchControl.valueChanges.pipe(debounceTime(1500), distinctUntilChanged()).subscribe({
       next: (searchText) => {
         const trimmedText = typeof searchText === 'string' ? searchText.trim() : '';
         if (!trimmedText) {
@@ -304,6 +304,6 @@ export class MainDashboardComponent implements OnInit {
   }
 
   ngOnDestroy(): void {
-    this.subscribeArr.unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 }

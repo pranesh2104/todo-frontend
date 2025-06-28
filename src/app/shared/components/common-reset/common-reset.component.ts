@@ -59,7 +59,7 @@ export class CommonResetComponent implements OnInit {
 
   private activeRoute = inject(ActivatedRoute);
 
-  private subscription = new Subscription();
+  private subscriptions = new Subscription();
 
   passwordForm!: FormGroup;
 
@@ -71,7 +71,7 @@ export class CommonResetComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.subscription.add(this.activeRoute.queryParams.subscribe({
+    this.subscriptions.add(this.activeRoute.queryParams.subscribe({
       next: (params: Params) => {
         if (params['email_token']) {
           this.resetPageName = 'Email';
@@ -99,7 +99,7 @@ export class CommonResetComponent implements OnInit {
 
   updateEmail(token: string) {
     this.resetState.email.status = RESET_STATE.EMAIL.SENDING;
-    this.subscription.add(this.authServie.updateEmail<ICommonAPIResponse>(token).subscribe({
+    this.subscriptions.add(this.authServie.updateEmail<ICommonAPIResponse>(token).subscribe({
       next: (res) => {
         if (res && res['updateEmail']) {
           this.resetState.email.code = res['updateEmail'].code as UPDATE_EMAIL_CODES;

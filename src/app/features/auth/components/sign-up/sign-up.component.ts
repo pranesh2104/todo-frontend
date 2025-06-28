@@ -68,13 +68,13 @@ export class SignUpComponent implements OnInit {
 
   private timerSubscription: Subscription = new Subscription();
 
-  private observableSubscription: Subscription = new Subscription();
+  private subscriptions: Subscription = new Subscription();
 
   private readonly coreAuthService = inject(CoreAuthService);
 
   ngOnInit(): void {
     this.initializeForm();
-    this.observableSubscription.add(this.activeRoute.queryParams.subscribe((queryParams: Params) => {
+    this.subscriptions.add(this.activeRoute.queryParams.subscribe((queryParams: Params) => {
       if (queryParams && queryParams['email']) {
         this.signupForm.get('email')?.setValue(queryParams['email']);
       }
@@ -106,7 +106,7 @@ export class SignUpComponent implements OnInit {
     const nameFormControl = this.signupForm.get('name');
     if (emailFormControl && emailFormControl.value && nameFormControl && nameFormControl.value && (emailFormControl.disabled ? true : emailFormControl?.valid)) {
       this.state.otp.status = AUTH_STATUS.OTP.SENDING;
-      this.observableSubscription.add(this.authService.sendEmailOTP({ email: emailFormControl.value.toLowerCase(), name: nameFormControl.value }).subscribe({
+      this.subscriptions.add(this.authService.sendEmailOTP({ email: emailFormControl.value.toLowerCase(), name: nameFormControl.value }).subscribe({
         next: () => this.handleOTPSendSuccess(),
         error: () => {
           this.state.otp.status = AUTH_STATUS.OTP.ERROR;
@@ -147,7 +147,7 @@ export class SignUpComponent implements OnInit {
     const email = this.signupForm.get('email')?.value;
     if (otpFormControl && otpFormControl.value && otpFormControl.value.toString().length == 6 && email) {
       this.state.otp.isSubmitting = true;
-      this.observableSubscription.add(this.authService.verifyOTP<ICommonAPIResponse<IVerifyOTPResponse>>({ otpDetails: { email, otp: otpFormControl.value.toString() } }).subscribe({
+      this.subscriptions.add(this.authService.verifyOTP<ICommonAPIResponse<IVerifyOTPResponse>>({ otpDetails: { email, otp: otpFormControl.value.toString() } }).subscribe({
         next: (res: ICommonAPIResponse<IVerifyOTPResponse>) => {
           if (res)
             this.handleOTPVerificationResponse(res);
@@ -211,7 +211,7 @@ export class SignUpComponent implements OnInit {
       const password = this.signupForm.value.password;
       if (name && emailFormControl && emailFormControl.value && password) {
         const data = { userDetails: { name, email: emailFormControl.value, password } };
-        this.observableSubscription.add(this.authService.createUser(data).subscribe({
+        this.subscriptions.add(this.authService.createUser(data).subscribe({
           next: (res: ICreateUserDetails) => {
             if (res && res.createUser && res.createUser.user) {
               // this.coreAuthService.setAccessToken(res.createUser.tokens.accessToken);
@@ -256,8 +256,8 @@ export class SignUpComponent implements OnInit {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
     }
-    if (this.observableSubscription) {
-      this.observableSubscription.unsubscribe();
+    if (this.subscriptions) {
+      this.subscriptions.unsubscribe();
     }
   }
 }
