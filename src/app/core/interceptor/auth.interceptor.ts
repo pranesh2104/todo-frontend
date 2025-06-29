@@ -15,9 +15,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
 
   if (isPlatformServer(platformId)) {
-    const server = inject(REQUEST);
-    const cookie = server?.headers.get('cookie');
-    if (server && cookie) {
+    const serverReq = inject(REQUEST);
+    const cookie = serverReq?.headers.get('cookie');
+    if (serverReq && cookie) {
       req = req.clone({ setHeaders: { Cookie: cookie } });
     }
     return next(req);

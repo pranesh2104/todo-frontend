@@ -1,7 +1,7 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter, TitleStrategy, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
-import { provideClientHydration } from '@angular/platform-browser';
+import { provideClientHydration, withHttpTransferCacheOptions } from '@angular/platform-browser';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideApollo } from 'apollo-angular';
@@ -19,6 +19,10 @@ export const appConfig: ApplicationConfig = {
     { provide: EnvironmentToken, useValue: environment },
     { provide: TitleStrategy, useClass: CustomTitleStrategy },
     provideClientHydration(),
+    // provideClientHydration(withHttpTransferCacheOptions({
+    //   includePostRequests: true,
+    //   includeHeaders: ['Set-Cookie']
+    // })),
     provideHttpClient(withInterceptors([authInterceptor]), withFetch()),
     provideAnimationsAsync(),
     provideApollo(ApolloConfigService.setApolloConfig),

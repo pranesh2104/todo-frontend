@@ -84,7 +84,6 @@ export class MainDashboardComponent implements OnInit {
         this.filteredTasks = res.getAllTasks;
         this.tags = [...res.getAllTags];
         this.cdr.detectChanges();
-        console.log('all task response ', res);
       },
       error: (error: ICommonErrorResponse) => {
         const parsedError: ICommonResponse = JSON.parse(error.message);

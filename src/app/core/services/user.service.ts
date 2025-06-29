@@ -1,17 +1,14 @@
-import { inject, Injectable, signal, TransferState } from '@angular/core';
-import { USER_KEY } from '@core/constants/state.constant';
+import { inject, Injectable, signal } from '@angular/core';
 import { UPDATE_SESSION_TOKEN, GET_ALL_USER, GET_CURRENT_USER } from '@core/graphql/user.query';
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private graphqlClientService = inject(GraphqlClientService);
-
-  private transferState = inject(TransferState);
 
   readonly currentUser = signal<IUserReponse>({} as IUserReponse);
 

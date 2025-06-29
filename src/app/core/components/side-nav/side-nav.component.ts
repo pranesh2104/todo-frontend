@@ -54,7 +54,6 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.subscriptions.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
         this.tags.set([...res.getAllTags]);
-        console.log('from side nav', this.tags());
       },
       error: (error) => {
         console.error('all task error ', error);
