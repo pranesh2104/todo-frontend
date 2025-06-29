@@ -18,7 +18,7 @@
       @for (item of filterItems;let index = $index;track $index) {
       <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg" tabindex="0"
         (click)="onFilterSelect(item)"
-        [ngClass]="selectedFilterItem === item.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
+        [ngClass]="selectedFilterItem() === item.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
         <i [class]="'pi ' + 'pi-'+item.icon"></i> {{item.name}}
       </button>
       }
@@ -28,7 +28,7 @@
       <div class="space-y-1">
         @for (priority of priorities; track $index) {
         <button tabindex="0" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 rounded-lg"
-          [ngClass]="selectedFilterItem === priority.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'"
+          [ngClass]="selectedFilterItem() === priority.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'"
           (click)="onFilterPriority(priority.value)">
           <div class="w-2 h-2 rounded-full" [ngStyle]="{'background-color': priority.color}">
           </div>
@@ -63,7 +63,7 @@
         @for (tag of tags(); track $index) {
         <button tabindex="0" class="w-full flex items-center justify-between gap-2 px-3 py-2 text-gray-700 rounded-lg"
           (click)="onFilterTag(tag?.id)"
-          [ngClass]="selectedFilterItem === tag?.id ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
+          [ngClass]="selectedFilterItem() === tag?.id ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full" [ngStyle]="{'background-color': tag.color}"></div>
             {{tag.name}}

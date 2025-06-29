@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, inject, OnDestroy, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, inject, OnDestroy, OnInit, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
@@ -17,35 +17,44 @@ import { ButtonModule } from 'primeng/button';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BaseLayoutComponent implements OnInit, OnDestroy {
-
+  /**
+   * Injects the UserService instance
+   */
   private readonly userService = inject(UserService);
-
-  drawerVisible = signal(false);
-
-  isMobile = signal(false);
-  isHydrated = signal(false);
-  user = signal<IUserReponse>({} as IUserReponse)
-
-  private router = inject(Router);
-
-  private subscription!: Subscription;
-
-  private cdr = inject(ChangeDetectorRef);
+  /**
+   * Signal to control the visibility state of the drawer (open/close)
+   */
+  drawerVisible: WritableSignal<boolean> = signal(false);
+  /**
+   * Signal to identify whether app in Mobile or Desktop.
+   */
+  isMobile: WritableSignal<boolean> = signal(false);
+  /**
+   * Signal to manage the user data.
+   */
+  user: WritableSignal<IUserReponse> = signal<IUserReponse>({} as IUserReponse);
+  /**
+   * Inject the Router Instance.
+   */
+  private readonly router = inject(Router);
+  /**
+   * Manages observable subscriptions.
+   */
+  private subscription: Subscription = new Subscription();
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
-      this.isHydrated.set(true); // ✅ Mark as hydrated
       this.checkScreen();
       window.addEventListener('resize', () => this.checkScreen());
     }
   }
-
+  /**
+   * Fetch the User data.
+   */
   ngOnInit(): void {
     this.subscription = this.userService.getCurrentUser().subscribe({
       next: (res: IGetOneUserResponse) => {
-        this.user.set(res.getOneUser);
         this.userService.currentUser.set(res.getOneUser);
-        this.cdr.markForCheck();
       },
       error: (error: ICommonErrorResponse) => {
         const parsedError: ICommonResponse = JSON.parse(error.message);
@@ -55,22 +64,27 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
       }
     });
   }
-
+  /**
+   * UnSubscribe the Observable streams.
+   */
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
   }
-  checkScreen() {
+  /**
+   * Change the visibility of drawer based on screen width.
+   */
+  checkScreen(): void {
     this.isMobile.set(window.innerWidth < 640);
-    console.log('inside ', this.isMobile());
-
     if (!this.isMobile()) {
       this.drawerVisible.set(false);
     }
   }
-
-  toggleDrawer() {
+  /**
+   * Update the drawer visiblity based on click.
+   */
+  toggleDrawer(): void {
     this.drawerVisible.update(v => !v);
   }
 }

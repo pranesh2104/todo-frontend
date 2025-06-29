@@ -38,8 +38,14 @@ export function removeTypename<T>(data: T): T {
   // Return primitives unchanged
   return data;
 }
-
-
+/**
+ * Removes duplicate tags from the input `data` array based on tag name,
+ * comparing them against the original `ogTags` array.
+ * 
+ * @param data - The array of new tag inputs to filter.
+ * @param ogTags - The array of existing tags to check for duplicates.
+ * @returns A new array containing only the tags from `data` that are not present in `ogTags`.
+ */
 export function removeDuplicateTag(data: ITaskTagInput[], ogTags: ITaskTagInput[]): ITaskTagInput[] {
   if (!ogTags || !ogTags.length || !data || !data.length) return data;
   data = data.filter(tag => !ogTags.some(ogTag => ogTag.name === tag.name))

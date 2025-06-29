@@ -1,4 +1,7 @@
-export const PRIORITIES = [
+import { IPRIORITY } from "@core/models/core.model";
+
+
+export const PRIORITIES: IPRIORITY[] = [
   {
     name: 'High',
     value: 'high',

@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
+import { RESET_STATE } from '@shared/constants/reset.constant';
+import { UPDATE_EMAIL_CODES } from '@shared/enums/reset.enum';
+import { EMAIL_DYNAMIC_DATA } from '@shared/models/reset.model';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { PASSWORD_PATTERN } from 'app/features/auth/constants/auth.constant';
 import { CustomValidators } from 'app/features/auth/custom-validators/email-password.validator';
@@ -9,34 +12,6 @@ import { AuthService } from 'app/features/auth/services/auth.service';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { Subscription } from 'rxjs';
-
-const RESET_STATE = {
-  EMAIL: {
-    INITIAL: 'INITIAL',
-    SENDING: 'SENDING',
-    SENT: 'SENT'
-  }
-}
-
-enum UPDATE_EMAIL_CODES {
-  EMAIL_UPDATED = 'EMAIL_UPDATED',
-  PASSWORD_CHANGED = 'PASSWORD_CHANGED',
-  INVALID_TOKEN = 'INVALID_TOKEN',
-  MISMATCH_TOKEN = 'MISMATCH_TOKEN',
-  TOKEN_EXPIRED = 'TOKEN_EXPIRED',
-  UPDATE_ERROR = 'UPDATE_ERROR'
-}
-
-interface EMAIL_DYNAMIC_DATA {
-  icon: string,
-  title: string,
-  message: string,
-  color: string,
-  bgColor: string,
-  borderColor: string,
-  iconColor: string
-}
-
 
 @Component({
   selector: 'app-common-reset',
@@ -80,24 +55,45 @@ export class CommonResetComponent implements OnInit {
         }
         else if (params['pass_token']) {
           this.resetPageName.set('Password');
-          this.checkPasswordToken();
         }
       }
     }));
 
   }
-
-  checkPasswordToken() {
-
-  }
-
+  /**
+   * Initializes the password form with validation rules.
+   * 
+   * The form contains two controls:
+   * - `password`: required, must match the PASSWORD_PATTERN regex, and non-nullable.
+   * - `repeatPassword`: same validation as `password`.
+   * 
+   * The entire form group also applies a custom validator `matchPasswordValidator` 
+   * to ensure both passwords match.
+   */
   initializeForm() {
     this.passwordForm = this.formBuilder.group({
       password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
       repeatPassword: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
     }, { validators: CustomValidators.matchPasswordValidator() });
   }
-
+  /**
+   * Calls the auth service to update the email using the provided token.
+   * 
+   * - Updates `resetState.email.status` to indicate the email update process is sending.
+   * - Subscribes to the `updateEmail` observable from the service.
+   * - On success:
+   *   - Checks if response contains `updateEmail` property.
+   *   - Updates `resetState.email.code` with the received status code.
+   *   - Updates some UI message/state by calling `getMessage` with the code.
+   *   - Starts a countdown timer that decrements `this.timer` every second until it reaches zero.
+   * 
+   * - On error:
+   *   - Sets `resetState.email.code` to a constant `UPDATE_ERROR`.
+   * 
+   * The subscription is tracked by `this.subscriptions` to allow cleanup (e.g., unsubscribe on destroy).
+   * 
+   * @param token - The email update token (e.g., from a verification link).
+   */
   updateEmail(token: string) {
     this.resetState.email.status = RESET_STATE.EMAIL.SENDING;
     this.subscriptions.add(this.authServie.updateEmail<ICommonAPIResponse>(token).subscribe({
@@ -119,9 +115,13 @@ export class CommonResetComponent implements OnInit {
       }
     }));
   }
-
-
-  getMessage(code: string) {
+  /**
+   * Returns the UI message data corresponding to the given email update status code.
+   * 
+   * @param code - The update email status code as a string.
+   * @returns EMAIL_DYNAMIC_DATA - The UI data object with text and styling info.
+   */
+  getMessage(code: string): EMAIL_DYNAMIC_DATA {
     switch (code) {
       case UPDATE_EMAIL_CODES.EMAIL_UPDATED:
         return {

@@ -7,7 +7,6 @@ import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
 import { Password } from 'primeng/password';
 import { Button } from 'primeng/button';
-import { CoreAuthService } from '@core/services/core-auth.service';
 import { AuthService } from '../../services/auth.service';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
 import { Toast } from 'primeng/toast';
@@ -33,8 +32,6 @@ export class SignInComponent implements OnDestroy {
 
   isPasswordVisible: boolean = false;
 
-  private readonly coreAuthService = inject(CoreAuthService);
-
   private readonly headerService = inject(HeaderService);
 
   private readonly authService = inject(AuthService);
@@ -54,7 +51,6 @@ export class SignInComponent implements OnDestroy {
         next: (loginResponse: ILoginSuccessResponse) => {
           if (loginResponse && loginResponse.login) {
             this.headerService.removeHeader('Registration');
-            this.coreAuthService.user.next(loginResponse.login.user);
             this.router.navigate(['/app/dashboard']);
           }
         },

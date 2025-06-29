@@ -18,7 +18,6 @@ import { Button } from 'primeng/button';
 import { InputOtp } from 'primeng/inputotp';
 import { Toast } from 'primeng/toast';
 import { finalize, interval, Subscription, takeWhile } from 'rxjs';
-import { CoreAuthService } from '@core/services/core-auth.service';
 import { DividerModule } from 'primeng/divider';
 
 @Component({
@@ -69,8 +68,6 @@ export class SignUpComponent implements OnInit {
   private timerSubscription: Subscription = new Subscription();
 
   private subscriptions: Subscription = new Subscription();
-
-  private readonly coreAuthService = inject(CoreAuthService);
 
   ngOnInit(): void {
     this.initializeForm();
@@ -214,8 +211,6 @@ export class SignUpComponent implements OnInit {
         this.subscriptions.add(this.authService.createUser(data).subscribe({
           next: (res: ICreateUserDetails) => {
             if (res && res.createUser && res.createUser.user) {
-              // this.coreAuthService.setAccessToken(res.createUser.tokens.accessToken);
-              this.coreAuthService.user.next(res.createUser.user);
               this.showRegistrationSuccessToast();
             }
           },
