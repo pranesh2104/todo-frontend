@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
 import { TaskService } from '../../services/task.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { FormArray, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { IAllTaskResponse, ICreateTaskInput, ICreateTaskResponse, IGetAllTask, ITaskTagInput } from '../../models/task.model';
 import { convertFormToTaskDetails, FormTaskDetails, isControlEmpty, isDateExpired } from '../../utils/task.util';
 import { Toast } from 'primeng/toast';
-import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { TooltipModule } from 'primeng/tooltip';
 import { AutoCompleteModule } from 'primeng/autocomplete';
@@ -29,11 +29,10 @@ import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
 import { isDateAfter, isSameDate } from '../../utils/date.util';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Menu } from 'primeng/menu';
 
 @Component({
   selector: 'app-main-dashboard',
-  imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, Menu, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
+  imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
   templateUrl: './main-dashboard.component.html',
   styleUrl: './main-dashboard.component.scss',
   providers: [MessageService, ConfirmationService, FormModifyService],
@@ -75,7 +74,9 @@ export class MainDashboardComponent implements OnInit {
 
   private activedRoute = inject(ActivatedRoute);
 
-  menuItems: MenuItem[] | undefined;
+  visibleTagCount = signal(3);
+
+  private platformId = inject(PLATFORM_ID);
 
   constructor() { }
 
@@ -111,24 +112,11 @@ export class MainDashboardComponent implements OnInit {
         }
       }
     }));
-    this.menuItems = [
-      {
-        items: [
-          {
-            label: 'Edit',
-            icon: 'pi pi-pencil'
-          },
-          {
-            label: 'Delete',
-            icon: 'pi pi-trash'
-          },
-          {
-            label: 'Important',
-            icon: 'pi pi-star'
-          }
-        ]
+    if (isPlatformBrowser(this.platformId)) {
+      if (window.innerWidth < 640) {
+        this.visibleTagCount.set(2);
       }
-    ]
+    }
   }
 
   private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {

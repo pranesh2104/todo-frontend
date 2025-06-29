@@ -41,12 +41,21 @@
               </div>
 
               <!-- Tags with different style -->
-              @for (tag of task.tags; track $index) {
-              <div
-                class="flex items-center px-3 py-1 rounded-full text-xs font-medium hover:bg-gray-200 transition-all duration-150 ease-in-out"
-                [ngStyle]="tag | tagBgStyle">
-                <i class="text-xs pi pi-tag mr-1" style="font-size: 0.75rem !important;"></i>
-                <span>{{tag.name}}</span>
+              @if (task && task.tags && task.tags.length) {
+              <div class="flex gap-2 flex-wrap items-center">
+                @for (tag of task.tags.slice(0,visibleTagCount()); track $index) {
+                <div
+                  class="flex items-center px-3 py-1 rounded-full text-xs font-medium hover:bg-gray-200 transition-all duration-150 ease-in-out"
+                  [ngStyle]="tag | tagBgStyle">
+                  <i class="text-xs pi pi-tag mr-1" style="font-size: 0.75rem !important;"></i>
+                  <span>{{tag.name}}</span>
+                </div>
+                }
+                @if (task.tags.length > visibleTagCount()) {
+                <span class="text-xs text-gray-500 px-2 py-1 bg-gray-50 rounded-full">
+                  +{{task.tags.length - visibleTagCount()}} more
+                </span>
+                }
               </div>
               }
             </div>
@@ -171,7 +180,6 @@
 
 <p-toast />
 <p-confirmpopup />
-<p-menu #menu [model]="menuItems" [popup]="true" />
 
 <!-- Task Dialog -->
 @if (taskDialogVisible) {

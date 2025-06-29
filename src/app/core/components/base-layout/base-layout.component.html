@@ -1,12 +1,3 @@
-<!-- <div class="flex">
-  <p-drawer [(visible)]="drawerVisible" >
-    <app-side-nav></app-side-nav>
-  </p-drawer>
-  <div class="w-full" style="background-color: #f8fafc;">
-    <router-outlet />
-  </div>
-</div> -->
-
 <!-- Mobile Header with Menu Button -->
 <div *ngIf="isMobile()" class="sm:hidden p-4 bg-gray-100 flex items-center justify-between w-full">
   <p-button class="pi pi-bars" (onClick)="toggleDrawer()" label="Menu" severity="secondary"></p-button>
@@ -15,7 +6,7 @@
 
 <!-- Mobile Drawer -->
 <p-drawer *ngIf="isMobile()" [visible]="drawerVisible()" (onHide)="drawerVisible.set(false)" [modal]="true"
-  position="left" [showCloseIcon]="true" class="sm:hidden">
+  position="left" closable="false" class="sm:hidden">
   <app-side-nav></app-side-nav>
 </p-drawer>
 
@@ -25,7 +16,6 @@
 </div>
 
 <!-- Main Content -->
-<div class="sm:ml-64 p-4">
-  <!-- Your main router content or page goes here -->
+<div class="sm:ml-64 p-4 sm:h-full" style="background-color: #f8fafc;">
   <router-outlet></router-outlet>
 </div>

@@ -74,6 +74,20 @@ export class GraphqlClientService {
     );
   }
 
+
+  executeDeleteMutation<T, V extends Record<string, any>>(mutation: string, variables: V): Observable<T> {
+    return this.apollo.mutate<T>({
+      mutation: gql`${mutation}`,
+      variables,
+      update: (cache, { data }) => {
+        cache.evict({ id: cache.identify({ __typename: 'TaskResponse', id: variables['taskId'] }) });
+        cache.gc();
+      }
+    }).pipe(
+      map(response => this.handleResponse<T>(response))
+    );
+  }
+
   /**
    * Create a type-safe cache updater
    * @param cacheConfig - Cache update configuration

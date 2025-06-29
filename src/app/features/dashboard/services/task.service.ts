@@ -78,7 +78,7 @@ export class TaskService {
   // { cacheConfig: { updateStrategy: 'update', query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task' } }
 
   deleteTask<T>(taskId: string) {
-    return this.graphqlClientService.executeMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId });
+    return this.graphqlClientService.executeDeleteMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId });
   }
 
   updateTaskStatus<T>(taskStatus: IUpdateTaskStatusInput) {
