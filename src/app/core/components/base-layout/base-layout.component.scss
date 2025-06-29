@@ -1,0 +1,12 @@
+:root {
+  --p-drawer-content-padding: 0px;
+}
+
+::ng-deep .p-drawer-content {
+  padding: 0px;
+}
+
+::ng-deep .p-drawer-header {
+  padding-bottom: 0px;
+  padding-top: 0px;
+}

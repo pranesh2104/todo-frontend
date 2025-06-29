@@ -7,7 +7,7 @@ import { FormArray, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { IAllTaskResponse, ICreateTaskInput, ICreateTaskResponse, IGetAllTask, ITaskTagInput } from '../../models/task.model';
 import { convertFormToTaskDetails, FormTaskDetails, isControlEmpty, isDateExpired } from '../../utils/task.util';
 import { Toast } from 'primeng/toast';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { MessageService, ConfirmationService, MenuItem } from 'primeng/api';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { TooltipModule } from 'primeng/tooltip';
 import { AutoCompleteModule } from 'primeng/autocomplete';
@@ -29,11 +29,11 @@ import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
 import { isDateAfter, isSameDate } from '../../utils/date.util';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
 import { ActivatedRoute, Router } from '@angular/router';
-
+import { Menu } from 'primeng/menu';
 
 @Component({
   selector: 'app-main-dashboard',
-  imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
+  imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, Menu, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
   templateUrl: './main-dashboard.component.html',
   styleUrl: './main-dashboard.component.scss',
   providers: [MessageService, ConfirmationService, FormModifyService],
@@ -75,6 +75,8 @@ export class MainDashboardComponent implements OnInit {
 
   private activedRoute = inject(ActivatedRoute);
 
+  menuItems: MenuItem[] | undefined;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -108,12 +110,30 @@ export class MainDashboardComponent implements OnInit {
           this.handlePriorityFilter({ filterBy: 'priority', priority: res['priority'] });
         }
       }
-    }))
+    }));
+    this.menuItems = [
+      {
+        items: [
+          {
+            label: 'Edit',
+            icon: 'pi pi-pencil'
+          },
+          {
+            label: 'Delete',
+            icon: 'pi pi-trash'
+          },
+          {
+            label: 'Important',
+            icon: 'pi pi-star'
+          }
+        ]
+      }
+    ]
   }
 
   private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {
     const tagName = this.tags.find(t => t.id === filter.tagId)?.name;
-    if (tagName) this.headerText.update(() => tagName);
+    if (tagName) this.headerText.set(tagName);
     this.filteredTasks = this.tasks.filter(task => task.tags?.some(t => t.id === filter.tagId));
   }
 
@@ -134,6 +154,7 @@ export class MainDashboardComponent implements OnInit {
   }
 
   private handlePriorityFilter(filter: Extract<IFilter, { filterBy: 'priority' }>) {
+    this.headerText.set(filter.priority);
     this.filteredTasks = this.tasks.filter(task => task.priority === filter.priority);
   }
 

@@ -1,14 +1,17 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, Inject, inject, OnDestroy, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
 import { Router, RouterOutlet } from '@angular/router';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
 import { Subscription } from 'rxjs';
+import { DrawerModule } from 'primeng/drawer';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-base-layout',
-  imports: [SideNavComponent, RouterOutlet],
+  imports: [SideNavComponent, RouterOutlet, DrawerModule, CommonModule, ButtonModule],
   templateUrl: './base-layout.component.html',
   styleUrl: './base-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,6 +20,10 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
 
   private readonly userService = inject(UserService);
 
+  drawerVisible = signal(false);
+
+  isMobile = signal(false);
+  isHydrated = signal(false);
   user = signal<IUserReponse>({} as IUserReponse)
 
   private router = inject(Router);
@@ -24,6 +31,14 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
   private subscription!: Subscription;
 
   private cdr = inject(ChangeDetectorRef);
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.isHydrated.set(true); // ✅ Mark as hydrated
+      this.checkScreen();
+      window.addEventListener('resize', () => this.checkScreen());
+    }
+  }
 
   ngOnInit(): void {
     this.subscription = this.userService.getCurrentUser().subscribe({
@@ -45,5 +60,17 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+  checkScreen() {
+    this.isMobile.set(window.innerWidth < 640);
+    console.log('inside ', this.isMobile());
+
+    if (!this.isMobile()) {
+      this.drawerVisible.set(false);
+    }
+  }
+
+  toggleDrawer() {
+    this.drawerVisible.update(v => !v);
   }
 }

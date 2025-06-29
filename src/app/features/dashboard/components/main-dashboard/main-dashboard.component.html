@@ -1,10 +1,10 @@
-<div class="flex-1 p-8">
+<div class="flex-1 sm:p-8">
   @if (tasks && tasks.length) {
-  <div class="flex justify-between items-center mb-8">
-    <div class="relative">
+  <div class="flex flex-col items-end w-full sm:flex-row sm:items-center gap-3 sm:gap-0 justify-between mb-8">
+    <div class="w-full sm:w-fit relative">
       <i class="pi pi-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       <input type="text" placeholder="Search tasks..." id="search_box" [formControl]="searchControl" tabindex="0"
-        class="pl-10 pr-4 py-2 border border-gray-200 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
     </div>
     <button class="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
       (click)="onCreateTask()">
@@ -13,29 +13,32 @@
     </button>
   </div>
   <div class="bg-white rounded-xl shadow-sm">
-    <div class="p-6">
+    <div class="sm:p-6">
       <h2 class="text-xl font-semibold mb-4">{{headerText()}} Tasks</h2>
+      @if (filteredTasks && filteredTasks.length) {
       <div class="space-y-4">
         @for (task of filteredTasks;let index = $index; track $index) {
-        <div class="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 ">
+        <div class="flex items-center gap-4 p-4 border border-gray-300 bg-white rounded-lg hover:bg-gray-50 ">
           <input [id]="index" type="checkbox" [checked]="task.isCompleted" (click)="onTaskStatusUpdate(task, false)"
             class="h-5 w-5 cursor-pointer accent-blue-500 focus:ring-1 focus:ring-blue-400" />
           <div class="flex-1">
             <h3 class="font-medium" [ngClass]="task.isCompleted ? 'text-gray-400 line-through' :'text-gray-700'">
               {{task.title}}
             </h3>
-            <div class="flex items-center gap-2 mt-1">
-              <div class="gap-2 flex">
-                <i class="pi pi-calendar text-gray-600"></i>
-                <span class="text-sm text-gray-500"
-                  [ngClass]="{'text-red-500' : isDateExpired(task.dueDate)}">{{task.dueDate | date }}</span>
-              </div>
-              <!-- priority indicator -->
-              <span class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md" [ngClass]="task.priority==='high' ? 'bg-red-100 text-red-700 border border-red-300' :
+            <div class="flex flex-col items-start gap-2 mt-1">
+              <div class="flex gap-2">
+                <div class="gap-2 flex">
+                  <i class="pi pi-calendar text-gray-600"></i>
+                  <span class="text-sm text-gray-500"
+                    [ngClass]="{'text-red-500' : isDateExpired(task.dueDate)}">{{task.dueDate | date }}</span>
+                </div>
+                <!-- priority indicator -->
+                <span class="flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md" [ngClass]="task.priority==='high' ? 'bg-red-100 text-red-700 border border-red-300' :
             task.priority==='medium' ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' : 
             'bg-green-100 text-green-700 border border-green-300'">
-                {{task.priority | titlecase}}
-              </span>
+                  {{task.priority | titlecase}}
+                </span>
+              </div>
 
               <!-- Tags with different style -->
               @for (tag of task.tags; track $index) {
@@ -57,11 +60,49 @@
         </div>
         }
       </div>
+      }
+      @else {
+      <div class="flex-1 flex items-center justify-center p-8">
+        <div class="text-center max-w-md">
+          <div class="mb-6">
+            <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
+              <i class="pi pi-check-circle"> </i>
+              <!-- <CheckCircle size={48} class="text-gray-400" /> -->
+            </div>
+          </div>
+
+          <h2 class="text-2xl font-semibold text-gray-900 mb-3">
+            No {{headerText()}} tasks
+          </h2>
+
+          <p class="text-gray-600 mb-8 leading-relaxed">
+            Tasks you mark as {{headerText().toLowerCase()}} will appear here. Start by creating your first task and
+            checking it off
+            when
+            done!
+          </p>
+
+          <div class="space-y-3 flex flex-col gap-4">
+            <p-button icon="pi pi-plus" label="Create Your First Task"></p-button>
+            <p-button label="View All Tasks" severity="secondary"></p-button>
+          </div>
+
+          <div class="mt-8 p-4 bg-blue-50 rounded-lg text-left">
+            <h3 class="font-medium text-blue-900 mb-2">💡 Pro Tips:</h3>
+            <ul class="text-sm text-blue-800 space-y-1">
+              <li>• Use priority levels to organize important tasks</li>
+              <li>• Add tags to categorize your work</li>
+              <li>• Set due dates to stay on track</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      }
     </div>
   </div>
   }
   @else {
-  <div class="flex-1 p-8">
+  <div class="flex-1 p-8 sm:p-2">
     <div class="flex justify-between items-center mb-8">
       <h2 class="text-xl font-semibold">Welcome to TaskTide! 👋 </h2>
       <button (click)="onCreateTask()"
@@ -130,6 +171,7 @@
 
 <p-toast />
 <p-confirmpopup />
+<p-menu #menu [model]="menuItems" [popup]="true" />
 
 <!-- Task Dialog -->
 @if (taskDialogVisible) {
