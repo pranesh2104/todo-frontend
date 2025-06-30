@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { AUTH_STATUS, EMAIL_PATTERN, PASSWORD_PATTERN } from '../../constants/auth.constant';
 import { AuthService } from '../../services/auth.service';
@@ -8,7 +8,6 @@ import { IEmailCheckResponse, IEmailCommonState, IResetForm } from '../../models
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { finalize, interval, Subscription, takeWhile } from 'rxjs';
-import { CardModule } from 'primeng/card';
 import { Button } from 'primeng/button';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
@@ -17,10 +16,11 @@ import { Message } from 'primeng/message';
 import { Password } from 'primeng/password';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule, RouterLink, Toast, CommonModule, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
+  imports: [ReactiveFormsModule, RouterLink, Toast, DividerModule, FormsModule, CommonModule, IconField, InputIcon, InputText, Message, Password, Button],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
   providers: [MessageService]
@@ -32,7 +32,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
    */
   emailState: IEmailCommonState = {
     status: AUTH_STATUS.EMAIL.INITIAL,
-    isEmailAvailable: false
+    isEmailRegistered: false
   }
   /**
    * Store the token.
@@ -44,24 +44,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
    * @type {boolean} 
    */
   isPasswordLinkSended: boolean = false;
-  /**|
-   * Stores the Reset Form control.
-   * @type {FormGroup<IResetForm>}
-   */
-  resetForm: FormGroup<IResetForm> = new FormGroup({
-    userEmail: new FormControl<string>('', {
-      validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
-      asyncValidators: CustomValidators.checkEmailExist(this.authService,
-        { setCheckingState: (checkState: string) => this.emailState.status = checkState },
-        { setEmailExistState: (emailExistState: boolean) => { this.emailState.isEmailAvailable = emailExistState } },
-        false)
-    }),
-    password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
-    repeatPassword: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
-  }, { validators: [CustomValidators.matchPasswordValidator()] });
-  /**
-   * 
-   */
+
   isVerifyingPage: boolean = false;
 
   timer = 10;
@@ -72,12 +55,27 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
 
   private timerSubscription: Subscription = new Subscription();
 
-  private observableSubscription = new Subscription();
+  private subscriptions = new Subscription();
+  /**
+   * Stores the Reset Form control.
+   * @type {FormGroup<IResetForm>}
+   */
+  resetForm: FormGroup<IResetForm> = new FormGroup({
+    userEmail: new FormControl<string>('', {
+      validators: [Validators.required, Validators.pattern(EMAIL_PATTERN)], nonNullable: true,
+      asyncValidators: CustomValidators.checkEmailAvailability(this.authService,
+        { setCheckingState: (checkState: string) => this.emailState.status = checkState },
+        { setEmailRegisterState: (isEmailRegistered: boolean) => { this.emailState.isEmailRegistered = isEmailRegistered; } },
+        false)
+    }),
+    password: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true }),
+    repeatPassword: new FormControl<string>('', { validators: [Validators.required, Validators.pattern(PASSWORD_PATTERN)], nonNullable: true })
+  }, { validators: [CustomValidators.matchPasswordValidator()] });
 
   constructor(private activeRoute: ActivatedRoute, private authService: AuthService, @Inject(PLATFORM_ID) private platformId: object, private router: Router, private toastMessageService: MessageService) { }
 
   ngOnInit(): void {
-    this.observableSubscription.add(this.activeRoute.queryParams.subscribe((queryParams: Params) => {
+    this.subscriptions.add(this.activeRoute.queryParams.subscribe((queryParams: Params) => {
       if (queryParams && queryParams['email'] && !queryParams['token']) {
         this.handleParamEmail(queryParams['email'])
       }
@@ -94,10 +92,10 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.isVerifyingPage = false;
     this.resetForm.get('userEmail')?.setValue(email);
     this.resetForm.get('userEmail')?.updateValueAndValidity();
-    this.observableSubscription.add(this.authService.checkEmailExist(email).subscribe({
+    this.subscriptions.add(this.authService.checkEmailAvailable(email).subscribe({
       next: (checkEmailResponse: IEmailCheckResponse) => {
-        if (checkEmailResponse && checkEmailResponse.checkEmail && checkEmailResponse.checkEmail.code === 'EMAIL_EXIST') {
-          this.emailState.isEmailAvailable = true;
+        if (checkEmailResponse && checkEmailResponse.checkEmail && checkEmailResponse.checkEmail.code === 'EMAIL_REGISTERED') {
+          this.emailState.isEmailRegistered = true;
         }
       }
     }));
@@ -107,7 +105,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     this.emailState.status = AUTH_STATUS.EMAIL.SENDING;
     const userEmailFormControl = this.resetForm.get('userEmail');
     if (userEmailFormControl && userEmailFormControl.valid && userEmailFormControl.value) {
-      this.observableSubscription.add(this.authService.sendResetPasswordLink<ICommonAPIResponse>(userEmailFormControl.value).subscribe({
+      this.subscriptions.add(this.authService.sendResetPasswordLink<ICommonAPIResponse>(userEmailFormControl.value).subscribe({
         next: (res: ICommonAPIResponse) => {
           if (res && res['sendEmailResetPasswordLink'] && res['sendEmailResetPasswordLink'].success) {
             this.isPasswordLinkSended = true;
@@ -130,7 +128,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   }
 
   onRedirect() {
-    this.router.navigate(['../login']);
+    this.router.navigate(['../signin']);
   }
 
   onUpdatePassword() {
@@ -138,7 +136,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
     const repeatPasswordFormControl = this.resetForm.get('repeatPassword');
     const userEmailFormControl = this.resetForm.get('userEmail');
     if (userEmailFormControl && passwordFormControl && repeatPasswordFormControl && passwordFormControl.valid && repeatPasswordFormControl.valid && userEmailFormControl.value && passwordFormControl.value) {
-      this.observableSubscription.add(this.authService.updatePassword<ICommonAPIResponse>({ passwordDetails: { email: userEmailFormControl.value, password: passwordFormControl.value, token: this.token } }).subscribe({
+      this.subscriptions.add(this.authService.updatePassword<ICommonAPIResponse>({ passwordDetails: { email: userEmailFormControl.value, password: passwordFormControl.value, token: this.token } }).subscribe({
         next: (res: ICommonAPIResponse) => {
           if (res && res['updatePassword'] && res['updatePassword'].success) {
             this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Your Password has been updated successfully!', life: 3000 });
@@ -157,7 +155,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.timerSubscription)
       this.timerSubscription.unsubscribe();
-    if (this.observableSubscription)
-      this.observableSubscription.unsubscribe();
+    if (this.subscriptions)
+      this.subscriptions.unsubscribe();
   }
 }

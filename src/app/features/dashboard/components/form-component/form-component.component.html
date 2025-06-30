@@ -50,7 +50,7 @@
     <!-- Tags -->
     <div class="col-span-full space-y-1">
       <label for="tags" class="block text-sm font-medium text-gray-700">Tags <span class="text-red-500">*</span></label>
-      <p-autocomplete formControlName="tags" [suggestions]="filteredSuggestions" class="block w-full" id="tags"
+      <p-autocomplete formControlName="tags" [suggestions]="filteredSuggestions()" class="block w-full" id="tags"
         (completeMethod)="filterSuggestionsChips($event)" optionLabel="name" appendTo="body" completeOnFocus="true"
         multiple="true" focusOnHover="true" dataKey="name">
         <!-- [appendTo]="taskDialog" -->

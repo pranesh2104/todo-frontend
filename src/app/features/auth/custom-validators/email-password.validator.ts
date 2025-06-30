@@ -9,8 +9,8 @@ interface ICheckingState {
   setCheckingState: (checkState: string) => void;
 }
 
-interface IEmailExistState {
-  setEmailExistState: (emailState: boolean) => void;
+interface IEmailRegisterState {
+  setEmailRegisterState: (isEmailRegistered: boolean) => void;
 }
 export class CustomValidators {
 
@@ -38,7 +38,7 @@ export class CustomValidators {
     }
   }
 
-  static checkEmailExist(authService: AuthService, checkingState: ICheckingState, emailExistState: IEmailExistState, isExpectEmailExist: boolean): AsyncValidatorFn | null {
+  static checkEmailAvailability(authService: AuthService, checkingState: ICheckingState, emailRegisterState: IEmailRegisterState, isExpectEmailRegistered: boolean): AsyncValidatorFn | null {
     return (formControl: AbstractControl): Observable<ValidationErrors | null> => {
       if (formControl.pristine && formControl.value) return of(null);
       if (!formControl.value) return of(null);
@@ -48,19 +48,19 @@ export class CustomValidators {
         switchMap((email: string) => {
           if (!email) { return of(null); }
           checkingState.setCheckingState(AUTH_STATUS.EMAIL.CHECKING);
-          return authService.checkEmailExist(email).pipe(
+          return authService.checkEmailAvailable(email).pipe(
             map((checkEmailResponse: IEmailCheckResponse) => {
               checkingState.setCheckingState(AUTH_STATUS.EMAIL.CHECKED);
-              const isEmailExist = checkEmailResponse.checkEmail.code === 'EMAIL_EXIST';
+              const isEmailRegistered = checkEmailResponse.checkEmail.code === 'EMAIL_REGISTERED';
               formControl.markAsTouched();
-              emailExistState.setEmailExistState(!isEmailExist);
-              if (isExpectEmailExist && isEmailExist)
-                return { emailExists: true };
-              else if (!isEmailExist && !isExpectEmailExist)
-                return { emailNotExist: true };
+              emailRegisterState.setEmailRegisterState(isEmailRegistered);
+              if (isEmailRegistered && isExpectEmailRegistered)
+                return { emailRegistered: true };
+              else if (!isEmailRegistered && !isExpectEmailRegistered)
+                return { emailNotRegistered: true };
               return null;
             }),
-            catchError(() => { emailExistState.setEmailExistState(false); checkingState.setCheckingState(AUTH_STATUS.EMAIL.FAILED); return of(null); })
+            catchError(() => { emailRegisterState.setEmailRegisterState(false); checkingState.setCheckingState(AUTH_STATUS.EMAIL.FAILED); return of(null); })
           );
         }),
         first()

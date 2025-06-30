@@ -1,21 +1,24 @@
-<div class="flex min-h-screen bg-gray-50">
-  <div class="w-64 bg-white border-r border-gray-200 p-4">
+<!-- ! removed "min-h-screen" -->
+<div class="flex bg-gray-50">
+  <div class="w-full bg-white border-r border-gray-200 p-4 sm:w-64">
     <div class="flex items-center gap-2 mb-3">
-      <div style="display: flex;" [ngStyle]="{'background-color': userBGColor()}"
-        class="w-12 h-12 text-lg rounded-full flex items-center justify-center text-white font-semibold">
-        {{ userData()?.name?.charAt(0)?.toUpperCase() || '?' }}
-      </div>
+      <app-user-avatar size="medium" />
       <!-- <img src="" alt="Profile Image"> -->
-      <div class="w-[80%]">
-        <span>{{userData()?.name}} </span>
-        <span style="font-size: 10px;">{{userData()?.email}}</span>
+      <div class="w-4/5 flex items-center justify-between">
+        <div class="flex flex-col">
+          <span>{{currentUser().name}} </span>
+          <span style="font-size: 10px;">{{currentUser().email}}</span>
+        </div>
+        <a routerLink="profile" class="!text-black hover:!text-blue-500">
+          <i class="pi pi-cog text-base"></i>
+        </a>
       </div>
     </div>
     <div class="space-y-1">
       @for (item of filterItems;let index = $index;track $index) {
       <button class="w-full flex items-center gap-3 px-3 py-2 text-gray-700 rounded-lg" tabindex="0"
         (click)="onFilterSelect(item)"
-        [ngClass]="selectedFilterItem === item.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
+        [ngClass]="selectedFilterItem() === item.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
         <i [class]="'pi ' + 'pi-'+item.icon"></i> {{item.name}}
       </button>
       }
@@ -25,7 +28,7 @@
       <div class="space-y-1">
         @for (priority of priorities; track $index) {
         <button tabindex="0" class="w-full flex items-center gap-2 px-3 py-2 text-gray-700 rounded-lg"
-          [ngClass]="selectedFilterItem === priority.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'"
+          [ngClass]="selectedFilterItem() === priority.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'"
           (click)="onFilterPriority(priority.value)">
           <div class="w-2 h-2 rounded-full" [ngStyle]="{'background-color': priority.color}">
           </div>
@@ -42,7 +45,7 @@
         @if (tagForm) {
         <form [formGroup]="tagForm" class="flex gap-2 items-center">
           <!-- Tag name -->
-          <input id="tagName" pInputText formControlName="name" type="text"
+          <input id="name" pInputText formControlName="name" type="text"
             class="w-20 px-3 py-2 text-sm border-2 border-dashed border-gray-300 rounded-md focus:outline-none focus:border-blue-500 hover:border-gray-400 transition-colors duration-200 bg-white text-center"
             placeholder="Enter tag name..." />
           <!-- Tag Color -->
@@ -60,7 +63,7 @@
         @for (tag of tags(); track $index) {
         <button tabindex="0" class="w-full flex items-center justify-between gap-2 px-3 py-2 text-gray-700 rounded-lg"
           (click)="onFilterTag(tag?.id)"
-          [ngClass]="selectedFilterItem === tag?.id ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
+          [ngClass]="selectedFilterItem() === tag?.id ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100'">
           <div class="flex items-center gap-2">
             <div class="w-2 h-2 rounded-full" [ngStyle]="{'background-color': tag.color}"></div>
             {{tag.name}}

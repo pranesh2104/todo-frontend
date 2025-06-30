@@ -1,11 +1,8 @@
-import { inject, Injectable, TransferState } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { CREATE_TAG, CREATE_TASK, DELETE_TASK, GET_ALL_TASKS_TAGS, UPDATE_TASK_STATUS, UPDATE_TASK, DELETE_TAG } from '@core/graphql/task.query';
 import { GraphqlClientService } from '@shared/services/graphql-client.service';
 import { IAllTaskResponse, ICreateTagDetails, ICreateTaskInput, IDeleteTagInput, IDeleteTaskInput, IUpdateTaskInput, IUpdateTaskStatusInput } from '../models/task.model';
-import { TASK_KEY } from '../constants/task.state.consant';
-import { of, Observable, BehaviorSubject } from 'rxjs';
-import { IFilter } from '@core/constants/side-nav.constant';
-
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,27 +11,10 @@ export class TaskService {
 
   private graphqlClientService = inject(GraphqlClientService);
 
-  private transferState = inject(TransferState);
-
-  private filterSubject = new BehaviorSubject<IFilter>({ filterBy: 'property', property: 'all' });
-  filter$ = this.filterSubject.asObservable();
-
   constructor() { }
 
-  setFilter(filter: IFilter) {
-    this.filterSubject.next(filter);
-  }
-
   getAllTasks(): Observable<IAllTaskResponse> {
-    if (this.transferState.hasKey(TASK_KEY)) {
-      const taskData = this.transferState.get<IAllTaskResponse | null>(TASK_KEY, null);
-      if (taskData === null)
-        return this.graphqlClientService.executeWatchQuery<IAllTaskResponse>(GET_ALL_TASKS_TAGS, {});
-      return of(taskData);
-    }
-    else {
-      return this.graphqlClientService.executeWatchQuery<IAllTaskResponse>(GET_ALL_TASKS_TAGS, {});
-    }
+    return this.graphqlClientService.executeWatchQuery<IAllTaskResponse>(GET_ALL_TASKS_TAGS, {});
   }
 
   // createTask<T>(taskDetails: ICreateTaskInput) {
@@ -98,7 +78,7 @@ export class TaskService {
   // { cacheConfig: { updateStrategy: 'update', query: GET_ALL_TASKS_TAGS, listField: 'getAllTasks', responseKey: 'task' } }
 
   deleteTask<T>(taskId: string) {
-    return this.graphqlClientService.executeMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId });
+    return this.graphqlClientService.executeDeleteMutation<T, IDeleteTaskInput>(DELETE_TASK, { taskId });
   }
 
   updateTaskStatus<T>(taskStatus: IUpdateTaskStatusInput) {

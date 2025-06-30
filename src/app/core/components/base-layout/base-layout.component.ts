@@ -1,71 +1,90 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit, PLATFORM_ID, TransferState } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, inject, OnDestroy, OnInit, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
 import { Router, RouterOutlet } from '@angular/router';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
-import { isPlatformBrowser, isPlatformServer } from '@angular/common';
-import { USER_KEY } from '@core/constants/state.constant';
 import { Subscription } from 'rxjs';
-import { CoreAuthService } from '@core/services/core-auth.service';
-// import { SERVER_REQUEST } from 'server.token';
+import { DrawerModule } from 'primeng/drawer';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-base-layout',
-  imports: [SideNavComponent, RouterOutlet],
+  imports: [SideNavComponent, RouterOutlet, DrawerModule, CommonModule, ButtonModule],
   templateUrl: './base-layout.component.html',
   styleUrl: './base-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BaseLayoutComponent implements OnInit, OnDestroy {
-
+  /**
+   * Injects the UserService instance
+   */
   private readonly userService = inject(UserService);
+  /**
+   * Signal to control the visibility state of the drawer (open/close)
+   */
+  drawerVisible: WritableSignal<boolean> = signal(false);
+  /**
+   * Signal to identify whether app in Mobile or Desktop.
+   */
+  isMobile: WritableSignal<boolean> = signal(false);
+  /**
+   * Signal to manage the user data.
+   */
+  user: WritableSignal<IUserReponse> = signal<IUserReponse>({} as IUserReponse);
+  /**
+   * Inject the Router Instance.
+   */
+  private readonly router = inject(Router);
+  /**
+   * Manages observable subscriptions.
+   */
+  private subscription: Subscription = new Subscription();
 
-  private transferState = inject(TransferState);
-
-  user !: IUserReponse;
-
-  private userData = inject(CoreAuthService).user;
-
-  private platformId = inject(PLATFORM_ID);
-
-  private router = inject(Router);
-
-  // private severToken = inject(SERVER_REQUEST);
-
-  private subscription!: Subscription;
-
-  private cdr = inject(ChangeDetectorRef);
-
-  ngOnInit(): void {
-    if (this.userData && this.userData.value) {
-      this.user = this.userData.value;
-    }
-    else {
-      if (isPlatformBrowser(this.platformId)) {
-        this.subscription = this.userService.getCurrentUser().subscribe({
-          next: (res: IGetOneUserResponse) => {
-            console.log('res ', res);
-            if (isPlatformServer(this.platformId)) {
-              this.transferState.set(USER_KEY, res);
-            }
-            this.user = res.getOneUser;
-            this.cdr.markForCheck();
-          },
-          error: (error: ICommonErrorResponse) => {
-            const parsedError: ICommonResponse = JSON.parse(error.message);
-            if (parsedError.code === 'USER_NOT_FOUND') {
-              this.router.navigate(['/login']);
-            }
-          }
-        });
-      }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreen();
+      window.addEventListener('resize', () => this.checkScreen());
     }
   }
-
+  /**
+   * Fetch the User data.
+   */
+  ngOnInit(): void {
+    this.subscription = this.userService.getCurrentUser().subscribe({
+      next: (res: IGetOneUserResponse) => {
+        this.userService.currentUser.set(res.getOneUser);
+      },
+      error: (error: ICommonErrorResponse) => {
+        const parsedError: ICommonResponse = JSON.parse(error.message);
+        if (parsedError.code === 'USER_NOT_FOUND') {
+          this.router.navigate(['/signin']);
+        }
+      }
+    });
+  }
+  /**
+   * UnSubscribe the Observable streams.
+   */
   ngOnDestroy(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
+  }
+  /**
+   * Change the visibility of drawer based on screen width.
+   */
+  checkScreen(): void {
+    this.isMobile.set(window.innerWidth < 640);
+    if (!this.isMobile()) {
+      this.drawerVisible.set(false);
+    }
+  }
+  /**
+   * Update the drawer visiblity based on click.
+   */
+  toggleDrawer(): void {
+    this.drawerVisible.update(v => !v);
   }
 }

@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
 import { TaskService } from '../../services/task.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { FormArray, FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -28,8 +28,7 @@ import { FormModifyService } from '../../services/form-modify.service';
 import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
 import { isDateAfter, isSameDate } from '../../utils/date.util';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
-import { Router } from '@angular/router';
-
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-main-dashboard',
@@ -41,19 +40,52 @@ import { Router } from '@angular/router';
 })
 export class MainDashboardComponent implements OnInit {
 
-  tasks: IGetAllTask[] = [];
+  tasks = signal<IGetAllTask[]>([]);
 
-  filteredTasks: IGetAllTask[] = [];
+  filteredTasks = computed(() => {
 
-  submitting = false;
+    const filter = this.filter();
 
-  tags: ITaskTagInput[] = [];
+    const search = this.searchText().toLowerCase();
 
-  taskDialogVisible: boolean = false;
+    let tasks = this.tasks();
+
+    if (filter.filterBy === 'property') {
+      const now = new Date();
+      const filterMap: Record<FilterValues, (task: IGetAllTask) => boolean> = {
+        all: () => true,
+        important: task => task.isImportant,
+        completed: task => task.isCompleted,
+        today: task => { return task.dueDate && typeof task.dueDate === 'string' ? isSameDate(task.dueDate, now) : false; },
+        upcoming: task => { return task.dueDate && typeof task.dueDate === 'string' ? isDateAfter(task.dueDate, now) : false; }
+      };
+
+      tasks = tasks.filter(filterMap[filter.property]);
+    }
+    else if (filter.filterBy === 'tag') {
+      tasks = tasks.filter(task => task.tags?.some(t => t.id === filter.tagId));
+    }
+    else {
+      tasks = tasks.filter(task => task.priority === filter.priority);
+    }
+    if (search) {
+      tasks = tasks.filter(task =>
+        task.title.toLowerCase().includes(search) ||
+        task.description?.toLowerCase().includes(search)
+      );
+    }
+    return tasks;
+  });
+
+  submitting = signal<boolean>(false);
+
+  tags = signal<ITaskTagInput[]>([]);
+
+  taskDialogVisible = signal<boolean>(false);
 
   searchControl = new FormControl<string>('', { nonNullable: true });
 
-  isEditDialog: boolean = false;
+  isEditDialog = signal<boolean>(false);
 
   private readonly taskService = inject(TaskService);
 
@@ -65,84 +97,81 @@ export class MainDashboardComponent implements OnInit {
 
   @ViewChild('formComponent', { static: false }) formComponent !: FormComponent;
 
-  private cdr = inject(ChangeDetectorRef);
-
   headerText = signal<string>('All');
 
-  private subscribeArr = new Subscription();
+  private subscriptions = new Subscription();
 
   private router = inject(Router);
 
-  constructor() { }
+  private activedRoute = inject(ActivatedRoute);
+
+  visibleTagCount = signal(3);
+
+  private platformId = inject(PLATFORM_ID);
+
+  private filter = signal<IFilter>({} as IFilter);
+
+  searchText = signal('');
+
+  constructor() {
+    effect(() => {
+      const filter = this.filter();
+      if (filter.filterBy === 'property') {
+        const headerMap: Record<FilterValues, string> = {
+          all: 'All', important: 'Important', completed: 'Completed', today: 'Today', upcoming: 'Upcoming'
+        };
+        this.headerText.set(headerMap[filter.property] || filter.property);
+      } else if (filter.filterBy === 'tag') {
+        const tagName = this.tags().find(t => t.id === filter.tagId)?.name;
+        if (tagName) this.headerText.set(tagName);
+      } else if (filter.filterBy === 'priority') {
+        this.headerText.set(filter.priority.charAt(0).toUpperCase() + filter.priority.slice(1));
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.subscribeArr.add(this.taskService.getAllTasks().subscribe({
+
+    this.subscriptions.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
-        this.tasks = res.getAllTasks;
-        this.filteredTasks = res.getAllTasks;
-        this.tags = [...res.getAllTags];
-        this.cdr.detectChanges();
-        console.log('all task response ', res);
+        this.tasks.set(res.getAllTasks);
+        this.tags.set(res.getAllTags);
       },
       error: (error: ICommonErrorResponse) => {
         const parsedError: ICommonResponse = JSON.parse(error.message);
         if (parsedError.code === 'USER_NOT_FOUND') {
-          this.router.navigate(['/login']);
+          this.toastMessageService.add({ severity: 'warn', detail: 'For security, kindly log in again.', life: 3000, summary: 'Warning' });
+          this.router.navigate(['/signin']);
         }
-        console.error('all task error ', error);
-      }
-    }));
-
-    this.subscribeArr.add(this.taskService.filter$.pipe(distinctUntilChanged()).subscribe({
-      next: (res: IFilter) => {
-        if (!this.tasks?.length) return;
-        switch (res.filterBy) {
-          case 'tag':
-            this.handleTagFilter(res);
-            break;
-          case 'property':
-            this.handlePropertyFilter(res);
-            break;
-          case 'priority':
-            this.handlePriorityFilter(res);
-            break;
-        }
-        this.cdr.detectChanges();
       }
     }));
     this.handleSearch();
-  }
-
-  private handleTagFilter(filter: Extract<IFilter, { filterBy: 'tag' }>) {
-    const tagName = this.tags.find(t => t.id === filter.tagId)?.name;
-    if (tagName) this.headerText.update(() => tagName);
-    this.filteredTasks = this.tasks.filter(task => task.tags?.some(t => t.id === filter.tagId));
-  }
-
-  private handlePropertyFilter(filter: Extract<IFilter, { filterBy: 'property' }>) {
-    const headerMap: Record<FilterValues, string> = { all: 'All', important: 'Important', completed: 'Completed', today: 'Today', upcoming: 'Upcoming' };
-
-    this.headerText.update(() => headerMap[filter.property] || filter.property);
-    const now = new Date();
-    const filterMap: Record<FilterValues, (task: IGetAllTask) => boolean> = {
-      all: () => true,
-      important: task => task.isImportant,
-      completed: task => task.isCompleted,
-      today: task => { return task.dueDate && typeof task.dueDate === 'string' ? isSameDate(task.dueDate, now) : false; },
-      upcoming: task => { return task.dueDate && typeof task.dueDate === 'string' ? isDateAfter(task.dueDate, now) : false; }
-    };
-
-    this.filteredTasks = this.tasks.filter(filterMap[filter.property]);
-  }
-
-  private handlePriorityFilter(filter: Extract<IFilter, { filterBy: 'priority' }>) {
-    this.filteredTasks = this.tasks.filter(task => task.priority === filter.priority);
+    this.subscriptions.add(this.activedRoute.queryParams.subscribe({
+      next: (res) => {
+        if (res['property']) {
+          const value = res['property'];
+          this.filter.set({ filterBy: 'property', property: value });
+        }
+        else if (res['tag']) {
+          const value = res['tag'];
+          this.filter.set({ filterBy: 'tag', tagId: value });
+        }
+        else if (res['priority']) {
+          this.filter.set({ filterBy: 'priority', priority: res['priority'] });
+        }
+      }
+    }));
+    if (isPlatformBrowser(this.platformId)) {
+      if (window.innerWidth < 640) {
+        this.visibleTagCount.set(2);
+      }
+    }
   }
 
   onCancel(event: Event) {
     if (!this.formComponent.taskForm.dirty) {
       this.formComponent.hideTaskDialog();
-      this.taskDialogVisible = false;
+      this.taskDialogVisible.set(false);
     } else if (!isControlEmpty(this.formComponent.taskForm) && this.formComponent.taskForm.dirty) {
       this.confirmationService.confirm({
         target: event.target as EventTarget,
@@ -151,37 +180,41 @@ export class MainDashboardComponent implements OnInit {
         rejectButtonProps: { label: 'Cancel', severity: 'secondary', outlined: true },
         acceptButtonProps: { label: 'Save' },
         accept: () => {
-          if (this.isEditDialog) this.onEditSubmit();
+          if (this.isEditDialog()) this.onEditSubmit();
           else this.onSubmit();
         },
-        reject: () => { this.formComponent.hideTaskDialog(); this.taskDialogVisible = false; }
+        reject: () => { this.formComponent.hideTaskDialog(); this.taskDialogVisible.set(false); }
       })
     }
     else if (isControlEmpty(this.formComponent.taskForm)) {
       this.formComponent.hideTaskDialog();
-      this.taskDialogVisible = false;
+      this.taskDialogVisible.set(false);
     }
+  }
+
+  onResetFilter() {
+    this.router.navigate([], { relativeTo: this.activedRoute, queryParams: { property: 'all' } })
   }
 
   onSubmit() {
     const title = this.formComponent.taskForm.get('title');
     if (this.formComponent.taskForm.valid && this.formComponent.taskForm.value && title && title.value) {
       let taskInput: ICreateTaskInput = { taskDetails: convertFormToTaskDetails(this.formComponent.taskForm.value as FormTaskDetails) };
-      this.submitting = true;
+      this.submitting.set(true);
       taskInput = removeTypename(taskInput);
-      this.subscribeArr.add(this.taskService.createTask<ICommonAPIResponse<ICreateTaskResponse>>(taskInput).subscribe({
+      this.subscriptions.add(this.taskService.createTask<ICommonAPIResponse<ICreateTaskResponse>>(taskInput).subscribe({
         next: (res: ICommonAPIResponse<ICreateTaskResponse>) => {
           if (res && res['createTask'] && res['createTask'].success) {
-            this.submitting = false;
+            this.submitting.set(false);
             this.formComponent.hideTaskDialog();
-            this.taskDialogVisible = false;
+            this.taskDialogVisible.set(false);
             this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Added successfully', life: 3000 });
           }
         },
         error: () => {
-          this.submitting = false;
+          this.submitting.set(false);
           this.formComponent.hideTaskDialog();
-          this.taskDialogVisible = false;
+          this.taskDialogVisible.set(false);
           this.toastMessageService.add({ severity: 'error', detail: 'Task Added failed', life: 3000, summary: 'Error' });
         }
       }));
@@ -192,20 +225,20 @@ export class MainDashboardComponent implements OnInit {
   }
 
   onCreateTask() {
-    this.taskDialogVisible = true;
+    this.taskDialogVisible.set(true);
   }
 
   onEdit(task: IGetAllTask) {
-    this.isEditDialog = true;
-    this.taskDialogVisible = true;
-    this.formComponent.patchValue(task);
+    this.taskDialogVisible.set(true);
+    this.isEditDialog.set(true);
+    setTimeout(() => { this.formComponent.patchValue(task); }, 100);
   }
 
   onTaskStatusUpdate(task: IGetAllTask, isImportant: boolean) {
     let updateValue: { isImportant?: boolean, isCompleted?: boolean } = {};
     if (isImportant) updateValue.isImportant = !task.isImportant;
     else updateValue.isCompleted = !task.isCompleted;
-    this.subscribeArr.add(this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
+    this.subscriptions.add(this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
       next: (res) => {
         if (res && res['updateTaskStatus'] && res['updateTaskStatus'].success)
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
@@ -219,7 +252,7 @@ export class MainDashboardComponent implements OnInit {
 
   onFormSubmit(isFormSubmitted: boolean) {
     if (isFormSubmitted) {
-      if (this.isEditDialog) {
+      if (this.isEditDialog()) {
         this.onEditSubmit();
       }
       else {
@@ -234,7 +267,7 @@ export class MainDashboardComponent implements OnInit {
     }
     const id = this.formComponent.taskForm.get('id');
     if (id && id.value) {
-      const ogTask = this.tasks.find(task => task.id === id.value);
+      const ogTask = this.tasks().find(task => task.id === id.value);
       if (ogTask) {
         let simpleChanges = this.formModifyService.getChangedValues(this.formComponent.taskForm, ogTask);
         let subtaskChanges;
@@ -249,17 +282,17 @@ export class MainDashboardComponent implements OnInit {
 
         // simpleChanges = removeTypename(simpleChanges);
         simpleChanges.tags = removeDuplicateTag(simpleChanges.tags, ogTask.tags || []);
-        this.subscribeArr.add(this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
+        this.subscriptions.add(this.taskService.updateTask<ICommonAPIResponse<IGetAllTask>>({ updateTaskDetails: { id: id.value, ...simpleChanges, subTask: subtaskChanges } }).subscribe({
           next: (res) => {
             if (res && res['updateTask'] && res['updateTask'].success) {
               this.formComponent.hideTaskDialog();
-              this.taskDialogVisible = false;
+              this.taskDialogVisible.set(false);
               this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
             }
           },
           error: () => {
             this.formComponent.hideTaskDialog();
-            this.taskDialogVisible = false;
+            this.taskDialogVisible.set(false);
             this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Updated Failed', life: 2000 });
           }
         }));
@@ -268,7 +301,7 @@ export class MainDashboardComponent implements OnInit {
   }
 
   onDelete(taskId: string) {
-    this.subscribeArr.add(this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
+    this.subscriptions.add(this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
       next: (res) => {
         if (res && res['deleteTask'] && res['deleteTask'].success)
           this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Deleted successfully', life: 3000 });
@@ -288,25 +321,14 @@ export class MainDashboardComponent implements OnInit {
   }
 
   handleSearch() {
-    this.subscribeArr.add(this.searchControl.valueChanges.pipe(debounceTime(1500), distinctUntilChanged()).subscribe({
+    this.subscriptions.add(this.searchControl.valueChanges.pipe(debounceTime(1500), distinctUntilChanged()).subscribe({
       next: (searchText) => {
-        const trimmedText = typeof searchText === 'string' ? searchText.trim() : '';
-        if (!trimmedText) {
-          this.filteredTasks = this.tasks;
-        } else {
-          this.filteredTasks = this.tasks.filter(task =>
-            task.title.toLowerCase().includes(trimmedText.toLowerCase()) ||
-            task.description?.toLowerCase().includes(trimmedText.toLowerCase())
-          );
-        }
-        console.log('inside Handle Search');
-
-        this.cdr.detectChanges();
+        this.searchText.set(typeof searchText === 'string' ? searchText.trim() : '');
       }
     }));
   }
 
   ngOnDestroy(): void {
-    this.subscribeArr.unsubscribe();
+    this.subscriptions.unsubscribe();
   }
 }

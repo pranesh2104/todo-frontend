@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { IGetAllTask, ISubTaskForm, ISubTaskInput, ITaskForm, ITaskTagInput } from '../../models/task.model';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -23,9 +23,10 @@ import { PRIORITIES } from '@core/constants/common.constant';
   selector: 'app-form-component',
   imports: [CommonModule, AutoCompleteModule, ButtonModule, ChipModule, Message, MultiSelectModule, ColorPickerModule, AccordionModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
   templateUrl: './form-component.component.html',
-  styleUrl: './form-component.component.scss'
+  styleUrl: './form-component.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
 
   tags = input<ITaskTagInput[]>();
 
@@ -39,17 +40,11 @@ export class FormComponent {
 
   priorities = PRIORITIES;
 
-  filteredSuggestions: ITaskTagInput[] = [];
-
-  isEditDialog: boolean = false;
+  filteredSuggestions = signal<ITaskTagInput[]>([]);
 
   today: Date = new Date();
 
   minDate: Date = new Date();
-
-  taskDialogVisible: boolean = false;
-
-  tagDialogVisible: boolean = false;
 
   constructor(private fb: FormBuilder) { }
 
@@ -119,7 +114,7 @@ export class FormComponent {
     const query = event.query.toLowerCase();
     const tags = this.tags();
     if (tags && tags.length) {
-      this.filteredSuggestions = tags.filter(item => item.name && item.name.toLowerCase().includes(query));
+      this.filteredSuggestions.set(tags.filter(item => item.name && item.name.toLowerCase().includes(query)));
     }
   }
 
@@ -148,7 +143,6 @@ export class FormComponent {
   }
 
   public hideTaskDialog() {
-    this.taskDialogVisible = false;
     this.taskForm.reset();
     while (this.subTasks.length) {
       this.subTasks.removeAt(0);

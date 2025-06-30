@@ -19,7 +19,7 @@ export interface IEmailCheckResponse {
 }
 
 interface ICheckEmail {
-  code: 'EMAIL_EXIST' | 'EMAIL_NOT_EXIST';
+  code: 'EMAIL_REGISTERED' | 'EMAIL_NOT_REGISTERED';
   message: string;
   success: true;
 }
@@ -53,7 +53,7 @@ export interface IEmailCommonState {
   status: string;
   isVerified?: boolean;
   isChangeEnabled?: boolean;
-  isEmailAvailable: boolean;
+  isEmailRegistered: boolean;
 }
 
 interface IOTPCommonState {

@@ -1,15 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
-@import "https://fonts.googleapis.com/css?family=Montserrat";
+@import "https://fonts.googleapis.com/css?family=Inter";
 @import "primeicons/primeicons.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer primeng {
-  :root {
-    --primary-color: #2563eb;
-    --primary-color-text: white;
-    --surface-hover: rgba(37, 99, 235, 0.1);
+@layer base {
+  body {
+    @apply font-sans;
+  }
+
+  a {
+    @apply text-blue-500 font-semibold hover:text-blue-600
+  }
+}
+
+@layer utilities {
+  .er-m {
+    color: #f44336;
   }
 }
 
@@ -20,7 +28,34 @@ body {
 
 body {
   margin: 0;
-  font-family: 'Montserrat', sans-serif;
+}
+
+
+.thin-stroke {
+  font-variation-settings:
+    'GRAD' -25,
+    'wght' 400;
+}
+
+/* WebKit Browsers */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
 .flex-column {

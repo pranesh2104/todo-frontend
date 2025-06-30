@@ -54,6 +54,7 @@ export const CREATE_TASK = `mutation CreateTask($taskDetails: CreateTaskInput) {
       }
       title
       updatedAt
+      isImportant
       subTasks {
         id
         comment

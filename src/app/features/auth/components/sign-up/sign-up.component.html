@@ -1,174 +1,187 @@
-<div class="flex-row align-center-center signup-parent w-full h-full">
-  @if (signupForm) {
-  <p-card class="signup-card-container">
-    <ng-template #header>
-      <div class="flex-column align-center-center">
-        <h3>Create Your Account</h3>
-        <span style="margin-bottom: 10px;">Have an account? <a class="anchorTag" href="./login">Login
-            now</a></span>
-      </div>
-    </ng-template>
-    <form [formGroup]="signupForm" class="flex-column align-center-center gap-3.2" style="gap: 15px;">
-      <div>
-        <p-iconfield>
-          <p-inputicon styleClass="pi pi-user" />
-          <input pInputText id="first-name" formControlName="name" type="text" placeholder="First Name"
-            autocomplete="name" />
-        </p-iconfield>
-        @if (signupForm.get('name')?.dirty && signupForm.get('name')?.hasError('required')) {
-        <p-message severity="error" variant="simple" size="small" hideTransitionOptions="0ms"
-          showTransitionOptions="0ms">First name is
-          required</p-message>
-        }
-        @else if (signupForm.get('name')?.dirty && !signupForm.get('name')?.hasError('required') &&
-        signupForm.get('name')?.hasError('pattern')) {
-        <p-message severity="error" variant="simple" size="small" hideTransitionOptions="0ms"
-          showTransitionOptions="0ms">Invalid First
-          Name!</p-message>
-        }
-      </div>
-      <div>
-        <p-iconfield class="w-full">
-          <p-inputicon styleClass="pi pi-envelope" />
-          <input type="text" id="email" pInputText formControlName="email" placeholder="Email" autocomplete="email" />
-          @if (state.email.status === AUTH_STATUS.EMAIL.CHECKING) {
-          <p-inputicon styleClass="pi pi-spinner pi-spin" />
-          }
-          @else if (state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailAvailable === true &&
-          signupForm.get('email')?.value) {
-          <p-inputicon styleClass="pi pi-check" style="color: limegreen;" />
-          }
-          @else if(state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailAvailable === false &&
-          signupForm.get('email')?.value) {
-          <p-inputicon styleClass="pi pi-times" style="color: lightcoral;" />
-          }
-        </p-iconfield>
-        @if (signupForm.get('email')?.hasError('required') && signupForm.get('email')?.dirty) {
-        <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple"
-          size="small"> Email is required!</p-message>
-        }
-        @else if (signupForm.get('email')?.hasError('pattern') && signupForm.get('email')?.dirty) {
-        <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple"
-          size="small"> Invalid Email!</p-message>
-        }
-        @else if (signupForm.get('email')?.hasError('emailExists') && signupForm.get('email')?.dirty) {
-        <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple"
-          size="small"> This email is already registered</p-message>
-        }
-        @else if (signupForm.get('email')?.hasError('isOTPSendError') && signupForm.get('email')?.dirty) {
-        <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple"
-          size="small"> There is error while sending OTP, Kindly verify
-          email!!</p-message>
-        }
-      </div>
-      @if(!isOTPResending && !showPasswordFields() && state.otp.status !== AUTH_STATUS.OTP.SENT || state.otp.status ===
-      AUTH_STATUS.OTP.ERROR ||
-      state.otp.status === AUTH_STATUS.OTP.EXPIRED){
-      @if(state.otp.status === AUTH_STATUS.OTP.EXPIRED){
-      <span style="color: #f44336;">Verification code has expired. Please request a new one or Change Email!.</span>
+@if (signupForm) {
+<div class="flex flex-col items-center justify-center signup-parent w-full bg-white p-12">
+  <div class="flex flex-col items-center justify-center mb-4">
+    <h1 class="text-3xl font-bold text-blue-600 mb-1 font-sans">Task Tide</h1>
+    <p class="text-lg font-medium text-blue-400 mb-8">Ride the wave of productivity</p>
+    <h3 class="text-2xl font-medium mb-2">Create Your Account</h3>
+    <span class="mb-3 text-gray-400">Have an account? <a [routerLink]="['/signin']">Login
+        now</a></span>
+  </div>
+  <form [formGroup]="signupForm" class="flex flex-col justify-center items-center gap-4">
+    <div>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-user" />
+        <input pInputText id="first-name" formControlName="name" type="text" placeholder="Name" autocomplete="name" />
+      </p-iconfield>
+      @if (signupForm.get('name')?.dirty && signupForm.get('name')?.hasError('required')) {
+      <p-message severity="error" variant="simple" size="small" hideTransitionOptions="0ms"
+        showTransitionOptions="0ms">Name is
+        required</p-message>
       }
-      <div style="gap: 10px;" class="flex-row align-center-center w-full gap-2">
-        @if (state.otp.status === AUTH_STATUS.OTP.EXPIRED) {
-        <p-button label="Change Email" (click)="onChangeEmail()" />
-        }
-        <p-button [label]="state.otp.status === AUTH_STATUS.OTP.SENDING ? 'Sending OTP...' : 'Send OTP'"
-          (click)="onSendOTP()" [raised]="true" icon="pi pi-send" iconPos="right"
-          [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
-      </div>
+      @else if (signupForm.get('name')?.dirty && !signupForm.get('name')?.hasError('required') &&
+      signupForm.get('name')?.hasError('pattern')) {
+      <p-message severity="error" variant="simple" size="small" hideTransitionOptions="0ms"
+        showTransitionOptions="0ms">Invalid First
+        Name!</p-message>
       }
-      @if (showPasswordFields()) {
-      <div>
-        <p-iconfield>
-          <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
-          <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password"
-            [feedback]="false" />
-        </p-iconfield>
-        @if (signupForm.get('password')?.hasError('required')) {
-        <p-message severity="error" variant="simple" size="small"> Password is required!</p-message>
+    </div>
+    <div>
+      <p-iconfield class="w-full">
+        <p-inputicon styleClass="pi pi-envelope" />
+        <input type="text" id="email" pInputText formControlName="email" placeholder="Email" autocomplete="email" />
+        @if (state.email.status === AUTH_STATUS.EMAIL.CHECKING) {
+        <p-inputicon styleClass="pi pi-spinner pi-spin" />
         }
-        @else if (signupForm.get('password')?.hasError('pattern')) {
-        <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
+        @else if (state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === false &&
+        signupForm.get('email')?.value) {
+        <p-inputicon styleClass="pi pi-check" style="color: limegreen;" />
         }
-      </div>
-      <div>
-        <p-iconfield>
-          <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
-          <p-password id="repeatPassword" formControlName="repeatPassword" [toggleMask]="true" class="w-full"
-            placeholder="Repeat Password" [feedback]="false" />
-        </p-iconfield>
-        @if (signupForm.get('repeatPassword')?.hasError('required')) {
-        <p-message severity="error" variant="simple" size="small"> Password is required!</p-message>
+        @else if(state.email.status === AUTH_STATUS.EMAIL.CHECKED && state.email.isEmailRegistered === true &&
+        signupForm.get('email')?.value) {
+        <p-inputicon styleClass="pi pi-times" style="color: lightcoral;" />
         }
-        @else if (signupForm.get('repeatPassword')?.hasError('pattern')) {
-        <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
-        }
-        @else if (signupForm.get('repeatPassword')?.value && signupForm.get('repeatPassword')?.hasError('notMatching')
-        && signupForm.get('repeatPassword')?.touched) {
-        <p-message severity="error" variant="simple" size="small">Password do not match! </p-message>
-        }
-      </div>
+      </p-iconfield>
+      @if (signupForm.get('email')?.hasError('required') && signupForm.get('email')?.dirty) {
+      <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple" size="small">
+        Email is required!</p-message>
       }
-      @else if (state.otp.status === AUTH_STATUS.OTP.SENT && state.otp.status !== AUTH_STATUS.OTP.EXPIRED ||
-      isOTPResending) {
-      @if (canResendOTP()) {
-      <span style="color: #f44336;">Maximum attempts reached. Please try with same or different email.</span>
+      @else if (signupForm.get('email')?.hasError('pattern') && signupForm.get('email')?.dirty) {
+      <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple" size="small">
+        Invalid Email!</p-message>
       }
-      @else if(!isEmailChangeEnabled){
-      <span style="color: gray;font-size: 15px;">A verification code has been sent to your email</span>
+      @else if (signupForm.get('email')?.hasError('emailRegistered') && signupForm.get('email')?.dirty) {
+      <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple" size="small">
+        This email is already registered</p-message>
       }
-      @if(state.otp.status === AUTH_STATUS.OTP.ERROR){
-      <span style="color: #f44336;">Something went wrong, please try again later.</span>
+      @else if (signupForm.get('email')?.hasError('isOTPSendError') && signupForm.get('email')?.dirty) {
+      <p-message hideTransitionOptions="0ms" showTransitionOptions="0ms" severity="error" variant="simple" size="small">
+        There is error while sending OTP, Kindly verify
+        email!!</p-message>
       }
-      @if (!isEmailChangeEnabled) {
-      <div class="flex-column align-center-center gap-2">
-        <p-inputotp formControlName="otp" [length]="6" [integerOnly]="true" [disabled]="state.otp.isDisabled" />
-        @if (showOTPError()) {
-        <p-message severity="error" variant="simple" size="small"> {{ state.otp.error }}</p-message>
-        }
-      </div>
+    </div>
+    @if(!isOTPResending && !showPasswordFields() && state.otp.status !== AUTH_STATUS.OTP.SENT || state.otp.status ===
+    AUTH_STATUS.OTP.ERROR ||
+    state.otp.status === AUTH_STATUS.OTP.EXPIRED){
+    @if(state.otp.status === AUTH_STATUS.OTP.EXPIRED){
+    <span style="color: #f44336;">Verification code has expired. Please request a new one or Change Email!.</span>
+    }
+    <div class="flex justify-center items-center w-full gap-2">
+      @if (state.otp.status === AUTH_STATUS.OTP.EXPIRED) {
+      <p-button label="Change Email" (click)="onChangeEmail()" />
       }
-      <div style="gap: 10px;" class="flex-row align-center-center w-full gap-10px">
-        @if (state.otp.remainingAttempts !== 0 && !isEmailChangeEnabled) {
-        <p-button [label]=" state.otp.isSubmitting ? 'Verifying...' : 'Verify OTP'" [raised]="true"
-          (click)="onVerifyOTP();"
-          [disabled]="signupForm.get('otp')?.invalid  || state.otp.isSubmitting || isOTPResending" />
-        }
-        @if (canResendOTP() || isEmailChangeEnabled) {
-        <p-button [label]="isOTPResending ? 'Resending OTP...' :'Resend OTP'" [raised]="true"
-          (click)="isOTPResending = true;onSendOTP();signupForm.get('otp')?.reset();" icon="pi pi-send" iconPos="right"
-          [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
-        }
-        <!-- @if (canResendOTP()) { -->
-        <p-button label="Change Email" (click)="onChangeEmail()" [raised]="true" />
-        <!-- } -->
-      </div>
+      <p-button [label]="state.otp.status === AUTH_STATUS.OTP.SENDING ? 'Sending OTP...' : 'Send OTP'"
+        (click)="onSendOTP()" [raised]="true" icon="pi pi-send" iconPos="right"
+        [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" />
+    </div>
+    }
+    @if (showPasswordFields()) {
+    <div>
+      <p-iconfield>
+        <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
+        <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password">
+          <ng-template #header>
+            <div class="font-semibold text-xm mb-4">Pick a password</div>
+          </ng-template>
+          <ng-template #footer>
+            <p-divider />
+            <ul class="pl-2 ml-2 my-0 leading-normal">
+              <li>At least one lowercase</li>
+              <li>At least one uppercase</li>
+              <li>At least one numeric</li>
+              <li>Minimum 8 characters</li>
+            </ul>
+          </ng-template>
+        </p-password>
+        <!-- <p-password id="password" formControlName="password" [toggleMask]="true" class="w-full" placeholder="Password"
+            [feedback]="false" /> -->
+      </p-iconfield>
+      @if (signupForm.get('password')?.hasError('required')) {
+      <p-message severity="error" variant="simple" size="small"> Password is required!</p-message>
       }
-      @if (showPasswordFields()) {
-      <div class="flex-row align-center-center">
-        <p-button label="Sign Up" (click)="onUserRegister()" [raised]="true"
-          [disabled]="state.otp.status !== AUTH_STATUS.OTP.VERIFIED" />
-      </div>
+      @else if (signupForm.get('password')?.hasError('pattern')) {
+      <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
       }
-    </form>
-  </p-card>
-  }
+    </div>
+    <div>
+      <p-iconfield>
+        <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
+        <p-password id="repeatPassword" formControlName="repeatPassword" [toggleMask]="true" class="w-full"
+          placeholder="Repeat Password" [feedback]="false" />
+      </p-iconfield>
+      @if (signupForm.get('repeatPassword')?.hasError('required')) {
+      <p-message severity="error" variant="simple" size="small"> Password is required!</p-message>
+      }
+      @else if (signupForm.get('repeatPassword')?.hasError('pattern')) {
+      <p-message severity="error" variant="simple" size="small">Invalid Password! </p-message>
+      }
+      @else if (signupForm.get('repeatPassword')?.value && signupForm.get('repeatPassword')?.hasError('notMatching')
+      && signupForm.get('repeatPassword')?.touched) {
+      <p-message severity="error" variant="simple" size="small">Password do not match! </p-message>
+      }
+    </div>
+    }
+    @else if (state.otp.status === AUTH_STATUS.OTP.SENT && state.otp.status !== AUTH_STATUS.OTP.EXPIRED ||
+    isOTPResending) {
+    @if (canResendOTP()) {
+    <span class="er-m">Maximum attempts reached. Please try with same or different email.</span>
+    }
+    @else if(!isEmailChangeEnabled){
+    <span style="color: gray;font-size: 15px;">A verification code has been sent to your email</span>
+    }
+    @if(state.otp.status === AUTH_STATUS.OTP.ERROR){
+    <span class="er-m">Something went wrong, please try again later.</span>
+    }
+    @if (!isEmailChangeEnabled) {
+    <div class="flex flex-col justify-center items-center gap-2">
+      <p-inputotp formControlName="otp" [length]="6" [integerOnly]="true" [disabled]="state.otp.isDisabled" />
+      @if (showOTPError()) {
+      <p-message severity="error" variant="simple" size="small"> {{ state.otp.error }}</p-message>
+      }
+    </div>
+    }
+    <div style="gap: 10px;" class="flex items-center justify-center w-full">
+      @if (state.otp.remainingAttempts !== 0 && !isEmailChangeEnabled) {
+      <p-button [label]=" state.otp.isSubmitting ? 'Verifying...' : 'Verify OTP'" [raised]="true"
+        (click)="onVerifyOTP();" [disabled]="!signupForm.valid"
+        [disabled]="signupForm.get('otp')?.invalid  || state.otp.isSubmitting || isOTPResending" />
+      }
+      @if (canResendOTP() || isEmailChangeEnabled) {
+      <p-button [label]="isOTPResending ? 'Resending OTP...' :'Resend OTP'" [raised]="true"
+        (click)="isOTPResending = true;onSendOTP();signupForm.get('otp')?.reset();" icon="pi pi-send" iconPos="right"
+        [loading]="state.otp.status === AUTH_STATUS.OTP.SENDING" [disabled]="!signupForm.valid" />
+      }
+      <!-- @if (canResendOTP()) { -->
+      <p-button label="Change Email" (click)="onChangeEmail()" [raised]="true" />
+      <!-- } -->
+    </div>
+    }
+    @if (showPasswordFields()) {
+    <div class="flex justify-center items-center">
+      <p-button label="Sign Up" (click)="onUserRegister()" [raised]="true" type="submit"
+        [disabled]="state.otp.status !== AUTH_STATUS.OTP.VERIFIED" [disabled]="!signupForm.valid" />
+    </div>
+    }
+  </form>
 </div>
+}
 
 <p-toast position="top-center" key="registrationSuccess" [baseZIndex]="1000" (onClose)="onClose($event)">
   <ng-template let-message #headless>
-    <section class="flex-column align-center-center w-full"
-      style="border-radius: 10px;border: 2px solid var(--p-primary-color);padding: 20px;background-color: white;gap: 15px;">
+    <section class="flex flex-col items-center justify-center w-full p-5 bg-white gap-4"
+      style="border-radius: 10px;border: 2px solid var(--p-primary-color);">
       <div style="width: 60px;height: 60px;border-radius: 50%;border: 2px solid springgreen;"
-        class="flex-row align-center-center">
+        class="flex justify-center items-center">
         <i class="pi pi-check" style="font-size: 2rem;color: var(--p-primary-color);"></i>
       </div>
-      <h1 style="font-size: 20px;font-weight: bold;">Registration Successful!</h1>
-      <p style="text-align: center;">Welcome aboard! Your account has been created successfully.</p>
+      <h1 class="font-bold text-xl">Registration Successful!</h1>
+      <p class="text-center">Welcome aboard! Your account has been created successfully.</p>
       <span>You will be redirect to Dashboard in {{timer}} seconds</span>
-      <div class="flex-row align-center-center" style="gap: 15px;">
+      <div class="flex justify-center items-center gap-4">
         <p-button label="Dashboard" (click)="onRedirect('app/dashboard')" severity="primary" />
-        <p-button label="login" (click)="onRedirect('login')" severity="secondary" />
+        <p-button label="Signin" (click)="onRedirect('signin')" severity="secondary" />
       </div>
     </section>
   </ng-template>
 </p-toast>
+
+<p-toast />

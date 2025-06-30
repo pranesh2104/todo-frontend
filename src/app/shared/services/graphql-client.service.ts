@@ -39,7 +39,19 @@ type UpdatedData = {
 export class GraphqlClientService {
 
   constructor(private apollo: Apollo) { }
-
+  /**
+   * Executes a one-time GraphQL query and returns an Observable of the typed data.
+   * 
+   * @template T - The expected shape of the query result data.
+   * @param query - The GraphQL query string.
+   * @param variables - An object containing the query variables.
+   * @returns Observable<T> emitting the query result data.
+   * 
+   * Uses:
+   * - `fetchPolicy: 'network-only'` to bypass cache and always fetch fresh data.
+   * - `errorPolicy: 'all'` to allow handling partial errors if needed.
+   * - Uses a custom response handler to extract the `data` field or throw an error if missing.
+   */
   executeQuery<T>(query: string, variables: { [key: string]: any }): Observable<T> {
     return this.apollo.query<T>({
       query: gql`${query}`,
@@ -48,27 +60,78 @@ export class GraphqlClientService {
       fetchPolicy: 'network-only',
     }).pipe(map(this.handleResponse));
   }
-
+  /**
+   * Executes a watched GraphQL query returning an Observable that emits on data changes.
+   * 
+   * @template T - The expected shape of the query result data.
+   * @param query - The GraphQL query string.
+   * @param variables - An object containing the query variables.
+   * @returns Observable<T> emitting the latest query result data on changes.
+   * 
+   * This method uses Apollo's `watchQuery` for reactive updates.
+   */
   executeWatchQuery<T>(query: string, variables: { [key: string]: any }): Observable<T> {
     return this.apollo.watchQuery<T>({
       query: gql`${query}`,
       variables: variables,
     }).valueChanges.pipe(map(response => this.handleResponse<T>(response)));
   }
-
+  /**
+   * Helper to extract the `data` property from Apollo query/mutation results,
+   * throwing an error if no data is present.
+   * 
+   * @template T - The expected data shape.
+   * @param response - ApolloQueryResult<T> or MutationResult<T>
+   * @returns The `data` property of the response.
+   * @throws Error if `data` is missing or falsy.
+   */
   private handleResponse<T>(response: ApolloQueryResult<T> | MutationResult<T>): T {
     if (response && response.data) {
       return response.data;
     }
     throw new Error('No data received');
   }
-
+  /**
+   * Executes a GraphQL mutation and returns an Observable of the mutation result data.
+   * 
+   * @template T - The expected mutation result shape.
+   * @template V - The variables object shape.
+   * @param mutation - The GraphQL mutation string.
+   * @param variables - The variables to pass to the mutation.
+   * @param options - Optional object for cache update config.
+   * @returns Observable<T> emitting the mutation result data.
+   * 
+   * Optionally accepts a cache update configuration to update Apollo cache after mutation.
+   */
   executeMutation<T, V extends Record<string, any>>(mutation: string, variables: V, options?: { cacheConfig?: CacheUpdateOptions<T>; }): Observable<T> {
     return this.apollo.mutate<T>({
       mutation: gql`${mutation}`,
       variables,
       fetchPolicy: 'network-only',
       ...(options?.cacheConfig && { update: this.createCacheUpdater<T>(options.cacheConfig, variables) })
+    }).pipe(
+      map(response => this.handleResponse<T>(response))
+    );
+  }
+  /**
+   * Executes a GraphQL mutation specifically for deletion and handles cache eviction.
+   * 
+   * @template T - The expected mutation result shape.
+   * @template V - The variables object shape.
+   * @param mutation - The GraphQL mutation string for deletion.
+   * @param variables - The variables to pass to the mutation. Must include `taskId` to evict from cache.
+   * @returns Observable<T> emitting the mutation result data.
+   * 
+   * This method evicts the deleted entity from Apollo cache using `cache.evict` and runs garbage collection.
+   */
+  executeDeleteMutation<T, V extends Record<string, any>>(mutation: string, variables: V): Observable<T> {
+    return this.apollo.mutate<T>({
+      mutation: gql`${mutation}`,
+      variables,
+      update: (cache, { data }) => {
+        cache.evict({ id: cache.identify({ __typename: 'TaskResponse', id: variables['taskId'] }) });
+        cache.gc();
+      }
     }).pipe(
       map(response => this.handleResponse<T>(response))
     );

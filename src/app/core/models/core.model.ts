@@ -6,11 +6,16 @@ export interface ICustomGraphQLError extends GraphQLFormattedError {
   stacktrace?: string[] | null;
 }
 
-
 export interface DecodedToken {
   sub: string;
   exp: number;
   jti: string;
   type: string;
   iat: number;
+}
+
+export interface IPRIORITY {
+  name: string;
+  value: string;
+  color: string;
 }

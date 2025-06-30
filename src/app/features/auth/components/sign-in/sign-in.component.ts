@@ -1,26 +1,24 @@
 import { Component, inject, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EMAIL_PATTERN, PASSWORD_PATTERN, SIGNIN_API_RESPONSE_CODE } from '../../constants/auth.constant';
-import { CardModule } from 'primeng/card';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';
 import { Message } from 'primeng/message';
 import { Password } from 'primeng/password';
 import { Button } from 'primeng/button';
-import { CoreAuthService } from '@core/services/core-auth.service';
 import { AuthService } from '../../services/auth.service';
 import { ICommonErrorResponse, ICommonResponse } from '@shared/models/shared.model';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { ILoginSuccessResponse } from '../../models/auth.model';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HeaderService } from '@core/services/header.service';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [ReactiveFormsModule, Toast, CardModule, IconField, InputIcon, InputText, Message, Password, Button],
+  imports: [ReactiveFormsModule, Toast, IconField, InputIcon, InputText, Message, Password, Button, RouterLink],
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.scss',
   providers: [MessageService]
@@ -34,8 +32,6 @@ export class SignInComponent implements OnDestroy {
 
   isPasswordVisible: boolean = false;
 
-  private readonly coreAuthService = inject(CoreAuthService);
-
   private readonly headerService = inject(HeaderService);
 
   private readonly authService = inject(AuthService);
@@ -44,18 +40,17 @@ export class SignInComponent implements OnDestroy {
 
   private readonly router = inject(Router);
 
-  private obervableSubscription: Subscription = new Subscription();
+  private subscriptions: Subscription = new Subscription();
 
   onLogin() {
     const emailFormControl = this.signInForm.get('email');
     const passwordFormControl = this.signInForm.get('password');
     if (emailFormControl && passwordFormControl && emailFormControl.valid && passwordFormControl.valid) {
       this.headerService.setHeaders('Registration', `${emailFormControl.value}:${passwordFormControl.value}`);
-      this.obervableSubscription.add(this.authService.login().subscribe({
+      this.subscriptions.add(this.authService.login().subscribe({
         next: (loginResponse: ILoginSuccessResponse) => {
           if (loginResponse && loginResponse.login) {
             this.headerService.removeHeader('Registration');
-            this.coreAuthService.user.next(loginResponse.login.user);
             this.router.navigate(['/app/dashboard']);
           }
         },
@@ -64,6 +59,7 @@ export class SignInComponent implements OnDestroy {
           if (parsedError) {
             if (parsedError.code === SIGNIN_API_RESPONSE_CODE.USER_NOT_FOUND) {
               this.signInForm.get('email')?.setErrors({ userNotFound: true });
+              this.toastService.add({ severity: 'info', detail: 'Email not found. Please check your email or create a new account.', life: 4000, summary: 'Sign In Failed' });
             }
             else if (parsedError.code === SIGNIN_API_RESPONSE_CODE.PASSWORD_MISMATCH) {
               this.signInForm.get('password')?.setErrors({ passwordMismatch: true });
@@ -82,8 +78,8 @@ export class SignInComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.obervableSubscription) {
-      this.obervableSubscription.unsubscribe();
+    if (this.subscriptions) {
+      this.subscriptions.unsubscribe();
     }
   }
 }
