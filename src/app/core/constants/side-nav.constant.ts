@@ -26,6 +26,6 @@ export const SIDE_NAV_ITEMS = [
   {
     name: 'Completed',
     value: 'completed' as FilterValues,
-    icon: 'folder'
+    icon: 'check-circle'
   },
 ]

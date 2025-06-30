@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, Signal, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PRIORITIES } from '@core/constants/common.constant';
 import { FilterValues, SIDE_NAV_ITEMS } from '@core/constants/side-nav.constant';
 import { UserService } from '@core/services/user.service';
@@ -71,6 +71,8 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * Inject the Router instance.
    */
   private router = inject(Router);
+
+  private activedRoute = inject(ActivatedRoute);
   /**
    * Fetch the tag data.
    */
@@ -89,14 +91,14 @@ export class SideNavComponent implements OnInit, OnDestroy {
    * Update the Selected filter item value initial time.
    */
   updateSelectedFilterItem(): void {
-    const queryParams = this.router.url.split('?')[1];
-    if (!queryParams) {
-      this.selectedFilterItem.set('all');
-    }
-    else {
-      const item = queryParams.split('=')[1];
-      this.selectedFilterItem.set(item);
-    }
+    this.subscriptions.add(this.activedRoute.queryParams.subscribe({
+      next: (res) => {
+        if (res)
+          this.selectedFilterItem.set(Object.values(res)[0]);
+        else
+          this.selectedFilterItem.set('all');
+      }
+    }));
   }
   /**
    * Change the Route based on the selected item.

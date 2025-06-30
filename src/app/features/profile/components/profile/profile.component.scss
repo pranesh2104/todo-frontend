@@ -1,7 +1,9 @@
 ::ng-deep p-password .p-password-input {
-  width: 450px;
-  max-width: 450px;
   padding-inline-start: calc((var(--p-form-field-padding-x)* 2) + var(--p-icon-size));
+}
+
+::ng-deep .p-password {
+  width: 100%;
 }
 
 :host ::ng-deep .p-message.p-message-warn .p-message-text {

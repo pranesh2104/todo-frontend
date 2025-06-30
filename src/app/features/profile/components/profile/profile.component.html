@@ -1,4 +1,4 @@
-<div class="p-8">
+<div class="sm:p-8">
   <div class="mb-5">
     <h2 class="text-3xl font-bold mb-2">Profile Settings</h2>
     <p class="text-gray-500">Manage your account settings and preferences</p>
@@ -11,9 +11,9 @@
       <h3 class="text-xl font-semibold">Personal Information</h3>
       <p-divider class="!m-2" />
       <div class="flex flex-col">
-        <!-- Name -->
-        <div class="flex gap-3 items-center justify-center mt-3 w-full">
-          <div class="w-1/2">
+        <div class="flex flex-col  gap-3 items-center justify-center mt-3 w-full sm:flex-row">
+          <!-- Name -->
+          <div class="w-full flex-1 sm:w-1/2">
             <h4 class="mb-1">Name</h4>
             <p-iconfield>
               <p-inputicon styleClass="pi pi-user" />
@@ -21,13 +21,14 @@
                 autocomplete="name" />
             </p-iconfield>
             <div class="form-error-container"></div>
+            <p-button label="Save Changes" (onClick)="onSaveChanges()"></p-button>
           </div>
           <!-- Email -->
-          <div class="w-1/2 flex flex-col items-start">
+          <div class="w-full flex flex-col items-start sm:w-1/2">
             <h4 class="mb-1">Email</h4>
-            <div class="flex flex-wrap w-full gap-4 items-center">
-              <!-- Input Field with Icons -->
-              <div class="flex flex-col flex-1 min-w-[200px]">
+            <div class="flex flex-col w-full items-start sm:items-end ">
+              <!-- Input Field -->
+              <div class="flex flex-col flex-1 w-full">
                 <p-iconfield>
                   <p-inputicon styleClass="pi pi-envelope" />
                   <input type="text" id="email" pInputText formControlName="email" placeholder="Email"
@@ -79,11 +80,11 @@
               </div>
               <!-- Change Button -->
               @if (emailState().status === PROFILE_STATUS.EMAIL.INITIAL || emailState().isRegistered ===
-              true || emailState().status === PROFILE_STATUS.EMAIL.CHECKING) {
+              true || emailState().status === PROFILE_STATUS.EMAIL.CHECKING || !userForm.get('email')?.valid) {
               <div>
                 <p-button class="w-auto" (onClick)="onEmailPassword()" label="Change"
                   [disabled]="emailTimeLeft() > 0" />
-                <div class="form-error-container"></div>
+                <!-- <div class="form-error-container hidden sm:block"></div> -->
               </div>
               }
               <!-- Send Link Button -->
@@ -93,22 +94,21 @@
                 <p-button class="w-auto" (onClick)="onRequestEmailVerification()"
                   [loading]="linkState() === PROFILE_STATUS.LINK.SENDING"
                   [label]="linkState() === PROFILE_STATUS.LINK.SENDING ? 'Sending...' : 'Send Link'" />
-                <div class="form-error-container"></div>
+                <!-- <div class="form-error-container hidden sm:block"></div> -->
               </div>
               }
             </div>
           </div>
         </div>
-        <p-button label="Save Changes" (onClick)="onSaveChanges()"></p-button>
       </div>
     </p-card>
     <!-- Paassword section -->
     <p-card>
       <h3 class="text-xl font-semibold">Change Password</h3>
       <p-divider class="!m-2" />
-      <div class="flex flex-col mt-3 mb-5">
-        <div class="flex gap-3 w-full">
-          <div class="flex flex-col w-2/4">
+      <div class="flex flex-col mt-3 mb-2">
+        <div class="flex flex-col gap-3 w-full sm:flex-row ">
+          <div class="flex flex-col flex-1 sm:w-1/2">
             <!-- New Password -->
             <h4 class="mb-1">New Password</h4>
             <p-iconfield>
@@ -121,7 +121,7 @@
               }
             </div>
           </div>
-          <div class="flex flex-col w-2/4">
+          <div class="flex flex-col flex-1 sm:w-1/2">
             <!-- Repeat Password -->
             <h4 class="mb-1">Confirm New Password</h4>
             <p-iconfield>
@@ -158,13 +158,13 @@
       </div>
     </p-card>
     <!-- Account section -->
-    <div class="bg-red-50 border border-red-500 rounded-xl p-4">
+    <div class=" border border-red-500 rounded-xl p-4">
       <h3 class="text-xl font-semibold text-red-500">Account Management</h3>
       <p-divider class="!m-2" />
-      <div class="flex flex-col gap-3 bg-red-50">
-        <p-button icon="pi pi-sign-out" severity="secondary" label="Sign Out" variant="outlined"
+      <div class="flex flex-col gap-3 ">
+        <p-button icon="pi pi-sign-out" severity="contrast" label="Sign Out" variant="outlined"
           (onClick)="onSignOut()" />
-        <p-message severity="warn">
+        <p-message severity="warn" showTransitionOptions="0ms">
           <div class="flex gap-2">
             <i class="pi pi-exclamation-triangle"></i>
             <span class="text-sm">
@@ -190,7 +190,7 @@
   <span class="p-text-secondary block mb-8">{{dialogContent()}}</span>
   <div class="flex items-start gap-2 flex-col">
     <label for="currentPassword" class="font-semibold">Current Password</label>
-    <p-iconfield>
+    <p-iconfield class="w-full">
       <p-inputicon style="z-index: 1;" styleClass="pi pi-lock" />
       <p-password inputId="currentPassword" [(ngModel)]="currentPassword" toggleMask="true" class="w-full"
         placeholder="Current Password" feedback="false" (ngModelChange)="onCPasswordChange($event)" />

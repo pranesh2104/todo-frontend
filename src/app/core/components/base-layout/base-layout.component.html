@@ -11,11 +11,12 @@
 </p-drawer>
 
 <!-- Desktop Sidebar -->
-<div *ngIf="!isMobile()" class="hidden sm:block w-64 fixed h-full border-r border-gray-200 bg-white">
+<div *ngIf="!isMobile()"
+  class="hidden sm:block w-64 fixed h-full border-r border-gray-200 bg-white sm:overflow-y-scroll">
   <app-side-nav></app-side-nav>
 </div>
 
 <!-- Main Content -->
-<div class="sm:ml-64 p-4 sm:h-full" style="background-color: #f8fafc;">
+<div class="sm:ml-64 p-4 sm:h-auto" style="background-color: #f8fafc;">
   <router-outlet></router-outlet>
 </div>

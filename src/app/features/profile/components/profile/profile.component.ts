@@ -10,7 +10,7 @@ import { PROFILE_STATUS } from 'app/features/auth/constants/profile.constant';
 import { CustomValidators } from 'app/features/auth/custom-validators/email-password.validator';
 import { AuthService } from 'app/features/auth/services/auth.service';
 import { MessageService } from 'primeng/api';
-import { Button, ButtonModule } from 'primeng/button';
+import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { Divider } from 'primeng/divider';
 import { IconField } from 'primeng/iconfield';

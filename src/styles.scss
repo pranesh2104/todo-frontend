@@ -34,9 +34,28 @@ body {
 .thin-stroke {
   font-variation-settings:
     'GRAD' -25,
-    /* Stroke thinness (-200 to 200) */
     'wght' 400;
-  /* Optional: adjust overall weight */
+}
+
+/* WebKit Browsers */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
 .flex-column {
