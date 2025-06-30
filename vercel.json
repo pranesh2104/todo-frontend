@@ -1,12 +1,29 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "dist/todo/server/server.mjs",
-      "use": "@vercel/node"
+  "version": 3,
+  "output": {
+    "type": "static",
+    "dir": "dist/todo/browser"
+  },
+  "functions": {
+    "dist/todo/server/server.mjs": {
+      "includeFiles": [
+        "dist/todo/browser/**"
+      ],
+      "memory": 1024,
+      "maxDuration": 30
     }
-  ],
+  },
   "routes": [
+    {
+      "src": "/static/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000"
+      }
+    },
+    {
+      "src": "/(.*\\.(ico|png|jpg|jpeg|svg|css|js|json))",
+      "dest": "/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "dist/todo/server/server.mjs"
