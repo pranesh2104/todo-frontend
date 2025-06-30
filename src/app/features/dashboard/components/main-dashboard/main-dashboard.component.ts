@@ -131,11 +131,10 @@ export class MainDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.subscriptions.add(this.taskService.getAllTasks().subscribe({
       next: (res: IAllTaskResponse) => {
-        this.tasks.set(res.getAllTasks);
-        this.tags.set(res.getAllTags);
+        this.tasks.set([...res.getAllTasks]);
+        this.tags.set([...res.getAllTags]);
       },
       error: (error: ICommonErrorResponse) => {
         const parsedError: ICommonResponse = JSON.parse(error.message);
@@ -148,6 +147,9 @@ export class MainDashboardComponent implements OnInit {
     this.handleSearch();
     this.subscriptions.add(this.activedRoute.queryParams.subscribe({
       next: (res) => {
+        if (!Object.keys(res).length) {
+          this.filter.set({ filterBy: 'property', property: 'all' });
+        }
         if (res['property']) {
           const value = res['property'];
           this.filter.set({ filterBy: 'property', property: value });
