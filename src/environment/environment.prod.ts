@@ -1,5 +1,5 @@
 export const environment = {
   app: 'prod',
-  graphqlUri: 'https://todo-backend-ecfz.onrender.com/graphql',
+  graphqlUri: 'https://api-task-tide.onrender.com',
   CRYPTO_SECRET_KEY: 'mindMosaic'
 }
