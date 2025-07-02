@@ -259,16 +259,20 @@ export class ProfileComponent implements OnInit {
               if (res['changePassword'].code === 'PASSWORD_CHANGED') {
                 this.profileStateManager.updatePasswordStatus(PROFILE_STATUS.PASSWORD.CHANGED);
                 repeatPasswordControl.reset();
-                this.userForm.get('newPassword')?.reset();
-                this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Password Changed successfully!, Sign in with new credentials', life: 3000 });
+                this.userForm.get('password')?.reset();
+                this.userForm.get('currentPassword')?.reset();
+                this.toastMessageService.add({ severity: 'success', summary: 'Password Changed', detail: 'Password Changed successfully!, Sign in with new credentials', life: 3000 });
                 if (isPlatformBrowser(this.platformId)) {
-                  this.timerSubscription = interval(4000).pipe(takeWhile(() => this.timer > 0), finalize(() => this.onRedirect())).subscribe(() => { this.timer--; });
+                  this.timerSubscription = interval(1000).pipe(takeWhile(() => this.timer > 0), finalize(() => this.onRedirect())).subscribe(() => { this.timer--; });
                 }
               }
               this.profileStateManager.updateCurrentPasswordState({ status: PROFILE_STATUS.PASSWORD.INITIAL }, 'password');
             }
           },
           error: () => {
+            this.userForm.get('password')?.reset();
+            this.userForm.get('repeatPassword')?.reset();
+            this.userForm.get('currentPassword')?.reset();
             this.profileStateManager.updatePasswordStatus(PROFILE_STATUS.PASSWORD.FAILED);
             this.profileStateManager.updateCurrentPasswordState({ status: PROFILE_STATUS.PASSWORD.INITIAL }, 'password');
             this.toastMessageService.add({ severity: 'error', summary: 'Oops! Something Went Wrong', detail: 'We couldn’t complete your request. Please try again in a moment.', life: 3000 });
