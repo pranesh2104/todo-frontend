@@ -210,7 +210,7 @@ export class MainDashboardComponent implements OnInit {
             this.submitting.set(false);
             this.formComponent.hideTaskDialog();
             this.taskDialogVisible.set(false);
-            this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Added successfully', life: 3000 });
+            this.toastMessageService.add({ severity: 'success', summary: 'Task Added', detail: 'Task Added successfully', life: 3000 });
           }
         },
         error: () => {
@@ -243,7 +243,7 @@ export class MainDashboardComponent implements OnInit {
     this.subscriptions.add(this.taskService.updateTaskStatus<ICommonAPIResponse>({ taskStatus: { taskId: task.id, ...updateValue } }).subscribe({
       next: (res) => {
         if (res && res['updateTaskStatus'] && res['updateTaskStatus'].success)
-          this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
+          this.toastMessageService.add({ severity: 'success', summary: 'Task Updated', detail: 'Task Updated successfully', life: 3000 });
       },
       error: (e) => {
         console.error('OnImportant Error :', e);
@@ -289,7 +289,7 @@ export class MainDashboardComponent implements OnInit {
             if (res && res['updateTask'] && res['updateTask'].success) {
               this.formComponent.hideTaskDialog();
               this.taskDialogVisible.set(false);
-              this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Updated successfully', life: 3000 });
+              this.toastMessageService.add({ severity: 'success', summary: 'Task Updated', detail: 'Task Updated successfully', life: 3000 });
             }
           },
           error: () => {
@@ -306,7 +306,7 @@ export class MainDashboardComponent implements OnInit {
     this.subscriptions.add(this.taskService.deleteTask<ICommonAPIResponse>(taskId).subscribe({
       next: (res) => {
         if (res && res['deleteTask'] && res['deleteTask'].success)
-          this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Task Deleted successfully', life: 3000 });
+          this.toastMessageService.add({ severity: 'success', summary: 'Task Deleted', detail: 'Task Deleted successfully', life: 3000 });
       },
       error: () => {
         this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Task Deleted Failed', life: 2000 });
