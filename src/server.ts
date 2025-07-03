@@ -36,6 +36,7 @@ app.use(
     redirect: false,
   }),
 );
+app.set('trust proxy', 1);
 
 /**
  * Handle all other requests by rendering the Angular application.
