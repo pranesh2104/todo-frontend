@@ -36,13 +36,16 @@ app.use(
     redirect: false,
   }),
 );
+app.set('trust proxy', 1);
 
 /**
  * Handle all other requests by rendering the Angular application.
  */
 app.use('/**', (req, res, next) => {
-  console.log('from server.ts res', res.getHeaderNames());
-  console.log('from server.ts req', req.headers);
+  // console.log('from server.ts res', res.getHeaderNames());
+  // console.log('from server.ts req', req.headers);
+  console.log('url ', req.originalUrl);
+  console.log('res ', res.getHeader('Set-Cookie'));
 
   angularApp
     .handle(req)

@@ -69,6 +69,7 @@ export class ApolloConfigService {
       link: apolloLinks,
       cache: cache,
       ssrMode: true,
+      credentials: 'include'
     };
   }
 }
