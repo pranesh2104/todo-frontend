@@ -54,6 +54,7 @@ export class ApolloConfigService {
       link: apolloLinks,
       cache: new InMemoryCache(),
       ssrMode: true,
+      credentials: 'include'
     };
   }
 }
