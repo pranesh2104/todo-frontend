@@ -1,9 +1,5 @@
 {
   "version": 3,
-  "output": {
-    "type": "static",
-    "dir": "dist/todo/browser"
-  },
   "functions": {
     "dist/todo/server/server.mjs": {
       "includeFiles": [
