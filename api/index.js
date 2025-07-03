@@ -1,5 +1,5 @@
 import('../dist/todo/server/server.mjs')
-  .then(module => module.reqHandler)
+  .then(module => module.default)
   .catch(error => {
     console.error('Failed to load server module:', error);
     throw error;
@@ -7,6 +7,6 @@ import('../dist/todo/server/server.mjs')
 
 
 export default async (req, res) => {
-  const { reqHandler: app } = await import('../dist/todo/server/server.mjs');
+  const { default: app } = await import('../dist/todo/server/server.mjs');
   return app(req, res);
 };
