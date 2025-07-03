@@ -136,7 +136,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.subscriptions.add(this.taskService.createTag<ICommonAPIResponse<ICreateTagResponse>>({ tagDetails: tagFormValue as ITaskTagInput }).subscribe({
         next: (res: ICommonAPIResponse<ICreateTagResponse>) => {
           if (res && res['createTag'] && res['createTag'].success) {
-            this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
+            this.toastMessageService.add({ severity: 'success', summary: 'Tag Added', detail: 'Tag added successfully', life: 3000 });
             this.tagForm.reset();
           }
         }
@@ -158,11 +158,11 @@ export class SideNavComponent implements OnInit, OnDestroy {
     this.subscriptions.add(this.taskService.deleteTag<ICommonAPIResponse>(tagId).subscribe({
       next: (res) => {
         if (res && res['deleteTag'] && res['deleteTag'].success) {
-          this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Tag Deleted successfully', life: 3000 });
+          this.toastMessageService.add({ severity: 'success', summary: 'Tag Deleted', detail: 'Tag was deleted successfully', life: 3000 });
         }
       },
       error: () => {
-        this.toastMessageService.add({ severity: 'error', summary: 'Error', detail: 'Tag Deleted Failed', life: 2000 });
+        this.toastMessageService.add({ severity: 'error', summary: 'Tag Deletion Failed', detail: 'Failed to delete the tag', life: 2000 });
       }
     }));
   }

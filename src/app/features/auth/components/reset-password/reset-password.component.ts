@@ -139,7 +139,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
       this.subscriptions.add(this.authService.updatePassword<ICommonAPIResponse>({ passwordDetails: { email: userEmailFormControl.value, password: passwordFormControl.value, token: this.token } }).subscribe({
         next: (res: ICommonAPIResponse) => {
           if (res && res['updatePassword'] && res['updatePassword'].success) {
-            this.toastMessageService.add({ severity: 'success', summary: 'Success', detail: 'Your Password has been updated successfully!', life: 3000 });
+            this.toastMessageService.add({ severity: 'success', summary: 'Password Updated', detail: 'Your Password has been updated successfully!', life: 3000 });
             this.isPasswordUpdated = true;
             this.startRedirectTimer();
           }
