@@ -7,6 +7,6 @@ import('../dist/todo/server/server.mjs')
 
 
 export default async (req, res) => {
-  const { reqHandler: app } = await import('../dist/YOUR-APP/server/server.mjs');
+  const { reqHandler: app } = await import('../dist/todo/server/server.mjs');
   return app(req, res);
 };
