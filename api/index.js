@@ -1,7 +1,7 @@
-import {
-  AngularNodeAppEngine,
-  writeResponseToNodeResponse,
-} from '@angular/ssr/node';
+// import {
+//   AngularNodeAppEngine,
+//   writeResponseToNodeResponse,
+// } from '@angular/ssr/node';
 
 
 import('../dist/todo/server/server.mjs')
@@ -16,19 +16,19 @@ import('../dist/todo/server/server.mjs')
 
 export default async (req, res) => {
   const { default: app } = await import('../dist/todo/server/server.mjs');
-  const angularApp = new AngularNodeAppEngine();
+  // const angularApp = new AngularNodeAppEngine();
 
-  app.use('/**', (req, res, next) => {
-    console.log('from index.js res', res.getHeaderNames());
-    console.log('from index.js req', req.headers);
+  // app.use('/**', (req, res, next) => {
+  //   console.log('from index.js res', res.getHeaderNames());
+  //   console.log('from index.js req', req.headers);
 
-    angularApp
-      .handle(req)
-      .then((response) =>
-        response ? writeResponseToNodeResponse(response, res) : next(),
-      )
-      .catch(next);
-  });
+  //   angularApp
+  //     .handle(req)
+  //     .then((response) =>
+  //       response ? writeResponseToNodeResponse(response, res) : next(),
+  //     )
+  //     .catch(next);
+  // });
 
 
   const originalSetHeader = res.setHeader;
