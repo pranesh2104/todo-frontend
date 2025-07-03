@@ -14,6 +14,12 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
+const compression = require('compression');
+
+app.use(compression());
+
+app.set('trust proxy', true);
+
 /**
  * Example Express Rest API endpoints can be defined here.
  * Uncomment and define endpoints as necessary.
@@ -36,7 +42,6 @@ app.use(
     redirect: false,
   }),
 );
-app.set('trust proxy', 1);
 
 /**
  * Handle all other requests by rendering the Angular application.
