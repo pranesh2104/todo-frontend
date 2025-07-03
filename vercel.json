@@ -1,10 +1,11 @@
 {
-  "version": 3,
-  "functions": {
-    "dist/todo/server/server.mjs": {
-      "includeFiles": "dist/todo/browser/**"
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/todo/server/server.mjs",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
