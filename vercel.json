@@ -1,24 +1,16 @@
 {
   "version": 2,
-  "builds": [
+  "public": true,
+  "name": "todo",
+  "rewrites": [
     {
-      "src": "dist/todo/server/server.mjs",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "dist/todo/browser/**/*",
-      "use": "@vercel/static"
+      "source": "/(.*)",
+      "destination": "/api"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "dist/todo/server/server.mjs"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "dist/todo/**"
     }
-  ],
-  "outputDirectory": "dist/todo/browser"
+  }
 }
