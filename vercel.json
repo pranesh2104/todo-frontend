@@ -14,6 +14,11 @@
     {
       "src": "/(.*)",
       "dest": "dist/todo/server/server.mjs"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.js"
     }
-  ]
+  ],
+  "outputDirectory": "dist/todo/browser"
 }
