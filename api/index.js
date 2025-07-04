@@ -12,7 +12,8 @@ export default async (req, res) => {
   const originalSetHeader = res.setHeader;
   console.log('req[user-agent]', req.headers['user-agent']);
 
-  console.log('res.headers ', res.getHeaderNames());
+  console.log('res.getHeaderNames() in index', res.getHeaderNames());
+  console.log('req.headers in index', req.headers);
 
 
   // Intercept headers to ensure cookies are set
