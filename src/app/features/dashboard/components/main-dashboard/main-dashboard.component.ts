@@ -132,6 +132,7 @@ export class MainDashboardComponent implements OnInit {
       error: (error: ICommonErrorResponse) => {
         const parsedError: ICommonResponse = JSON.parse(error.message);
         if (parsedError.code === 'USER_NOT_FOUND') {
+          console.log('IN main dashboard');
           this.toastMessageService.add({ severity: 'warn', detail: 'For security, kindly log in again.', life: 3000, summary: 'Warning' });
           this.router.navigate(['/signin']);
         }
