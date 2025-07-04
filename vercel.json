@@ -15,18 +15,6 @@
       "dest": "api/index.js"
     }
   ],
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api",
-      "has": [
-        {
-          "type": "header",
-          "key": "cookie"
-        }
-      ]
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
