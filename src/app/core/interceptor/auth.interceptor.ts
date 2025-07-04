@@ -20,7 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     console.log({ cookie });
 
     if (serverReq && cookie) {
-      req = req.clone({ setHeaders: { Cookie: cookie } });
+      req = req.clone({ setHeaders: { Cookie: cookie }, withCredentials: true });
     }
     return next(req);
   }
