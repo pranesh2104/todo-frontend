@@ -15,12 +15,13 @@
   },
   "headers": [
     {
-      "key": "Access-Control-Allow-Credentials",
-      "value": "true"
-    },
-    {
-      "key": "Access-Control-Expose-Headers",
-      "value": "Set-Cookie"
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Set-Cookie",
+          "value": ":original"
+        }
+      ]
     }
   ]
 }
