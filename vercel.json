@@ -12,24 +12,24 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.js"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
+      "dest": "api/index.js",
       "headers": [
         {
-          "key": "Access-Control-Expose-Headers",
-          "value": "Set-Cookie"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store"
+          "source": "/(.*)",
+          "headers": [
+            {
+              "key": "Access-Control-Expose-Headers",
+              "value": "Set-Cookie"
+            },
+            {
+              "key": "Access-Control-Allow-Credentials",
+              "value": "true"
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache, no-store"
+            }
+          ]
         }
       ]
     }
