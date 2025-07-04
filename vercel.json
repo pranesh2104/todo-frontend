@@ -18,16 +18,20 @@
       "source": "/(.*)",
       "headers": [
         {
-          "key": "Set-Cookie",
-          "value": ":original"
+          "key": "Access-Control-Expose-Headers",
+          "value": "Set-Cookie"
         },
         {
           "key": "Access-Control-Allow-Credentials",
           "value": "true"
         },
         {
-          "key": "Access-Control-Expose-Headers",
-          "value": "Set-Cookie"
+          "key": "Set-Cookie",
+          "value": ":original"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store"
         }
       ]
     }
