@@ -27,11 +27,6 @@
       ]
     }
   ],
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "dist/todo/**"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
