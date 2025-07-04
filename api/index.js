@@ -13,7 +13,7 @@ export default async (req, res) => {
   console.log('req[user-agent]', req.headers['user-agent']);
 
   console.log('res.getHeaderNames() in index', res.getHeaderNames());
-  console.log('req.headers in index', req.headers);
+  console.log('req.headers in index', req.headers.cookie);
 
 
   // Intercept headers to ensure cookies are set
@@ -23,6 +23,8 @@ export default async (req, res) => {
     }
     return originalSetHeader.call(this, name, value);
   };
+
+  res.setHeader('Set-Cookie', 'test_cookie=verified; HttpOnly; Secure; SameSite=Lax');
 
   return app(req, res);
 };
