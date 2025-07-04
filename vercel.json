@@ -1,5 +1,24 @@
 {
   "version": 2,
   "public": true,
-  "name": "todo"
+  "name": "todo",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Expose-Headers",
+          "value": "Set-Cookie"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store"
+        }
+      ]
+    }
+  ]
 }
