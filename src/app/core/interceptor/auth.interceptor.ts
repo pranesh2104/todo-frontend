@@ -1,9 +1,9 @@
-import { HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
 import { inject, PLATFORM_ID, REQUEST } from '@angular/core';
 import { Router } from '@angular/router';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { HeaderService } from '@core/services/header.service';
-import { BehaviorSubject, catchError, from, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, from, switchMap, tap, throwError } from 'rxjs';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 
 let isRefreshing = false;
@@ -38,6 +38,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authReq = addToken(coreAuthService, req, headerService);
 
   return next(authReq).pipe(
+    tap(event => {
+      if (event instanceof HttpResponse) {
+        console.log('event.headers ', event.headers);
+
+        const token = event.headers.get('Set-Cookie');
+        if (token) {
+          document.cookie = token;
+        }
+      }
+    }),
     catchError(error => {
       if (error && error.status === 401 && !isRefreshing) {
         return handle401Error(authReq, next, coreAuthService, router, headerService);
