@@ -26,10 +26,6 @@
           "value": "true"
         },
         {
-          "key": "Set-Cookie",
-          "value": ":original"
-        },
-        {
           "key": "Cache-Control",
           "value": "no-cache, no-store"
         }
