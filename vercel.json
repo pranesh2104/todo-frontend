@@ -12,5 +12,14 @@
     "api/index.js": {
       "includeFiles": "dist/todo/**"
     }
-  }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/todo/server/server.mjs",
+      "headers": {
+        "Set-Cookie": ":original"
+      }
+    }
+  ]
 }
