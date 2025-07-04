@@ -24,10 +24,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
     return next(req);
   }
-  if (isPlatformBrowser(platformId)) {
-    console.log('req from auto interceptor', req.headers);
-
-  }
 
   const coreAuthService = inject(CoreAuthService);
 
@@ -37,23 +33,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const authReq = addToken(coreAuthService, req, headerService);
 
-  return next(authReq).pipe(
-    tap(event => {
-      if (event instanceof HttpResponse) {
-        console.log('event.headers ', event.headers);
-
-        const token = event.headers.get('Set-Cookie');
-        if (token) {
-          document.cookie = token;
-        }
-      }
-    }),
-    catchError(error => {
-      if (error && error.status === 401 && !isRefreshing) {
-        return handle401Error(authReq, next, coreAuthService, router, headerService);
-      }
-      return throwError(() => error);
-    })
+  return next(authReq).pipe(catchError(error => {
+    if (error && error.status === 401 && !isRefreshing) {
+      return handle401Error(authReq, next, coreAuthService, router, headerService);
+    }
+    return throwError(() => error);
+  })
   );
 };
 

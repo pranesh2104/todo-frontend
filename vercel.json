@@ -3,19 +3,40 @@
   "public": true,
   "name": "todo",
   "framework": "angular",
-  "builds": [
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
+      "source": "/(.*)",
+      "destination": "/api",
+      "has": [
+        {
+          "type": "header",
+          "key": "cookie"
+        }
+      ]
     }
   ],
-  "routes": [
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "dist/todo/**"
+    }
+  },
+  "headers": [
     {
-      "src": "/(.*)",
-      "dest": "api/index.js",
-      "headers": {
-        "Access-Control-Expose-Headers": "Set-Cookie"
-      }
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Expose-Headers",
+          "value": "Set-Cookie"
+        },
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store"
+        }
+      ]
     }
   ]
 }

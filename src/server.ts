@@ -49,9 +49,9 @@ app.use(
 app.use('/**', (req, res, next) => {
   // console.log('from server.ts res', res.getHeaderNames());
   // console.log('from server.ts req', req.headers);
-  console.log('url ', req.originalUrl);
-  console.log('res in server.ts ', res.getHeader('Set-Cookie'));
-  console.log('req in server.ts', req.headers);
+  // console.log('url ', req.originalUrl);
+  // console.log('res in server.ts ', res.getHeader('Set-Cookie'));
+  // console.log('req in server.ts', req.headers);
 
   angularApp
     .handle(req)
