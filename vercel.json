@@ -1,35 +1,5 @@
 {
   "version": 2,
   "public": true,
-  "name": "todo",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/api"
-    }
-  ],
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "dist/todo/**"
-    }
-  },
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Expose-Headers",
-          "value": "Set-Cookie"
-        },
-        {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store"
-        }
-      ]
-    }
-  ]
+  "name": "todo"
 }
