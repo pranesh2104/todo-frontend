@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { HeaderService } from '@core/services/header.service';
 import { BehaviorSubject, catchError, from, switchMap, throwError } from 'rxjs';
-import { isPlatformServer } from '@angular/common';
+import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 
 let isRefreshing = false;
 
@@ -23,6 +23,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       req = req.clone({ setHeaders: { Cookie: cookie } });
     }
     return next(req);
+  }
+  if (isPlatformBrowser(platformId)) {
+    console.log('req from auto interceptor', req.headers);
+
   }
 
   const coreAuthService = inject(CoreAuthService);
