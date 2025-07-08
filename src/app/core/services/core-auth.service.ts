@@ -21,13 +21,7 @@ export class CoreAuthService {
    */
   private readonly storageService = inject(StorageService);
 
-  constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      window.addEventListener('storage', (event) => {
-        if (event.key === 'logout') this.logout();
-      });
-    }
-  }
+  constructor() { }
   /**
    * Get the session cookie from storage service.
    * @returns session value or null
@@ -47,6 +41,7 @@ export class CoreAuthService {
       if (success) return true;
       else return false;
     } catch (error) {
+      console.log('error from core auth  ', error);
       this.logout();
       return false;
     }

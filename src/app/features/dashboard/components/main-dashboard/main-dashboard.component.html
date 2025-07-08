@@ -175,8 +175,10 @@
 <p-dialog [(visible)]="taskDialogVisible" [modal]="true" [draggable]="false" [resizable]="false"
   styleClass="w-full max-w-3xl" [closeOnEscape]="true" [dismissableMask]="true" header="Create New Task"
   (visibleChange)="onDialogClose($event)" #taskDialog>
+  @defer (when taskDialogVisible()) {
   <app-form-component #formComponent [tags]="tags()" [formSubmitted]="submitting()" [taskDialogRef]="taskDialog"
     (submitEmitter)="onFormSubmit($event)"></app-form-component>
+  }
 
   <ng-template pTemplate="footer">
     <div class="flex justify-end gap-2">

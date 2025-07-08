@@ -23,6 +23,7 @@ import { finalize, interval, Subscription, takeWhile } from 'rxjs';
 import { DialogModule } from 'primeng/dialog';
 import { ProfileStateManagerService } from 'app/features/dashboard/services/profile-state-manager.service';
 import { StorageService } from '@core/services/storage.service';
+import { Apollo } from 'apollo-angular';
 
 @Component({
   selector: 'app-profile',
@@ -98,6 +99,9 @@ export class ProfileComponent implements OnInit {
     else if (this.activeDialogType() === 'password') return 'Please verify your current password to change password';
     else return 'Please verify your current password to delete your account';
   });
+
+
+  private readonly apollo: Apollo = inject(Apollo);
 
   constructor(private formBuilder: FormBuilder, @Inject(PLATFORM_ID) private platformId: object, private router: Router) {
     effect(() => {
@@ -306,8 +310,10 @@ export class ProfileComponent implements OnInit {
   onSignOut() {
     this.subscriptions.add(this.authService.signOut().subscribe({
       next: (res) => {
-        if (res && res['signOut'] && res['signOut'].success)
+        if (res && res['signOut'] && res['signOut'].success) {
+          this.apollo.client.clearStore();
           this.onRedirect();
+        }
       },
       error: () => {
         this.toastMessageService.add({ severity: 'error', summary: 'Oops! Something Went Wrong', detail: 'We couldn’t complete your request. Please try again in a moment.', life: 3000 });

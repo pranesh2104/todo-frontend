@@ -10,20 +10,13 @@ import { Toast } from 'primeng/toast';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ICommonAPIResponse } from '@shared/models/shared.model';
 import { TooltipModule } from 'primeng/tooltip';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { TagBgStylePipe } from "../../pipes/tag-bg-style.pipe";
 import { removeDuplicateTag, removeTypename } from '@core/utils/graphql-utils';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 import { FormComponent } from '../form-component/form-component.component';
-import { ColorPickerModule } from 'primeng/colorpicker';
-import { AccordionModule } from 'primeng/accordion';
-import { ChipModule } from 'primeng/chip';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { SelectModule } from 'primeng/select';
-import { TextareaModule } from 'primeng/textarea';
-import { DatePickerModule } from 'primeng/datepicker';
 import { FormModifyService } from '../../services/form-modify.service';
 import { FilterValues, IFilter } from '@core/constants/side-nav.constant';
 import { isDateAfter, isSameDate } from '../../utils/date.util';
@@ -32,7 +25,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-main-dashboard',
-  imports: [CommonModule, Dialog, AutoCompleteModule, ConfirmPopupModule, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, ColorPickerModule, Toast, AccordionModule, ChipModule, InputTextModule, ReactiveFormsModule, TextareaModule, SelectModule, DatePickerModule, TagBgStylePipe],
+  imports: [CommonModule, Dialog, ConfirmPopupModule, ButtonModule, FormComponent, TooltipModule, MultiSelectModule, Toast, InputTextModule, ReactiveFormsModule, TagBgStylePipe],
   templateUrl: './main-dashboard.component.html',
   styleUrl: './main-dashboard.component.scss',
   providers: [MessageService, ConfirmationService, FormModifyService],
@@ -139,6 +132,7 @@ export class MainDashboardComponent implements OnInit {
       error: (error: ICommonErrorResponse) => {
         const parsedError: ICommonResponse = JSON.parse(error.message);
         if (parsedError.code === 'USER_NOT_FOUND') {
+          console.log('IN main dashboard');
           this.toastMessageService.add({ severity: 'warn', detail: 'For security, kindly log in again.', life: 3000, summary: 'Warning' });
           this.router.navigate(['/signin']);
         }
