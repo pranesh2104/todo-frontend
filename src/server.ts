@@ -7,6 +7,7 @@ import {
 import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getContext } from '@netlify/angular-runtime/context.mjs'
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -73,6 +74,20 @@ app.use('/**', (req, res, next) => {
     .catch(next);
 });
 
+export async function netlifyAppEngineHandler(request: any): Promise<any> {
+  const context = getContext()
+
+  // Example API endpoints can be defined here.
+  // Uncomment and define endpoints as necessary.
+  // const pathname = new URL(request.url).pathname;
+  // if (pathname === '/api/hello') {
+  //   return Response.json({ message: 'Hello from the API' });
+  // }
+
+  const result = await angularApp.handle(request, context)
+  return result || new Response('Not found', { status: 404 })
+}
+
 /**
  * Start the server if this module is the main entry point.
  * The server listens on the port defined by the `PORT` environment variable, or defaults to 4000.
@@ -87,4 +102,4 @@ export default app;
 /**
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
-export const reqHandler = createNodeRequestHandler(app);
+export const reqHandler = createNodeRequestHandler(netlifyAppEngineHandler);
