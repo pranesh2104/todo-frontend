@@ -1,0 +1,8 @@
+[build]
+  command = "npm run build"
+  publish = "dist/todo/browser"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/v1/functions/ssr"
+  status = 200

@@ -55,8 +55,20 @@ app.use('/**', (req, res, next) => {
 
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
+    .then((response) => {
+      if (response) {
+        // Pass cookies to SSR response
+        console.log('res ', res);
+
+        const cookies = req.get('Cookie') || '';
+        console.log('cookie from server.ts ', cookies);
+
+        // response.headers['Set-Cookie'] = cookies;
+        writeResponseToNodeResponse(response, res);
+      } else {
+        next();
+      }
+    }
     )
     .catch(next);
 });
