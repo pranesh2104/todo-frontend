@@ -84,6 +84,16 @@
           },
           "defaultConfiguration": "development"
         },
+        "prerender": {
+          "builder": "@angular-devkit/build-angular:prerender",
+          "options": {
+            "browserTarget": "todo:build:production",
+            "serverTarget": "todo:server:production",
+            "routes": [
+              "/"
+            ]
+          }
+        },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n"
         },

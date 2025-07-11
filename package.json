@@ -12,7 +12,8 @@
     "lint": "ng lint",
     "serve:ssr": "node dist/todo/server/server.mjs",
     "build:run": "ng build --configuration=production && ng run todo:server:production",
-    "vercel:build": "ng build && node dist/todo/server/server.mjs"
+    "vercel:build": "ng build && node dist/todo/server/server.mjs",
+    "prerender": "ng run todo:prerender"
   },
   "private": true,
   "dependencies": {
