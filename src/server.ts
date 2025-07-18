@@ -8,6 +8,7 @@ import express from 'express';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getContext } from '@netlify/angular-runtime/context.mjs'
+// import compression from 'compression';
 
 const serverDistFolder = dirname(fileURLToPath(import.meta.url));
 const browserDistFolder = resolve(serverDistFolder, '../browser');
@@ -15,9 +16,8 @@ const browserDistFolder = resolve(serverDistFolder, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-const compression = require('compression');
 
-app.use(compression());
+// app.use(compression());
 
 app.set('trust proxy', true);
 
