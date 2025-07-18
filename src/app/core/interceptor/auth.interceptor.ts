@@ -3,7 +3,7 @@ import { inject, PLATFORM_ID, REQUEST, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { HeaderService } from '@core/services/header.service';
-import { catchError, from, switchMap, tap, throwError } from 'rxjs';
+import { catchError, from, switchMap, throwError } from 'rxjs';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 
 let isRefreshing = false;
