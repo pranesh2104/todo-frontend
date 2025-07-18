@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Inject, inject, OnDestroy, OnInit, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, inject, OnDestroy, OnInit, Optional, PLATFORM_ID, REQUEST, signal, WritableSignal } from '@angular/core';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { UserService } from '@core/services/user.service';
 import { IGetOneUserResponse, IUserReponse } from 'app/features/auth/models/auth.model';
@@ -42,10 +42,17 @@ export class BaseLayoutComponent implements OnInit, OnDestroy {
    */
   private subscription: Subscription = new Subscription();
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, @Optional() @Inject(REQUEST) req: Request | null) {
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreen();
       window.addEventListener('resize', () => this.checkScreen());
+    }
+    else {
+      if (req) {
+        const userAgent = req.headers.get('user-agent') || '';
+        const isMobile = /mobile|android|iphone|ipad/i.test(userAgent);
+        this.isMobile.set(isMobile);
+      }
     }
   }
   /**

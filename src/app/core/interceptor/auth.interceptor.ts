@@ -1,14 +1,14 @@
 import { HttpHandlerFn, HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
-import { inject, PLATFORM_ID, REQUEST } from '@angular/core';
+import { inject, PLATFORM_ID, REQUEST, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CoreAuthService } from '@core/services/core-auth.service';
 import { HeaderService } from '@core/services/header.service';
-import { BehaviorSubject, catchError, from, switchMap, tap, throwError } from 'rxjs';
+import { catchError, from, switchMap, tap, throwError } from 'rxjs';
 import { isPlatformBrowser, isPlatformServer } from '@angular/common';
 
 let isRefreshing = false;
 
-const refreshSubject = new BehaviorSubject<boolean>(false);
+const refreshSubject = signal<boolean>(false);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
@@ -44,14 +44,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 const handle401Error = (req: HttpRequest<unknown>, next: HttpHandlerFn, coreAuthService: CoreAuthService, router: Router, headerService: HeaderService) => {
   isRefreshing = true;
-  refreshSubject.next(false);
+  refreshSubject.set(false);
 
   return from(coreAuthService.getRefreshToken()).pipe(
     switchMap(success => {
       isRefreshing = false;
-
       if (success) {
-        refreshSubject.next(true);
+        refreshSubject.set(true);
         return next(addToken(coreAuthService, req, headerService));
       }
       return throwError(() => new Error('Refresh failed'));
