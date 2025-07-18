@@ -1,10 +1,8 @@
 [dev]
-  command = "npm run start"
-  targetPort = 5200
+  command = "npm run serve:ssr"
+  targetPort = 4000
   port = 8888 
   publish = "dist"
 
-[build]
-  command = "npm run build"
-  functions = "netlify/functions"
-  publish = "dist/todo/browser"
+[functions]
+  external_node_modules = ["@netlify/angular-runtime"]

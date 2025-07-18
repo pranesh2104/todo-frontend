@@ -84,8 +84,10 @@ export async function netlifyAppEngineHandler(request: any): Promise<any> {
   //   return Response.json({ message: 'Hello from the API' });
   // }
 
-  const result = await angularApp.handle(request, context)
-  return result || new Response('Not found', { status: 404 })
+  const result = await angularApp.handle(request, context);
+  console.log({ result });
+
+  return result || new Response('Not found', { status: 404 });
 }
 
 /**
@@ -98,7 +100,7 @@ if (isMainModule(import.meta.url)) {
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
 }
-export default app;
+// export default app;
 /**
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
