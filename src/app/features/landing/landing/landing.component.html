@@ -1,0 +1,198 @@
+<header
+  class="fixed top-0 w-full bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-lg backdrop-blur-sm z-50">
+  <nav class="container mx-auto px-6 py-4">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl">🌊</span>
+        <span class="text-2xl font-bold">Task Tide</span>
+      </div>
+      <ul class="hidden md:flex space-x-8">
+        <li><a href="#features"
+            class="text-white hover:text-blue-200 transition-colors duration-300 font-medium">Features</a></li>
+        <li><a routerLink="/signin"
+            class="text-white hover:text-blue-200 transition-colors duration-300 font-medium">Sign In</a></li>
+      </ul>
+      <button id="mobile-menu-button" class="md:hidden focus:outline-none" (click)="toggleMobileMenu()">
+        @if(isMobileMenuOpen()) {
+        <svg #close id="close" class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        }
+        @else {
+        <svg id="hamburger" class="w-6 h-6 transition-transform duration-300" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        }
+      </button>
+    </div>
+    @if (isMobileMenuOpen()) {
+    <div id="mobile-menu" class="md:hidden mt-4 pb-2 animate-slide-down">
+      <ul class="flex flex-col space-y-3 border-t border-blue-300 pt-4">
+        <li>
+          <a href="#features" (click)="closeMobileMenu()"
+            class="block text-white hover:text-blue-200 transition-colors duration-300 font-medium py-2 px-2 rounded-md hover:bg-blue-500">
+            Features
+          </a>
+        </li>
+        <li>
+          <a href="/signin" (click)="closeMobileMenu()"
+            class="block text-white hover:text-blue-200 transition-colors duration-300 font-medium py-2 px-2 rounded-md hover:bg-blue-500">
+            Sign In
+          </a>
+        </li>
+      </ul>
+    </div>
+    }
+  </nav>
+</header>
+
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-blue-600 via-blue-400 to-blue-200 text-white overflow-hidden">
+  <div class="absolute inset-0 opacity-10">
+    <div class="wave-pattern"></div>
+  </div>
+  <div class="container mx-auto px-6 py-32 relative z-10">
+    <div class="text-center max-w-4xl mx-auto">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+        Ride the Wave of Productivity
+      </h1>
+      <p class="text-xl md:text-2xl mb-8 opacity-90 animate-fade-in-up animation-delay-300">
+        Task Tide helps you organize your life with the smooth flow of ocean currents.
+        Manage tasks effortlessly and stay on top of your goals.
+      </p>
+      <a routerLink="/signup"
+        class="bg-white text-blue-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-blue-50 
+                   transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl animate-fade-in-up animation-delay-600">
+        Get Started
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-slate-50">
+  <div class="container mx-auto px-6">
+    <h2 class="text-4xl md:text-5xl font-bold text-center mb-16 text-slate-800">
+      Why Choose Task Tide?
+    </h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div *ngFor="let feature of features; let i = index" class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transform hover:-translate-y-2 
+                      transition-all duration-300 border-2 border-transparent hover:border-blue-300"
+        [class.animate-fade-in-up]="true" [style.animation-delay]="(i * 200) + 'ms'">
+        <!-- <div class="text-4xl mb-4 bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent"> -->
+        <div class="text-4xl mb-4">
+          {{ feature.icon }}
+        </div>
+        <!-- </div> -->
+        <h3 class="text-xl font-semibold mb-3 text-slate-800">{{ feature.title }}</h3>
+        <p class="text-slate-600 leading-relaxed">{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- App Preview Section -->
+<section id="preview" class="py-20 bg-gradient-to-br from-blue-50 to-white">
+  <div class="container mx-auto px-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div class="order-2 lg:order-1">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6 text-slate-800">
+          See Task Tide in Action
+        </h2>
+        <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+          Experience the clean, intuitive interface that makes task management a breeze.
+          With Task Tide, organizing your life has never been this beautiful or effortless.
+        </p>
+        <a routerLink="/signin" class="bg-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold 
+                     hover:bg-blue-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+          Try It Now
+        </a>
+      </div>
+      <div class="order-1 lg:order-2">
+        <div class="relative">
+          <div
+            class="bg-blue-600 rounded-3xl p-6 transform hover:rotate-0 rotate-y-5 transition-transform duration-500 shadow-2xl">
+            <div class="bg-white rounded-2xl p-6 h-96 overflow-hidden">
+              <div class="space-y-4">
+                <div *ngFor="let task of mockTasks; let i = index"
+                  class="flex items-center space-x-3 bg-blue-50 p-4 rounded-xl animate-slide-in"
+                  [style.animation-delay]="(i * 200) + 'ms'">
+                  <div class="w-5 h-5 bg-blue-400 rounded-full"></div>
+                  <span class="text-slate-700 font-medium">{{ task }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer id="contact" class="bg-blue-600 text-white pt-8 pb-4">
+  <div class="container mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="col-span-1 md:col-span-2">
+        <div class="flex items-center space-x-2 mb-4">
+          <img src="favicon.ico" alt="">
+          <span class="text-2xl font-bold">Task Tide</span>
+        </div>
+        <p class="text-blue-100 mb-4 leading-relaxed">
+          Ride the wave of productivity with the most intuitive todo app designed to keep you organized and motivated.
+        </p>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+        <ul class="space-y-2 text-blue-100">
+          <li><a routerLink="/signin" class="text-white hover:text-white transition-colors duration-300">Sign In</a>
+          </li>
+          <li><a routerLink="/signup" class="text-white hover:text-white transition-colors duration-300">Sign Up</a>
+          </li>
+          <li><a href="#features" class="text-white hover:text-white transition-colors duration-300">Features</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold mb-4">Contact</h3>
+        <ul class="space-y-2 text-blue-200">
+          <li>
+            <a href="https://github.com/pranesh2104/todo-frontend" target="_blank" rel="noopener"
+              class="text-white flex items-center space-x-2 hover:text-white underline">
+              <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.207 11.387.6.113.793-.26.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.757-1.333-1.757-1.09-.746.083-.73.083-.73 1.204.084 1.838 1.236 1.838 1.236 1.07 1.834 2.81 1.304 3.495.996.107-.776.42-1.305.763-1.604-2.665-.3-5.467-1.332-5.467-5.93 0-1.31.468-2.38 1.236-3.22-.124-.303-.536-1.522.117-3.176 0 0 1.008-.322 3.3 1.23a11.49 11.49 0 013.003-.404 11.5 11.5 0 013.003.404c2.292-1.552 3.297-1.23 3.297-1.23.655 1.654.243 2.873.12 3.176.77.84 1.236 1.91 1.236 3.22 0 4.61-2.807 5.625-5.48 5.92.43.37.823 1.102.823 2.222v3.293c0 .32.192.694.8.576C20.565 21.796 24 17.297 24 12c0-6.63-5.373-12-12-12z" />
+              </svg>
+              <span>Report a bug on GitHub</span>
+            </a>
+          </li>
+          <li>
+            <a href="https://www.linkedin.com/in/pranesh-t-708848233/" target="_blank" rel="noopener"
+              class="text-white flex items-center space-x-2 hover:text-white underline">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-linkedin"
+                viewBox="0 0 16 16">
+                <path
+                  d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854zm4.943 12.248V6.169H2.542v7.225zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248S2.4 3.226 2.4 3.934c0 .694.521 1.248 1.327 1.248zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016l.016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225z" />
+              </svg>
+              <span>Connect on LinkedIn</span>
+            </a>
+          </li>
+          <li>
+            <a href="mailto:praneshthicet@gmail.com"
+              class="text-white flex items-center space-x-2 hover:text-white underline">
+              <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8.66l7.38 6.45a1 1 0 001.24 0L20 8.66V18H4z" />
+              </svg>
+              <span>praneshthicet&#64;gmail.com</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-blue-500 mt-8 pt-8 text-center text-blue-100">
+      <p>&copy; 2025 Task Tide. All rights reserved. An evolving project to help you manage tasks with ease.</p>
+    </div>
+  </div>
+</footer>

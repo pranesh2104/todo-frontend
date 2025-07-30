@@ -25,7 +25,8 @@
     "baseUrl": "src",
     "paths": {
       "@shared/*": ["app/shared/*"],
-      "@core/*": ["app/core/*"]
+      "@core/*": ["app/core/*"],
+      "@features/*": ["app/features/*"],
     },
     // "exactOptionalPropertyTypes": true,
     // "noUnusedLocals": true,
