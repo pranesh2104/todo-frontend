@@ -20,10 +20,6 @@
         {
           "key": "Access-Control-Allow-Credentials",
           "value": "true"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store"
         }
       ]
     }
