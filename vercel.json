@@ -6,20 +6,9 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api",
-      "has": [
-        {
-          "type": "header",
-          "key": "cookie"
-        }
-      ]
+      "destination": "/index.html"
     }
   ],
-  "functions": {
-    "api/index.js": {
-      "includeFiles": "dist/todo/**"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
