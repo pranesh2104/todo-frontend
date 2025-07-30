@@ -3,6 +3,7 @@
   "public": true,
   "name": "todo",
   "framework": "angular",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
       "source": "/(.*)",
